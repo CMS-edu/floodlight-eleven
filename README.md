@@ -6,4 +6,4 @@
 - 조작: 왼쪽 조이스틱으로 이동, 오른쪽 버튼으로 패스·스루·슛(길게 눌러 파워)·질주. 수비 때는 교체·압박·태클.
 - 키보드: WASD/방향키 이동, J 패스, K 스루, L/Space 슛, Shift 질주, C 카메라, P 일시정지.
 
-`index.html` 하나로 동작하며 three.js r128을 cdnjs에서 불러옵니다. `main`에 푸시하면 GitHub Actions가 Pages로 배포합니다.
+`index.html` 하나로 동작하며 three.js r128을 cdnjs에서 불러옵니다. GitHub Pages(브랜치 배포: `main` / root)로 서비스되며, `main`에 푸시하면 자동으로 다시 배포됩니다.
