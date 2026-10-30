@@ -1960,13 +1960,12 @@ function afterReplay(){
 const camLook=new THREE.Vector3(0,0,0),camPos=new THREE.Vector3(0,30,60),tmpV=new THREE.Vector3();
 let camFov=30;
 function setFov(f){const a=CAM.aspect;const adj=a<1.5?f*Math.min(1.9,1.5/a*1.15):f*Math.pow(1.95/a,0.35);if(Math.abs(adj-camFov)>0.01){camFov=adj;CAM.fov=adj;CAM.updateProjectionMatrix();}}
-const camDir=new THREE.Vector3();
+// The camera is worked out in "view space". For the online guest the view space is the pitch turned 180 degrees,
+// so the guest's team attacks to the right; m flips x/z when reading the world and again when placing the camera.
+function camPlace(m,p,lx,ly,lz){CAM.position.set(m*p.x,p.y,m*p.z);CAM.lookAt(m*lx,ly,m*lz);}
 function updateCam(dt){
-  updateCam0(dt);
-  if(NET.mirror){CAM.getWorldDirection(camDir);CAM.position.x*=-1;CAM.position.z*=-1;CAM.lookAt(CAM.position.x-camDir.x,CAM.position.y+camDir.y,CAM.position.z-camDir.z);}
-}
-function updateCam0(dt){
-  const st=G.state;
+  const st=G.state,m=NET.mirror?-1:1;
+  const bx=m*B.x,bz=m*B.z,bvx=m*B.vx,bvz=m*B.vz;
   if(st==='menu'||st==='boot'){
     G.menuT+=dt;const a=G.menuT*0.06+0.5;
     camPos.set(Math.cos(a)*78,24+Math.sin(G.menuT*0.11)*4,Math.sin(a)*54+8);camLook.set(0,0,0);setFov(34);
@@ -1977,30 +1976,31 @@ function updateCam0(dt){
     const p0=new THREE.Vector3(-HL-30,46,72),p1=new THREE.Vector3(10,30,64),p2=new THREE.Vector3(0,CAMS[G.set.cam].h,CAMS[G.set.cam].b);
     camPos.copy(p0).multiplyScalar((1-e)*(1-e)).addScaledVector(p1,2*e*(1-e)).addScaledVector(p2,e*e);
     camLook.set(0,0,lerp(0,-1.5,e));setFov(lerp(40,CAMS[G.set.cam].f,e));
-    CAM.position.copy(camPos);CAM.lookAt(camLook);
-    if(G.introT>3.4){G.state='kickoff';G.timer=0;G.kickReady=false;padHint(PADS[G.kickTeam],'패스 버튼으로 킥오프');}
+    camPlace(m,camPos,camLook.x,camLook.y,camLook.z);
+    if(G.introT>3.4&&NET.role!=='guest'){G.state='kickoff';G.timer=0;G.kickReady=false;padHint(PADS[G.kickTeam],'패스 버튼으로 킥오프');}
     return;
   }
   if(st==='replay'){
-    const s=RP.side;
-    tmpV.set(s*(HL+11),4.2,clamp(B.z*0.35,-8,8)+(B.z>0?-3:3));
+    const s=m*RP.side;
+    tmpV.set(s*(HL+11),4.2,clamp(bz*0.35,-8,8)+(bz>0?-3:3));
     RP.cam.lerp(tmpV,1-Math.exp(-dt*3));if(RP.cam.lengthSq()<1)RP.cam.copy(tmpV);
-    CAM.position.copy(RP.cam);camLook.lerp(tmpV.set(B.x*0.85+s*HL*0.15,Math.max(0.6,B.y*0.6),B.z),1-Math.exp(-dt*6));CAM.lookAt(camLook);setFov(36);return;
+    camLook.lerp(tmpV.set(bx*0.85+s*HL*0.15,Math.max(0.6,B.y*0.6),bz),1-Math.exp(-dt*6));
+    camPlace(m,RP.cam,camLook.x,camLook.y,camLook.z);setFov(36);return;
   }
-  if(st==='goal'&&G.goal&&G.timer>1.0){
-    const sc=G.goal.scorer;
-    tmpV.set(sc.x-sc.team.dir*3.5,3.4,sc.z+8.5);
-    camPos.lerp(tmpV,1-Math.exp(-dt*2.2));camLook.lerp(tmpV.set(sc.x,1.2,sc.z),1-Math.exp(-dt*4));
-    CAM.position.copy(camPos);CAM.lookAt(camLook);setFov(lerp(CAM.fov,32,0.05));return;
+  if(st==='goal'&&G.goal&&G.goal.scorer&&G.timer>1.0){
+    const sc=G.goal.scorer,sx=m*sc.x,sz=m*sc.z;
+    tmpV.set(sx-m*sc.team.dir*3.5,3.4,sz+8.5);
+    camPos.lerp(tmpV,1-Math.exp(-dt*2.2));camLook.lerp(tmpV.set(sx,1.2,sz),1-Math.exp(-dt*4));
+    camPlace(m,camPos,camLook.x,camLook.y,camLook.z);setFov(lerp(CAM.fov,32,0.05));return;
   }
   const P=CAMS[G.set.cam];
-  let tx=B.x,tz=B.z;
-  if(B.owner){tx+=Math.sin(B.owner.face)*3.5;tz+=Math.cos(B.owner.face)*1.5;}else{tx+=B.vx*0.3;tz+=B.vz*0.2;}
+  let tx=bx,tz=bz;
+  if(B.owner){tx+=m*Math.sin(B.owner.face)*3.5;tz+=m*Math.cos(B.owner.face)*1.5;}else{tx+=bvx*0.3;tz+=bvz*0.2;}
   tx=clamp(tx,-HL+4,HL-4);tz=clamp(tz*0.88,-HW+5,HW-2);
   tmpV.set(tx,0,tz);camLook.lerp(tmpV,1-Math.exp(-dt*3.4));
   tmpV.set(camLook.x*0.94,P.h,camLook.z*0.55+P.b);
   camPos.lerp(tmpV,1-Math.exp(-dt*3));
-  CAM.position.copy(camPos);CAM.lookAt(camLook.x,0,camLook.z-1.2);setFov(P.f);
+  camPlace(m,camPos,camLook.x,0,camLook.z-1.2);setFov(P.f);
 }
 
 /* ================= visuals per frame ================= */
