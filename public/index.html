@@ -643,45 +643,55 @@ function kitMats(club){
     glove:new THREE.MeshLambertMaterial({color:C3('#f4f4f4')}),
   };
 }
+// skeleton: root (feet on the ground) > pelvis at hip height > legs and spine; the spine carries torso, arms and head
+const HIP_H=0.93,ANK=0.065,LEG=0.44;
 function buildRig(m,o){
-  const root=new THREE.Group(),body=new THREE.Group();root.add(body);
+  const root=new THREE.Group(),pelvis=new THREE.Group();pelvis.position.y=HIP_H;root.add(pelvis);
+  const spine=new THREE.Group();spine.position.y=0.04;pelvis.add(spine);
   const shirt=o.gk?m.gk:m.shirt,skin=SKINS[o.skin],add=(geo,mat,par,x,y,z)=>{const q=new THREE.Mesh(geo,mat);q.position.set(x,y,z);par.add(q);return q;};
-  const torso=add(PG.torso,shirt,body,0,1.24,0);torso.scale.set(1,1,0.62);
-  const ch=add(PG.chest,shirt,body,0,1.5,0);ch.scale.set(1.12,0.35,0.66);
-  const sh=add(PG.shorts,o.gk?m.gkShorts:m.shorts,body,0,0.9,0);sh.scale.z=0.74;
-  // head sits on its own pivot so it can track the ball
-  const headG=new THREE.Group();headG.position.set(0,1.55,0);body.add(headG);
+  const torso=add(PG.torso,shirt,spine,0,0.27,0);torso.scale.set(1,1,0.62);
+  const ch=add(PG.chest,shirt,spine,0,0.53,0);ch.scale.set(1.12,0.35,0.66);
+  const sh=add(PG.shorts,o.gk?m.gkShorts:m.shorts,pelvis,0,-0.03,0);sh.scale.z=0.74;
+  const headG=new THREE.Group();headG.position.set(0,0.58,0);spine.add(headG);
   add(PG.neck,skin,headG,0,0.03,0);
   const head=add(PG.head,skin,headG,0,0.16,0.01);head.scale.set(0.95,1.05,1);
   const hr=add(PG.hair,HAIRS[o.hair],headG,0,0.17,-0.006);hr.rotation.x=-0.25;
   const legs=[],arms=[],hands=[];
   for(const side of[1,-1]){
-    const hip=new THREE.Group();hip.position.set(0.096*side,0.93,0);body.add(hip);
+    const hip=new THREE.Group();hip.position.set(0.096*side,0,0);pelvis.add(hip);
     add(PG.thigh,skin,hip,0,0,0);
-    const knee=new THREE.Group();knee.position.y=-0.44;hip.add(knee);
+    const knee=new THREE.Group();knee.position.y=-LEG;hip.add(knee);
     add(PG.shin,o.gk?m.gkShorts:m.socks,knee,0,0,0);
-    add(PG.boot,BOOTS[o.boot],knee,0,-0.44,0);
-    legs.push(hip,knee);
-    const shl=new THREE.Group();shl.position.set(0.245*side,1.46,0);body.add(shl);
+    const ank=new THREE.Group();ank.position.y=-LEG;knee.add(ank);
+    add(PG.boot,BOOTS[o.boot],ank,0,0,0);
+    legs.push(hip,knee,ank);
+    const shl=new THREE.Group();shl.position.set(0.245*side,0.49,0);spine.add(shl);
     add(PG.uarm,shirt,shl,0,0,0);
     const el=new THREE.Group();el.position.y=-0.27;shl.add(el);
     add(PG.farm,o.gk?shirt:skin,el,0,0,0);
     hands.push(add(PG.hand,o.gk?m.glove:skin,el,0,-0.29,0));
     arms.push(shl,el);
   }
-  const nm=add(PG.num,numMat(o.num,o.numColor),body,0,1.28,-0.132);nm.rotation.y=PI;
-  return{root,body,headG,hipL:legs[0],kneeL:legs[1],hipR:legs[2],kneeR:legs[3],shL:arms[0],elL:arms[1],shR:arms[2],elR:arms[3],handL:hands[0],handR:hands[1]};
+  const nm=add(PG.num,numMat(o.num,o.numColor),spine,0,0.31,-0.132);nm.rotation.y=PI;
+  return{root,body:pelvis,pelvis,spine,headG,hipL:legs[0],kneeL:legs[1],ankL:legs[2],hipR:legs[3],kneeR:legs[4],ankR:legs[5],shL:arms[0],elL:arms[1],shR:arms[2],elR:arms[3],handL:hands[0],handR:hands[1]};
 }
 
-/* pose: a locomotion layer (stride, shuffle, stance, lean, head) blended with an action layer */
-const BX=0,BY=1,BZ=2,TL=3,TR=4,KL=5,KR=6,ALX=7,ARX=8,ALZ=9,ARZ=10,EL=11,ER=12,HLZ=13,HRZ=14,HY=15,HX=16,NCH=17;
-const PZ=new Float32Array(NCH),PA=new Float32Array(NCH);
+/* pose channels: pelvis offset/rotation, spine, head, legs (thigh swing/spread, knee, ankle), arms */
+const PX=0,PY=1,PZ=2,PRX=3,PRY=4,PRZ=5,SX=6,SY=7,SZ=8,HX=9,HY=10,TL=11,TR=12,HLZ=13,HRZ=14,KL=15,KR=16,AL=17,AR=18,ALX=19,ARX=20,ALZ=21,ARZ=22,EL=23,ER=24,NCH=25;
+const POSE0=new Float32Array(NCH),POSE1=new Float32Array(NCH);
 const easeOut=u=>1-(1-u)*(1-u),easeIO=u=>u*u*(3-2*u);
 const fadeW=(t,end,fin,fout)=>clamp(Math.min(t/fin,(end-t)/fout),0,1);
+// two-bone leg IK: place the ankle at (fx,fy,fz) in root space, keep the foot flat
+function solveLeg(P,side,fx,fy,fz){
+  const dx=fx-(P[PX]+side*0.096),dy=Math.max(0.05,P[PY]-fy),dz=fz-P[PZ];
+  const az=Math.atan2(dx,dy),dyp=hyp(dx,dy),D=clamp(hyp(dyp,dz),0.25,2*LEG-0.002);
+  const t=-(Math.atan2(dz,dyp)+Math.acos(D/(2*LEG))),k=PI-Math.acos(clamp(1-D*D/(2*LEG*LEG),-1,1));
+  if(side>0){P[TL]=t;P[HLZ]=az;P[KL]=k;P[AL]=-(t+k+P[PRX]);}else{P[TR]=t;P[HRZ]=az;P[KR]=k;P[AR]=-(t+k+P[PRX]);}
+}
 function actEnd(e){
   switch(e.act){
     case ACT.KICK:return(e.ap1||0.1)+0.44;
-    case ACT.DIVE:return Math.max(0.16,e.ap3||0.3)+1.7;
+    case ACT.DIVE:return Math.max(0.16,e.ap3||0.3)+1.75;
     case ACT.THROW:return e.ap2>0?e.ap2+0.5:99;
     case ACT.HOLD:case ACT.CELEB:return 99;
     default:return ACT_LIM[e.act]||0.5;
@@ -696,116 +706,139 @@ function locoPose(e,P,dt){
     const acc=(sp-(e.pSp==null?sp:e.pSp))/dt;e.pSp=sp;
     e.accS=lerp(e.accS||0,clamp(acc,-12,12),Math.min(1,dt*6));
   }
-  const amp=clamp(sp/8.8,0,1),mov=Math.min(1,sp/1.1);
-  const sideW=sp>0.3?Math.abs(vl)/(Math.abs(vf)+Math.abs(vl)+1e-4):0,fwdW=1-sideW;
-  const ph=e.phase,s=Math.sin(ph),c=Math.cos(ph);
+  const gk=e.isGK,amp=clamp(sp/8.8,0,1),mov=Math.min(1,sp/1.0);
+  const sideW=sp>0.3?Math.abs(vl)/(Math.abs(vf)+Math.abs(vl)+1e-4):0;
+  const dl=sp>0.15?vl/sp:0,df=sp>0.15?vf/sp:1;
   const bdx=B.x-e.x,bdz=B.z-e.z,bd=hyp(bdx,bdz);
-  // athletic "ready" stance: keepers when play is near, defenders facing the ball carrier
+  // athletic stance: keepers when play comes near, defenders facing the ball carrier
   let ready=0;
-  if(e.isGK)ready=clamp(1-(bd-14)/24,0,1);
+  if(gk)ready=B.owner===e?0:clamp(1-(bd-14)/24,0,1);
   else if(e.team&&B.owner&&B.owner!==e&&B.owner.team!==e.team)ready=clamp(1-(bd-2.5)/5,0,1);
   e.rdy=lerp(e.rdy||0,ready,Math.min(1,(dt||0)*4));
-  const rd=e.rdy*(1-mov*0.6);
-  // stride: thigh swing grows with speed, knee folds in the swing phase
-  const sw=(0.22+0.8*amp)*mov*fwdW;
-  P[TL]=s*sw-rd*0.25;P[TR]=-s*sw-rd*0.25;
-  const kf=(0.25+1.35*amp)*mov*fwdW;
-  P[KL]=0.1+0.12*mov+rd*0.55+kf*Math.max(0,Math.sin(ph+1.9));
-  P[KR]=0.1+0.12*mov+rd*0.55+kf*Math.max(0,Math.sin(ph+1.9+PI));
-  // side shuffle: legs step apart and together instead of running
-  const ab=0.3*sideW*mov;
-  P[HLZ]=ab*Math.max(0,s)+rd*0.09;P[HRZ]=-ab*Math.max(0,-s)-rd*0.09;
-  P[KL]+=sideW*mov*0.4*Math.max(0,s);P[KR]+=sideW*mov*0.4*Math.max(0,-s);
-  // torso: lean with speed and acceleration, bank into turns, dip on each footfall
-  P[BX]=0.03+amp*0.24*fwdW*(vf<-0.3?-0.35:1)+clamp(e.accS*0.022,-0.12,0.18)+rd*0.18;
-  P[BZ]=clamp(-(e.turnV||0)*sp*0.026,-0.3,0.3);
-  P[BY]=-Math.abs(c)*0.045*amp*fwdW-rd*0.05;
-  // arms swing against the legs
-  const as=(0.22+0.78*amp)*mov*fwdW;
-  P[ALX]=-s*as-rd*0.3;P[ARX]=s*as-rd*0.3;
-  const out=0.1+sideW*mov*0.32+rd*0.38;
-  P[ALZ]=out;P[ARZ]=-out;
-  P[EL]=P[ER]=-(0.3+1.1*amp*mov)-rd*0.55;
-  if(mov<0.15){const b=Math.sin(G.t*2.1+e.i*1.3)*0.025;P[ALZ]+=b;P[ARZ]-=b;P[BX]+=b*0.3;}
-  // head tracks the ball
+  const rd=e.rdy*(1-amp*0.8);
+  P.fill(0);
+  // pelvis: sinks with speed and in the stance, dips on each footfall, swings with the stride
+  P[PY]=HIP_H-0.02*mov-amp*0.05-rd*(gk?0.21:0.11)-Math.abs(Math.cos(e.phase))*0.035*amp;
+  if(gk&&rd>0.5&&bd<22)P[PY]+=Math.sin(G.t*9+e.i)*0.012*rd; // keeper on his toes
+  P[PZ]=-rd*0.05;
+  P[PRY]=Math.sin(e.phase)*0.13*amp*(1-sideW);
+  // feet: planted during stance (no skating), lifted and carried forward in swing; works for any direction
+  const turnStep=Math.min(1,Math.abs(e.turnRate||0)/3)*(1-mov);
+  const Dc=1.25+0.26*sp,beta=lerp(0.6,0.36,amp);
+  const half=Math.min(0.42,beta*Dc*0.5)*mov,lift=(0.07+0.28*amp)*Math.max(mov,turnStep*0.7);
+  const width=0.1+rd*(gk?0.17:0.08)+sideW*0.05;
+  for(const side of[1,-1]){
+    const u=(((e.phase+(side>0?0:PI))/TAU)%1+1)%1;
+    let s,y=ANK;
+    if(u<beta)s=lerp(1,-1,u/beta);
+    else{const w=(u-beta)/(1-beta);s=lerp(-1,1,easeIO(w))-Math.sin(PI*w)*0.3*amp;y+=Math.sin(PI*w)*lift+Math.sin(PI*Math.min(1,w*1.7))*0.3*Math.max(0,amp-0.35);}
+    solveLeg(P,side,side*width+dl*s*half,y,df*s*half+rd*0.04);
+    if(u>=beta){const w=(u-beta)/(1-beta);P[side>0?AL:AR]+=Math.sin(PI*w)*0.35*amp;}
+  }
+  // trunk: lean with speed/acceleration and into turns, shoulders counter-rotate the hips
+  const bank=clamp(-(e.turnV||0)*sp*0.026,-0.3,0.3);
+  P[PRZ]=bank*0.5+Math.sin(e.phase)*0.035*mov;
+  P[SX]=0.04+amp*0.2*(df<-0.3?-0.3:1)*(1-sideW)+clamp(e.accS*0.02,-0.1,0.16)+rd*(gk?0.36:0.24);
+  P[SZ]=bank*0.5;P[SY]=-P[PRY]*1.5;
+  // arms swing against the legs; keepers hold their hands up and ready
+  const as=(0.2+0.8*amp)*mov*(1-sideW);
+  P[ALX]=-Math.sin(e.phase)*as;P[ARX]=Math.sin(e.phase)*as;
+  P[ALZ]=0.1+sideW*mov*0.3;P[ARZ]=-P[ALZ];
+  P[EL]=P[ER]=-(0.25+1.25*amp*mov);
+  if(gk){P[ALX]=lerp(P[ALX],-0.8,rd);P[ARX]=lerp(P[ARX],-0.8,rd);P[ALZ]=lerp(P[ALZ],0.42,rd);P[ARZ]=lerp(P[ARZ],-0.42,rd);P[EL]=lerp(P[EL],-1.3,rd);P[ER]=lerp(P[ER],-1.3,rd);}
+  else{P[ALZ]+=rd*0.3;P[ARZ]-=rd*0.3;P[EL]-=rd*0.4;P[ER]-=rd*0.4;}
+  if(mov<0.15){const b=Math.sin(G.t*2.1+e.i*1.3)*0.02;P[ALZ]+=b;P[ARZ]-=b;P[SX]+=b*0.3;}
+  // head tracks the ball and stays level when the trunk leans
   let hy=0,hx=0;
-  if(bd>0.4){hy=clamp(angD(e.face,Math.atan2(bdx,bdz)),-1.1,1.1);hx=clamp((1.5-B.y)/Math.max(2.5,bd)*0.9,-0.35,0.4);}
-  if(B.owner===e){hy*=0.3;hx=0.4;}
+  if(bd>0.4){hy=clamp(angD(e.face,Math.atan2(bdx,bdz))-P[SY]-P[PRY],-1.1,1.1);hx=clamp((1.5-B.y)/Math.max(2.5,bd)*0.9,-0.35,0.4);}
+  if(B.owner===e){hy*=0.3;hx=0.45;}
   e.hy=lerp(e.hy||0,hy,Math.min(1,(dt||0)*7));
-  P[HY]=e.hy;P[HX]=hx;
+  P[HY]=e.hy;P[HX]=hx-P[SX]*0.7;
 }
 function actionPose(e,P){
   const t=e.actT;
   switch(e.act){
     case ACT.KICK:{
-      const wind=e.ap1||0.1,str=e.actD||0.5,back=0.55+0.6*str,thru=-(0.55+0.85*str),kb=1.2+0.5*str;
-      if(t<wind){const u=easeOut(t/wind);P[TR]=lerp(P[TR],back,u);P[KR]=lerp(P[KR],kb,u);}
-      else{
-        const u=Math.min(1,(t-wind)/(0.16+0.06*str));P[TR]=lerp(back,thru,1-Math.pow(1-u,3));P[KR]=lerp(kb,0.08,Math.min(1,u*1.5));
-        if(t>wind+0.2){const q=Math.min(1,(t-wind-0.2)/0.22);P[TR]=lerp(thru,thru*0.4,q);P[KR]=lerp(0.08,0.5,q);}
-      }
-      P[TL]=-0.05;P[KL]=0.3+0.15*str;P[HLZ]=0.04;P[HRZ]=-0.04;
-      P[ALZ]=0.55+0.45*str;P[ARZ]=-0.35;P[ALX]=-0.4;P[ARX]=0.35;P[BX]=0.05-0.12*str;P[BZ]+=0.08*str;
+      // plant the left foot beside the ball, swing the right leg through, arms out for balance
+      const wind=e.ap1||0.1,str=e.actD||0.5,back=0.6+0.6*str,thru=-(0.6+0.8*str),kb=1.3+0.5*str;
+      P[PY]=HIP_H-0.07-0.04*str;
+      solveLeg(P,1,0.2,ANK,0.12);
+      let sw;
+      if(t<wind){const u=easeOut(t/wind);P[TR]=lerp(P[TR],back,u);P[KR]=lerp(P[KR],kb,u);sw=0;}
+      else{const u=Math.min(1,(t-wind)/(0.15+0.06*str));sw=u;P[TR]=lerp(back,thru,1-Math.pow(1-u,3));P[KR]=lerp(kb,0.06,Math.min(1,u*1.4));
+        if(t>wind+0.22){const q=Math.min(1,(t-wind-0.22)/0.2);P[TR]=lerp(thru,thru*0.35,q);P[KR]=lerp(0.06,0.45,q);}}
+      P[HRZ]=-0.05;P[AR]=-0.45;
+      P[PRY]=0.18-0.42*sw*str;P[SY]=-P[PRY]*0.6;P[SX]=0.12-0.22*str;P[SZ]=0.12;
+      P[ALZ]=0.65+0.45*str;P[ALX]=-0.35;P[ARZ]=-0.35;P[ARX]=0.4-0.8*sw;P[EL]=P[ER]=-0.35;
       return fadeW(t,actEnd(e),0.05,0.16);
     }
-    case ACT.TRAP:{const k=Math.sin(Math.min(1,t/0.28)*PI);P[TR]=lerp(P[TR],-0.45,k);P[KR]=lerp(P[KR],0.35,k);P[BX]+=0.08*k;P[HX]=0.45;return fadeW(t,0.3,0.04,0.1);}
-    case ACT.POKE:{const k=Math.sin(Math.min(1,t/0.32)*PI);P[TR]=-1.05*k;P[KR]=0.25;P[TL]=0.25*k;P[KL]=0.6;P[BX]=0.32*k;P[BY]=-0.08*k;P[ALZ]=0.5;P[ARZ]=-0.5;return fadeW(t,0.38,0.04,0.1);}
-    case ACT.STUMBLE:{const k=Math.sin(Math.min(1,t/0.6)*PI);P[BX]+=0.38*k;P[ALZ]=0.1+0.6*k;P[ARZ]=-0.1-0.6*k;P[ALX]=-0.6*k;P[ARX]=-0.4*k;P[KL]+=0.3*k;return fadeW(t,0.6,0.03,0.1);}
+    case ACT.TRAP:{const k=Math.sin(Math.min(1,t/0.28)*PI);P[TR]=lerp(P[TR],-0.45,k);P[KR]=lerp(P[KR],0.5,k);P[AR]=lerp(P[AR],0.25,k);P[SX]+=0.15*k;P[HX]=0.4;return fadeW(t,0.3,0.04,0.1);}
+    case ACT.POKE:{const k=Math.sin(Math.min(1,t/0.32)*PI);P[PY]=HIP_H-0.14*k;solveLeg(P,1,0.15,ANK,-0.15);P[TR]=-1.1*k;P[KR]=0.2;P[AR]=-0.3*k;P[SX]=0.15+0.25*k;P[ALZ]=0.55;P[ARZ]=-0.55;return fadeW(t,0.38,0.04,0.1);}
+    case ACT.STUMBLE:{const k=Math.sin(Math.min(1,t/0.6)*PI);P[SX]+=0.45*k;P[PY]-=0.08*k;P[ALZ]=0.15+0.65*k;P[ARZ]=-0.15-0.65*k;P[ALX]=-0.7*k;P[ARX]=-0.5*k;return fadeW(t,0.6,0.03,0.1);}
     case ACT.SLIDE:{
-      const u=easeOut(Math.min(1,t/0.16)),g=t>0.72?Math.min(1,(t-0.72)/0.26):0;
-      P[BX]=lerp(lerp(P[BX],-1.12,u),0,g);P[BY]=lerp(lerp(P[BY],0.1,u),0,g);
-      P[TL]=lerp(-0.05,P[TL],g);P[TR]=lerp(0.35,P[TR],g);P[KL]=lerp(0.08,P[KL],g);P[KR]=lerp(1.35,P[KR]+0.6,g);
-      P[ALX]=P[ARX]=0.7*(1-g);P[ALZ]=0.55;P[ARZ]=-0.55;P[EL]=P[ER]=-0.2;
-      return fadeW(t,1.0,0.03,0.04);
+      // on the hip, leading leg straight out, trailing leg folded, one hand down
+      const u=easeOut(Math.min(1,t/0.16)),g=t>0.72?easeIO(Math.min(1,(t-0.72)/0.28)):0,w=u*(1-g);
+      P[PY]=lerp(P[PY],0.24,w);P[PRZ]=-0.75*w;P[PRX]=-0.35*w;P[SX]=lerp(P[SX],-0.45,w);P[SZ]=0.3*w;
+      P[TR]=lerp(P[TR],-1.45,w);P[KR]=lerp(P[KR],0.08,w);P[AR]=lerp(P[AR],-0.3,w);P[HRZ]=lerp(P[HRZ],-0.05,w);
+      P[TL]=lerp(P[TL],-0.55,w);P[KL]=lerp(P[KL],1.7,w);P[AL]=lerp(P[AL],0.3,w);P[HLZ]=lerp(P[HLZ],0.25,w);
+      P[ALZ]=lerp(P[ALZ],1.25,w);P[ALX]=lerp(P[ALX],0.4,w);P[ARX]=lerp(P[ARX],-0.9,w);P[ARZ]=lerp(P[ARZ],-0.6,w);P[EL]=P[ER]=-0.25;
+      return t<1.0?1:0;
     }
     case ACT.FALL:{
-      const u=easeIO(Math.min(1,t/0.32));let bx=1.42*u,by=0.12*u;P[KL]=P[KR]=0.4;
-      if(t>1.05){const v=easeIO(Math.min(1,(t-1.05)/0.5));bx=lerp(1.42,0,v);by=lerp(0.12,0,v);P[KL]=P[KR]=0.4+Math.sin(v*PI);}
-      P[BX]=bx;P[BY]=by;P[ALX]=P[ARX]=-1.5*u;P[EL]=P[ER]=-0.4;P[TL]=P[TR]=0.15;
+      // pitch forward around the hips onto the turf, then push back up
+      let u=easeIO(Math.min(1,t/0.34));if(t>1.05)u=1-easeIO(Math.min(1,(t-1.05)/0.55));
+      P[PY]=lerp(P[PY],0.17,u);P[PRX]=1.45*u;P[SX]=lerp(P[SX],0.05,u);
+      P[TL]=lerp(P[TL],0.05,u);P[TR]=lerp(P[TR],0.1,u);P[KL]=lerp(P[KL],0.25,u)+(t>1.05?Math.sin(u*PI)*1.2:0);P[KR]=lerp(P[KR],0.35,u)+(t>1.05?Math.sin(u*PI)*1.2:0);P[AL]=P[AR]=0.4*u;
+      P[ALX]=lerp(P[ALX],-2.4,u);P[ARX]=lerp(P[ARX],-2.4,u);P[ALZ]=lerp(P[ALZ],0.35,u);P[ARZ]=lerp(P[ARZ],-0.35,u);P[EL]=P[ER]=-0.5*u;P[HX]=-0.6*u;
       return fadeW(t,1.62,0.02,0.1);
     }
     case ACT.DIVE:{
-      // keeper spring: tilt sideways around the planted foot until the hands meet the ball, land, get up
-      const side=e.actD||1,phi=e.ap1||1.2,lift=e.ap2||0.2,T1=Math.max(0.16,e.ap3||0.3);
-      let tilt,by;
-      if(t<T1){const u=easeOut(t/T1);tilt=phi*u;by=lift*Math.sin(u*PI*0.5);}
-      else if(t<T1+0.38){const u=(t-T1)/0.38;tilt=lerp(phi,1.48,easeIO(u));by=lerp(lift,0.16,u*u);}
-      else if(t<T1+1.15){tilt=1.48;by=0.16;}
-      else{const u=easeIO(Math.min(1,(t-T1-1.15)/0.5));tilt=lerp(1.48,0,u);by=lerp(0.16,0,u);}
-      P[BZ]=-side*tilt;P[BY]=by;P[BX]=0.1;
-      const reach=t<T1+0.55?1:Math.max(0,1-(t-T1-0.55)/0.6);
-      P[ALX]=lerp(P[ALX],-2.95,reach);P[ARX]=lerp(P[ARX],-2.95,reach);P[ALZ]=lerp(P[ALZ],0.18,reach);P[ARZ]=lerp(P[ARZ],-0.18,reach);P[EL]=lerp(P[EL],-0.08,reach);P[ER]=lerp(P[ER],-0.08,reach);
-      P[TL]=-0.15;P[TR]=0.25;P[KL]=0.25;P[KR]=0.7;P[HLZ]=side>0?0.25:0.05;P[HRZ]=side>0?-0.05:-0.25;P[HY]=0;
-      return fadeW(t,actEnd(e),0.03,0.12);
+      // keeper: crouch, spring sideways rolling around the hips until the hands meet the ball, land on the side, get up
+      const side=e.actD||1,tilt=e.ap1||1.2,py=e.ap2||0.6,T1=Math.max(0.16,e.ap3||0.3);
+      let r,y,reach=1;
+      if(t<T1){const u=t/T1,v=easeOut(u);r=tilt*v;y=u<0.18?lerp(P[PY],HIP_H-0.2,u/0.18):lerp(HIP_H-0.2,py,easeOut((u-0.18)/0.82));}
+      else if(t<T1+0.42){const u=(t-T1)/0.42;r=lerp(tilt,1.5,easeIO(u));y=lerp(py,0.2,u*u);}
+      else if(t<T1+1.15){r=1.5;y=0.2;reach=Math.max(0,1-(t-T1-0.42)/0.5);}
+      else{const u=easeIO(Math.min(1,(t-T1-1.15)/0.55));r=lerp(1.5,0,u);y=lerp(0.2,HIP_H,u);reach=0;}
+      P[PRZ]=-side*r;P[PY]=y;P[PRX]=0.08;P[SZ]=-side*0.18*reach;P[SX]=0.05;P[SY]=0;
+      const a=lerp(-1.4,-2.95,reach);
+      P[ALX]=P[ARX]=a;P[ALZ]=0.15+(side>0?0.2:0)*reach;P[ARZ]=-0.15-(side<0?0.2:0)*reach;P[EL]=P[ER]=lerp(-0.9,-0.08,reach);
+      // push-off leg stretched, other leg tucked
+      const near=side>0?'L':'R';
+      P[TL]=near==='L'?0.15:-0.25;P[KL]=near==='L'?0.15:0.9;P[TR]=near==='R'?0.15:-0.25;P[KR]=near==='R'?0.15:0.9;
+      P[HLZ]=0.12;P[HRZ]=-0.12;P[AL]=P[AR]=-0.3;P[HY]=0;P[HX]=0;
+      return fadeW(t,actEnd(e),0.03,0.15);
     }
     case ACT.CATCH:{
       const h=e.ap1||1,k=Math.sin(Math.min(1,t/0.5)*PI);
-      if(h>1.6){P[BY]=0.32*k;P[ALX]=P[ARX]=lerp(P[ALX],-2.8,Math.min(1,t/0.12));P[EL]=P[ER]=-0.3;P[KL]=P[KR]=0.2+0.6*k;P[TL]=P[TR]=-0.2;}
-      else if(h<0.55){P[BX]=0.55;P[BY]=-0.12;P[KL]=P[KR]=1.0;P[TL]=P[TR]=-0.7;P[ALX]=P[ARX]=-0.9;P[EL]=P[ER]=-0.5;P[ALZ]=0.15;P[ARZ]=-0.15;}
-      else{P[ALX]=P[ARX]=-1.2;P[EL]=P[ER]=-0.9;P[ALZ]=-0.1;P[ARZ]=0.1;P[BX]=0.15;}
+      if(h>1.6){P[PY]=HIP_H-0.05+0.35*k;P[TL]=P[TR]=-0.25*k;P[KL]=P[KR]=0.15+0.7*k;P[AL]=P[AR]=0;P[ALX]=P[ARX]=-2.85;P[ALZ]=0.12;P[ARZ]=-0.12;P[EL]=P[ER]=-0.35;P[SX]=-0.05;}
+      else if(h<0.55){P[PY]=0.64;solveLeg(P,1,0.17,ANK,-0.05);solveLeg(P,-1,-0.17,ANK,-0.05);P[SX]=0.95;P[ALX]=P[ARX]=-0.55;P[EL]=P[ER]=-0.25;P[ALZ]=0.12;P[ARZ]=-0.12;}
+      else{P[ALX]=P[ARX]=-1.25;P[EL]=P[ER]=-1.05;P[ALZ]=-0.05;P[ARZ]=0.05;P[SX]=0.18;}
       return fadeW(t,0.55,0.04,0.15);
     }
-    case ACT.HOLD:{P[ALX]=P[ARX]=-1.05;P[EL]=P[ER]=-0.95;P[ALZ]=-0.2;P[ARZ]=0.2;return Math.min(1,t/0.15);}
+    case ACT.HOLD:{P[ALX]=P[ARX]=-1.0;P[EL]=P[ER]=-1.05;P[ALZ]=-0.22;P[ARZ]=0.22;P[SX]=Math.max(P[SX],0.08);return Math.min(1,t/0.15);}
     case ACT.TOSS:{
-      const u=t/0.45;P[ARX]=u<0.35?lerp(-1.0,1.3,u/0.35):lerp(1.3,-1.7,Math.min(1,(u-0.35)/0.25));P[ER]=-0.2;
-      P[ALX]=-0.6;P[ALZ]=0.4;P[BX]=0.12+0.25*Math.min(1,u*1.5);P[TL]=-0.45;P[KL]=0.45;P[TR]=0.3;P[KR]=0.3;
-      return fadeW(t,0.55,0.04,0.12);
+      // underarm roll: right arm back, step in, release low
+      const u=t/0.45;P[PY]=HIP_H-0.18;solveLeg(P,1,0.12,ANK,0.45);solveLeg(P,-1,-0.12,ANK,-0.25);
+      P[ARX]=u<0.4?lerp(-0.6,1.2,u/0.4):lerp(1.2,-1.0,Math.min(1,(u-0.4)/0.3));P[ER]=-0.15;P[ALX]=-0.7;P[ALZ]=0.45;P[SX]=0.45;P[SY]=0.25*(1-u);
+      return fadeW(t,0.55,0.05,0.12);
     }
     case ACT.THROW:{
       let u=0;if(e.ap2>0&&t>e.ap2)u=Math.min(1,(t-e.ap2)/0.2);
-      P[ALX]=P[ARX]=lerp(-3.0,-1.5,u);P[EL]=P[ER]=lerp(-1.25,-0.2,u);P[ALZ]=0.18;P[ARZ]=-0.18;P[BX]=lerp(-0.14,0.22,u);P[TL]=-0.25;P[KL]=0.3;P[HY]=0;
+      solveLeg(P,1,0.13,ANK,0.3);solveLeg(P,-1,-0.13,ANK,-0.2);
+      P[ALX]=P[ARX]=lerp(-3.0,-1.5,u);P[EL]=P[ER]=lerp(-1.3,-0.2,u);P[ALZ]=0.18;P[ARZ]=-0.18;P[SX]=lerp(-0.3,0.3,u);P[HY]=0;
       return e.ap2>0?fadeW(t,e.ap2+0.5,0.05,0.15):Math.min(1,t/0.15);
     }
     case ACT.HEAD:{
       const u=Math.min(1,t/0.5),k=Math.sin(u*PI);
-      P[BY]=0.5*k;P[BX]=-0.2*k+0.45*Math.max(0,Math.sin((u-0.35)*PI*2.2))*k;P[ALX]=P[ARX]=-0.9*k;P[ALZ]=0.5*k;P[ARZ]=-0.5*k;
-      P[TL]=P[TR]=0.25*k;P[KL]=P[KR]=0.2+0.9*k;P[HX]=-0.3*k;
+      P[PY]=HIP_H+0.42*k;P[SX]=lerp(-0.35,0.45,clamp((u-0.35)/0.25,0,1))*k;P[ALX]=P[ARX]=-0.8*k;P[ALZ]=0.55*k;P[ARZ]=-0.55*k;
+      P[TL]=P[TR]=0.2*k;P[KL]=P[KR]=0.15+0.85*k;P[AL]=P[AR]=-0.3*k;P[HX]=-0.2*k;
       return fadeW(t,0.6,0.04,0.1);
     }
     case ACT.CELEB:{
       const w=Math.min(1,t/0.3);
       P[ALZ]=lerp(P[ALZ],1.35+Math.sin(t*9)*0.12,w);P[ARZ]=lerp(P[ARZ],-1.35-Math.sin(t*9)*0.12,w);
-      P[ALX]=lerp(P[ALX],-0.35,w);P[ARX]=lerp(P[ARX],-0.35,w);P[EL]=lerp(P[EL],-0.1,w);P[ER]=lerp(P[ER],-0.1,w);P[HX]=-0.25*w;
+      P[ALX]=lerp(P[ALX],-0.35,w);P[ARX]=lerp(P[ARX],-0.35,w);P[EL]=lerp(P[EL],-0.1,w);P[ER]=lerp(P[ER],-0.1,w);P[SX]-=0.15*w;P[HX]=-0.3*w;
       return 1;
     }
   }
@@ -813,11 +846,12 @@ function actionPose(e,P){
 }
 function applyPose(e,dt){
   const r=e.rig;r.root.position.set(e.x,0,e.z);r.root.rotation.y=e.face;
-  const P=PZ;locoPose(e,P,dt);
-  if(e.act){PA.set(P);const w=actionPose(e,PA);if(w>0)for(let i=0;i<NCH;i++)P[i]+=(PA[i]-P[i])*w;}
-  r.body.rotation.set(P[BX],0,P[BZ]);r.body.position.y=P[BY];
+  const P=POSE0;locoPose(e,P,dt);
+  if(e.act){POSE1.set(P);const w=actionPose(e,POSE1);if(w>0)for(let i=0;i<NCH;i++)P[i]+=(POSE1[i]-P[i])*w;}
+  r.pelvis.position.set(P[PX],P[PY],P[PZ]);r.pelvis.rotation.set(P[PRX],P[PRY],P[PRZ]);
+  r.spine.rotation.set(P[SX],P[SY],P[SZ]);
   r.hipL.rotation.set(P[TL],0,P[HLZ]);r.hipR.rotation.set(P[TR],0,P[HRZ]);
-  r.kneeL.rotation.x=P[KL];r.kneeR.rotation.x=P[KR];
+  r.kneeL.rotation.x=P[KL];r.kneeR.rotation.x=P[KR];r.ankL.rotation.x=P[AL];r.ankR.rotation.x=P[AR];
   r.shL.rotation.set(P[ALX],0,P[ALZ]);r.shR.rotation.set(P[ARX],0,P[ARZ]);
   r.elL.rotation.x=P[EL];r.elR.rotation.x=P[ER];
   r.headG.rotation.set(P[HX],P[HY],0);
@@ -1301,10 +1335,10 @@ function planSave(e){
   const lat=pt.z-e.z,h=clamp(pt.y,0.1,2.8),al=Math.abs(lat);
   const sideW=Math.sign(lat)||1,sideL=Math.sign(lat*-Math.sin(e.face))||1;
   const sp=hyp(B.vx,B.vy,B.vz),avail=Math.max(0,tP-0.05);
-  // a dive tilts the body by phi so that the hands (2.05 m from the planted foot) reach the ball height
-  let phi=0,lift=0,hand=0.55,kind='catch';
-  if(al>0.65||h>2.05){lift=clamp((h-1.0)*0.42,0,0.55);phi=Math.acos(clamp((h-lift)/2.05,0.06,0.98));hand=Math.sin(phi)*2.05;kind='dive';}
-  const move=Math.max(0,al-hand),can=0.25+avail*5.6;
+  // a dive rolls the body around the hips (hands ~1.25 m from the pelvis); the pelvis rises for high balls
+  let tilt=0,py=HIP_H,hand=0.5,kind='catch';
+  if(al>0.65||h>2.05){py=clamp(0.3+(h-0.35)*0.55,0.28,1.25);tilt=Math.acos(clamp((h-py)/1.25,0.05,0.97));hand=Math.sin(tilt)*1.25+0.1;kind='dive';}
+  const move=Math.max(0,al-hand),can=0.4+avail*6.5;
   let ch=0;
   if(move<=can)ch=e.gkSkill*(1.12-(move/Math.max(0.01,can))*0.5-Math.max(0,sp-19)/40-(al>2.7?0.14:0)-(h>2.05&&al>2.2?0.16:0)-(kind==='dive'&&h<0.45&&al>2.2?0.08:0));
   ch=clamp(ch,0,0.95);
@@ -1312,7 +1346,7 @@ function planSave(e){
   const reachZ=pt.z-sideW*hand*0.95;
   const T1=clamp(tP*0.92,0.16,0.62);
   e.save={ok,done:false,tEnd:G.t+tP,t0:G.t,T1,z0:e.z,rootZ:ok?reachZ:e.z+(reachZ-e.z)*rnd(0.45,0.75),handZ:pt.z,catch:ok&&sp<21&&(kind==='catch'||al<1.6)&&Math.random()<0.7};
-  if(kind==='dive'){e.act=ACT.DIVE;e.actT=0;e.actD=sideL;e.ap1=phi;e.ap2=lift;e.ap3=T1;}
+  if(kind==='dive'){e.act=ACT.DIVE;e.actT=0;e.actD=sideL;e.ap1=tilt;e.ap2=py;e.ap3=T1;}
   else{e.act=ACT.CATCH;e.actT=0;e.ap1=h;}
 }
 function doSave(e,sv){
@@ -1428,7 +1462,7 @@ function moveEnt(e,dt){
   e.x=clamp(e.x,-HL-3.5,HL+3.5);e.z=clamp(e.z,-HW-2.8,HW+2.8);
   const sp=hyp(e.vx,e.vz),vf=e.vx*Math.sin(e.face)+e.vz*Math.cos(e.face);
   // cadence from distance covered; the cycle runs backwards when backpedalling, and turning on the spot takes small steps
-  const back=vf<-0.4&&-vf>sp*0.6?-1:1;
+  const back=1;
   e.phase+=dt*sp/(1.25+sp*0.26)*TAU*back+(sp<1?dt*Math.min(5,Math.abs(e.turnRate||0))*0.8:0);
   e.speed=sp;
   if(e.team){if(e.sprint&&sp>e.vmax*0.75)e.stamina=Math.max(0,e.stamina-dt*0.075);else e.stamina=Math.min(1,e.stamina+dt*0.04);}
@@ -1958,7 +1992,7 @@ function updateVisuals(dt){
   if(ind.visible){
     const c=G.ctrl,pop=1+0.8*Math.exp(-(G.t-G.switchFx)*9);
     ind.position.x=c.x;ind.position.z=c.z;ind.rotation.y=c.face;ind.scale.setScalar(pop);
-    marker.position.set(c.x,2.35+Math.sin(T*5)*0.07+Math.max(0,c.rig.body.position.y),c.z);marker.rotation.y=T*2;marker.scale.setScalar(pop);
+    marker.position.set(c.x,2.35+Math.sin(T*5)*0.07+Math.max(0,c.rig.body.position.y-HIP_H),c.z);marker.rotation.y=T*2;marker.scale.setScalar(pop);
   }
   // on defence: who the switch button would pick next
   nextMk.visible=false;
