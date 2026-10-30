@@ -2,7 +2,7 @@
   "name": "floodlight-eleven",
   "version": "1.0.0",
   "private": true,
-  "description": "Floodlight Eleven — 3D night soccer game",
+  "description": "Floodlight Eleven \u2014 3D night soccer game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -11,6 +11,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "express": "4.21.2"
+    "express": "4.21.2",
+    "ws": "8.18.0"
   }
 }
