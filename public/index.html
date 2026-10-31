@@ -49,6 +49,11 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 #sb .h{display:flex;align-items:center;padding:0 7px;background:var(--glass);color:var(--mute);font-size:13px}
 #mini{position:absolute;top:calc(8px + var(--st));left:50%;transform:translateX(-50%);width:132px;height:86px;border-radius:4px;background:rgba(8,13,23,.55);box-shadow:0 0 0 1px var(--rule)}
 #tr{position:absolute;top:calc(8px + var(--st));right:var(--sr);display:flex;gap:8px;pointer-events:auto}
+.ib.on{background:var(--flood);color:#16120a;border-color:transparent}
+#autoBtn{width:48px}
+.auto #ctl{opacity:.3;pointer-events:none}
+.auto #ctl *{pointer-events:none}
+.auto #tag{display:none}
 .ib{width:38px;height:34px;border-radius:6px;border:1px solid var(--rule);background:var(--glass);display:grid;place-items:center;font-family:var(--f-num);font-weight:700;font-size:13px;letter-spacing:.06em;padding:0}
 .ib svg{width:16px;height:16px;fill:var(--ink)}
 #tag{position:absolute;left:var(--sl);top:calc(46px + var(--st));display:flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;border-radius:999px;background:var(--glass);font-size:13px;white-space:nowrap;box-shadow:0 0 0 1px var(--rule)}
@@ -302,6 +307,7 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
     </div>
     <canvas id="mini" width="264" height="172"></canvas>
     <div id="tr">
+      <button class="ib" id="autoBtn" aria-label="자동 모드">AUTO</button>
       <button class="ib" id="camBtn" aria-label="카메라 전환">CAM</button>
       <button class="ib" id="pauseBtn" aria-label="일시정지"><svg viewBox="0 0 16 16"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
     </div>
@@ -439,8 +445,10 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
       <button data-a="stick" id="pStk">조이스틱: 고정</button>
       <button data-a="snd" id="pSnd">사운드: 켜짐</button>
       <button data-a="help">조작법</button>
+      <button data-a="auto" id="pAuto">자동 모드: 꺼짐</button>
       <button data-a="restart" id="pRestart">경기 다시 시작</button>
-      <button data-a="menu">메인 메뉴로</button>
+      <button data-a="forfeit" id="pForfeit">기권하기 (0:3 패배)</button>
+      <button data-a="menu" id="pMenu">경기 나가기</button>
     </div>
   </section>
 
@@ -2508,6 +2516,7 @@ function startMatch(){
   G.score=[0,0];G.clock=0;G.half=1;G.stats=newStats();G.goalLog=[];G.lgRes=null;G.firstKick=Math.random()<0.5?0:1;G.kickTeam=G.firstKick;
   recW=0;recN=0;
   hudInit();hudScore();
+  G.auto=false;G.forfeit=false;$('autoBtn').classList.remove('on');$('app').classList.remove('auto');$('autoBtn').hidden=NET.online;
   $('menu').hidden=true;$('hud').hidden=false;$('result').hidden=true;$('pause').hidden=true;
   G.state='intro';G.introT=0;
   resetKickoffPositionsOnly();
@@ -3004,7 +3013,7 @@ function showResult(full){
   const rows=[[Math.round(st[0].poss/tp*100)+'%','점유율',Math.round(st[1].poss/tp*100)+'%'],[st[0].shots,'슈팅',st[1].shots],[st[0].onT,'유효 슈팅',st[1].onT],[st[0].passOk+'/'+st[0].pass,'패스 성공',st[1].passOk+'/'+st[1].pass],[st[0].tack,'태클 성공',st[1].tack],[st[0].skill||0,'개인기 성공',st[1].skill||0],[st[0].fouls||0,'파울',st[1].fouls||0],[(st[0].yel||0)+' / '+(st[0].red||0),'경고 / 퇴장',(st[1].yel||0)+' / '+(st[1].red||0)]];
   $('rStats').innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('');
   let msg='';
-  if(full&&G.lgRes&&!NET.online){const L=G.lgRes;msg=(G.score[0]>G.score[1]?'승점 3점!':G.score[0]<G.score[1]?'패배.':'승점 1점.')+' '+(L.md+1)+'라운드 종료 · 현재 '+L.pos+'위 (승점 '+L.pts+')'+(L.md===37?' · 시즌 종료':'');}
+  if(full&&G.lgRes&&!NET.online){const L=G.lgRes;msg=(G.forfeit?'기권패 (0:3).':G.score[0]>G.score[1]?'승점 3점!':G.score[0]<G.score[1]?'패배.':'승점 1점.')+' '+(L.md+1)+'라운드 종료 · 현재 '+L.pos+'위 (승점 '+L.pts+')'+(L.md===37?' · 시즌 종료':'');}
   else if(full){msg=G.score[0]>G.score[1]?'승리! '+DIFFS[G.set.diff].name+' 난이도를 꺾었습니다.':G.score[0]<G.score[1]?'패배. 다음 경기에서 설욕하세요.':'무승부로 끝났습니다.';if(!NET.online){const r=getRec();msg+='  · 전적 '+r.w+'승 '+r.d+'무 '+r.l+'패';}}
   else msg='후반전은 '+(G.firstKick===0?a.name:h.name)+'의 킥오프로 시작합니다.';
   $('rMsg').textContent=msg;
@@ -3108,7 +3117,7 @@ document.querySelectorAll('.bt').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('contextmenu',e=>e.preventDefault());});
 const KEYMAP={KeyJ:'pass',KeyK:'thru',KeyL:'shoot',Space:'shoot',KeyE:'shoot',KeyR:'shoot',KeyQ:'skill',ShiftLeft:'sprint',ShiftRight:'sprint'};
 let usedKeys=false;
-addEventListener('keydown',e=>{if(e.repeat)return;usedKeys=true;document.body.classList.remove('nokeys');IN.keys[e.code]=true;if(KEYMAP[e.code]){if(KEYMAP[e.code]==='shoot'&&!IN.btn.shoot)IN.shotKind=e.code==='KeyE'?'finesse':e.code==='KeyR'?'chip':'normal';btnDown(KEYMAP[e.code]);e.preventDefault();}if(e.code==='Escape'||e.code==='KeyP')togglePause();if(e.code==='KeyC')cycleCam();if(G.state==='replay'||G.state==='intro')skipCine();});
+addEventListener('keydown',e=>{if(e.repeat)return;usedKeys=true;document.body.classList.remove('nokeys');IN.keys[e.code]=true;if(KEYMAP[e.code]){if(KEYMAP[e.code]==='shoot'&&!IN.btn.shoot)IN.shotKind=e.code==='KeyE'?'finesse':e.code==='KeyR'?'chip':'normal';btnDown(KEYMAP[e.code]);e.preventDefault();}if(e.code==='Escape'||e.code==='KeyP')togglePause();if(e.code==='KeyC')cycleCam();if(e.code==='KeyT'&&!['menu','boot','full'].includes(G.state))setAuto(!G.auto);if(G.state==='replay'||G.state==='intro')skipCine();});
 addEventListener('keyup',e=>{IN.keys[e.code]=false;if(KEYMAP[e.code])btnUp(KEYMAP[e.code]);});
 function keyAxes(){if(IN.jid!==null)return;const K=IN.keys;let x=(K.KeyD||K.ArrowRight?1:0)-(K.KeyA||K.ArrowLeft?1:0),y=(K.KeyS||K.ArrowDown?1:0)-(K.KeyW||K.ArrowUp?1:0);const m=hyp(x,y);if(m){IN.jx=x/m;IN.jy=y/m;}else if(usedKeys){IN.jx=0;IN.jy=0;}}
 if(matchMedia('(pointer:coarse)').matches)document.body.classList.add('nokeys');
@@ -3306,10 +3315,30 @@ $('segM').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)
 $('tacReset').addEventListener('click',()=>{G.set.tacs[G.set.home]=clubTac(G.set.home);tacSel=-1;renderTac();});
 $('tacBack').addEventListener('click',()=>{$('tac').hidden=true;});
 $('tacGo').addEventListener('click',()=>{$('tac').hidden=true;if(tacMode==='solo'){AU.start();startMatch();}else{const t=myTac();$('olTac').textContent='전술: '+t.form+' · '+MENTS.find(m=>m.v===t.ment).n;}});
+// auto mode: the computer plays your side until you switch it off (single player only)
+function setAuto(on){
+  if(NET.online||!G.teams.length)return;
+  G.auto=!!on;
+  if(G.auto){PADS[0]=null;G.teams[0].human=false;hideHint();say('자동 모드: 컴퓨터가 대신 플레이해요');}
+  else{PADS[0]=mkPad(0,IN);G.teams[0].human=true;const o=B.owner&&B.owner.team.i===0&&!B.owner.isGK?B.owner:nearestHuman(G.teams[0],B.x,B.z,true);if(o)setCtrl(PADS[0],o);say('직접 조종으로 돌아왔어요');}
+  clearEdges(IN);for(const k in IN.chg)IN.chg[k]=false;IN.charging=false;
+  $('autoBtn').classList.toggle('on',G.auto);$('app').classList.toggle('auto',G.auto);$('pAuto').textContent='자동 모드: '+(G.auto?'켜짐':'꺼짐');
+}
+// walking out of a league match counts as a 0-3 defeat; the rest of the round is played out as usual
+let forfeitArm=0;
+function forfeit(){
+  if(NET.online||G.mode!=='league'||!LG.s)return;
+  if(performance.now()-forfeitArm>3000){forfeitArm=performance.now();$('pForfeit').textContent='정말 기권할까요? 한 번 더 누르면 0:3 패배';return;}
+  forfeitArm=0;G.paused=false;$('pause').hidden=true;if(AU.ctx)AU.ctx.resume();
+  G.score=[0,3];G.goalLog=[];G.forfeit=true;hudScore();bannerOff();fullTime();
+}
 function togglePause(){
   if(['menu','boot','half','full'].includes(G.state))return;
+  const lg=!NET.online&&G.mode==='league'&&!!LG.s;
+  $('pForfeit').hidden=!lg;$('pForfeit').textContent='기권하기 (0:3 패배)';forfeitArm=0;$('pAuto').hidden=NET.online;
+  $('pMenu').textContent=NET.online?'경기 나가기':lg?'나가기 (기록 없이, 다음에 다시 치름)':'경기 나가기';
   if(NET.online){$('pause').hidden=!$('pause').hidden;$('pRestart').hidden=true;return;}
-  $('pRestart').hidden=false;
+  $('pRestart').hidden=false;$('pAuto').textContent='자동 모드: '+(G.auto?'켜짐':'꺼짐');
   G.paused=!G.paused;$('pause').hidden=!G.paused;
   $('pCam').textContent='카메라: '+CAMS[G.set.cam].n;$('pSnd').textContent='사운드: '+(AU.on?'켜짐':'꺼짐');$('pStk').textContent='조이스틱: '+(G.set.stick?'자유':'고정');
   if(AU.ctx){G.paused?AU.ctx.suspend():AU.ctx.resume();}
@@ -3317,11 +3346,14 @@ function togglePause(){
 function cycleCam(){G.set.cam=(G.set.cam+1)%CAMS.length;$('camBtn').textContent=CAMS[G.set.cam].n;$('pCam').textContent='카메라: '+CAMS[G.set.cam].n;lsSet('fl11-set',JSON.stringify(G.set));}
 $('pauseBtn').addEventListener('click',togglePause);
 $('camBtn').addEventListener('click',cycleCam);
+$('autoBtn').addEventListener('click',()=>{if(!['menu','boot','full'].includes(G.state))setAuto(!G.auto);});
 $('pause').addEventListener('click',e=>{const a=e.target.dataset&&e.target.dataset.a;if(!a)return;
   if(a==='resume'){if(NET.online)$('pause').hidden=true;else togglePause();}
   if(a==='cam')cycleCam();
   if(a==='stick'){G.set.stick=G.set.stick?0:1;$('pStk').textContent='조이스틱: '+(G.set.stick?'자유':'고정');stickHome();lsSet('fl11-set',JSON.stringify(G.set));}
   if(a==='help')$('help').hidden=false;
+  if(a==='auto')setAuto(!G.auto);
+  if(a==='forfeit')forfeit();
   if(a==='snd'){AU.setOn(!AU.on);$('pSnd').textContent='사운드: '+(AU.on?'켜짐':'꺼짐');}
   if(a==='restart'){G.paused=false;$('pause').hidden=true;if(AU.ctx)AU.ctx.resume();startMatch();}
   if(a==='menu'){G.paused=false;$('pause').hidden=true;if(AU.ctx)AU.ctx.resume();goMenu();}
