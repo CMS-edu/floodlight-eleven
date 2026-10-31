@@ -2661,7 +2661,8 @@ function doUserAction(pd,kind,power,sk){
 // where the defence has to get to: the carrier a moment ahead, the end of an opponent's pass, or where a loose ball is going
 function switchPoint(pd){
   const o=B.owner;
-  if(o)return[o.x+o.vx*0.4,o.z+o.vz*0.4];
+  // against a carrier, the place to be is goal-side of him, a little ahead of where he is going
+  if(o){const gx=ownGoalX(G.teams[pd.ti]),vx=gx-o.x,vz=-o.z,l=hyp(vx,vz)||1;return[o.x+o.vx*0.5+vx/l*2.5,o.z+o.vz*0.5+vz/l*2.5];}
   if(B.target&&B.target.r&&B.target.r.team.i!==pd.ti)return[B.target.x,B.target.z];
   const p=trajAt(0.45);return[p.x,p.z];
 }
@@ -2671,7 +2672,9 @@ function engageT(p,fx,fz,gx){
   const dx=fx-p.x,dz=fz-p.z,d=hyp(dx,dz),vt=d>0.1?(dx*p.vx+dz*p.vz)/d:0;
   let t=d/(p.vmax*0.85)-clamp(vt,-3,7)*0.05+0.15;
   if(p.stun>0)t+=p.stun;if(p.act===ACT.FALL||p.act===ACT.SLIDE)t+=0.8;
-  if((p.x-fx)*(gx-fx)<-1)t+=0.7;
+  // beaten: further from his own goal than the play is; chasing a man's back rarely gets there
+  const pg=hyp(p.x-gx,p.z),fg=hyp(fx-gx,fz);
+  if(pg>fg+1)t+=0.8+Math.min(1.5,(pg-fg)*0.12);
   return t;
 }
 function switchList(pd){
@@ -2782,6 +2785,8 @@ function userStep(pd,dt){
       else{c.act=ACT.POKE;c.actT=0;}
     }
     if(G.t-pd.lastSwitch>0.8&&jm<0.3&&!locked)autoSwitchDef(pd,false);
+    // your man has been beaten: hand over to someone still goal-side, even while you are steering
+    else if(opp&&G.t-pd.lastSwitch>0.5&&!locked){const gx=ownGoalX(c.team);if(hyp(c.x-gx,c.z)>hyp(opp.x-gx,opp.z)+1.5&&hyp(c.x-opp.x,c.z-opp.z)>2)autoSwitchDef(pd,true);}
   }
   // loose ball: hand control to whoever gets there first
   if(!B.owner&&G.t-pd.lastSwitch>0.7&&!(B.target&&B.target.r===c)&&B.kicker!==c&&!locked){
