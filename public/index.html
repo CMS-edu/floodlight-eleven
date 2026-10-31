@@ -309,6 +309,8 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
 <script>
 (function(){
 'use strict';
@@ -381,6 +383,7 @@ R.setPixelRatio(PR);
 R.outputEncoding=THREE.sRGBEncoding;
 R.toneMapping=THREE.ACESFilmicToneMapping;
 R.toneMappingExposure=1.02;
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
 const S=new THREE.Scene();
 S.fog=new THREE.Fog(new THREE.Color('#0b1222').convertSRGBToLinear(),160,520);
 const CAM=new THREE.PerspectiveCamera(30,1,0.4,1400);
@@ -395,12 +398,16 @@ function ctex(w,h,draw,rep){
 }
 
 /* lights: 4 corner towers */
+// the strongest tower casts real shadows; the other three are painted as soft streaks under each player
+const KEY=new THREE.DirectionalLight(C3('#fff0d2'),0.95),KEY_DIR=new THREE.Vector3(-0.55,0.62,0.46).multiplyScalar(90);
+KEY.castShadow=true;KEY.shadow.mapSize.set(matchMedia('(pointer:coarse)').matches?1024:2048,matchMedia('(pointer:coarse)').matches?1024:2048);
+{const c=KEY.shadow.camera;c.left=-34;c.right=34;c.top=34;c.bottom=-34;c.near=10;c.far=220;}KEY.shadow.bias=-0.0004;KEY.shadow.normalBias=0.03;
 const FLOODS=[[-HL-24,-HW-30],[HL+24,-HW-30],[-HL-24,HW+30],[HL+24,HW+30]];
 const FLOOD_H=48;
 S.add(new THREE.HemisphereLight(C3('#a9bde0'),C3('#20381f'),0.62));
 S.add(new THREE.AmbientLight(C3('#3a4356'),0.22));
 {
-  const d1=new THREE.DirectionalLight(C3('#fff0d2'),0.78);d1.position.set(-60,80,55);S.add(d1);
+  const d1=KEY;S.add(d1);S.add(d1.target);
   const d2=new THREE.DirectionalLight(C3('#e3ebff'),0.55);d2.position.set(62,72,-48);S.add(d2);
   const d3=new THREE.DirectionalLight(C3('#ffe9c4'),0.28);d3.position.set(40,60,70);S.add(d3);
 }
@@ -446,7 +453,7 @@ const PITCH_W=126,PITCH_D=88;
     g.putImageData(id,0,0);
   });
   tex.anisotropy=MAXANI;
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(PITCH_W,PITCH_D),new THREE.MeshLambertMaterial({map:tex}));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(PITCH_W,PITCH_D),new THREE.MeshLambertMaterial({map:tex}));m.receiveShadow=true;
   m.rotation.x=-PI/2;S.add(m);
   // markings
   const LW=0.12;
@@ -726,7 +733,8 @@ function kitMats(club){
   };
 }
 // skeleton: root (feet on the ground) > pelvis at hip height > legs and spine; the spine carries torso, arms and head
-const HIP_H=0.93,ANK=0.065,LEG=0.44;
+// leg geometry of the active body (the skinned model switches these once it has loaded)
+let HIP_H=0.93,ANK=0.065,HIPW=0.096;const LEG=0.44;
 function buildRig(m,o){
   const root=new THREE.Group(),pelvis=new THREE.Group();pelvis.position.y=HIP_H;root.add(pelvis);
   const spine=new THREE.Group();spine.position.y=0.04;pelvis.add(spine);
@@ -765,7 +773,7 @@ const easeOut=u=>1-(1-u)*(1-u),easeIO=u=>u*u*(3-2*u);
 const fadeW=(t,end,fin,fout)=>clamp(Math.min(t/fin,(end-t)/fout),0,1);
 // two-bone leg IK: place the ankle at (fx,fy,fz) in root space, keep the foot flat
 function solveLeg(P,side,fx,fy,fz){
-  const dx=fx-(P[PX]+side*0.096),dy=Math.max(0.05,P[PY]-fy),dz=fz-P[PZ];
+  const dx=fx-(P[PX]+side*HIPW),dy=Math.max(0.05,P[PY]-fy),dz=fz-P[PZ];
   const az=Math.atan2(dx,dy),dyp=hyp(dx,dy),D=clamp(hyp(dyp,dz),0.25,2*LEG-0.002);
   const t=-(Math.atan2(dz,dyp)+Math.acos(D/(2*LEG))),k=PI-Math.acos(clamp(1-D*D/(2*LEG*LEG),-1,1));
   if(side>0){P[TL]=t;P[HLZ]=az;P[KL]=k;P[AL]=-(t+k+P[PRX]);}else{P[TR]=t;P[HRZ]=az;P[KR]=k;P[AR]=-(t+k+P[PRX]);}
@@ -940,6 +948,144 @@ function applyPose(e,dt){
   r.headG.rotation.set(P[HX],P[HY],0);
 }
 
+/* ================= skinned players ================= */
+// Human-proportioned body (Mixamo X Bot) driven by motion-captured idle/walk/run clips; kicks, dives, tackles and
+// stances come from the procedural pose above and are blended onto the same skeleton. A kit shader paints shirt,
+// shorts, socks, boots, skin and hair from the bind-pose position, so the kit follows the body whatever it does.
+const SKIN={ready:false,scene:null,clips:{}};
+const SKIN_HEX=['#f0c8a4','#e1ae84','#c78c62','#a06a45','#6b4430'],HAIR_HEX=['#17110d','#2b1d13','#4a3020','#8a6233','#cfb27a','#0d0d0d'],BOOT_HEX=['#111111','#f4f4f4','#ff3b5c','#27c8ff','#c8ff2b','#ff9f1c'];
+const KIT_PAT={pin:1,hoop:2,stripe:3,sash:4,bolt:5};
+const texCache={};
+function labelTex(key,w,h,draw){if(texCache[key])return texCache[key];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return texCache[key]=t;}
+const numTex=(n,color)=>labelTex('n'+n+color,128,128,(g,w,h)=>{g.clearRect(0,0,w,h);if(n===''||n==null)return;g.fillStyle=color;g.font='800 104px "Saira Condensed","Arial Narrow",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(n),w/2,h/2+6);});
+const sponTex=(s,color)=>labelTex('s'+s+color,256,128,(g,w,h)=>{g.clearRect(0,0,w,h);if(!s)return;g.fillStyle=color;g.font='800 62px "Saira Condensed","Arial Narrow",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(s,w/2,h/2+4);});
+function kitMaterial(o){
+  const m=new THREE.MeshStandardMaterial({roughness:0.72,metalness:0,skinning:true});
+  const c=h=>C3(h);
+  const U={uShirt:{value:c(o.shirt)},uPat:{value:c(o.pc)},uPatK:{value:o.patK||0},uShorts:{value:c(o.shorts)},uSocks:{value:c(o.socks)},uBoot:{value:c(o.boot)},
+    uSkin:{value:c(o.skin)},uHair:{value:c(o.hair)},uHairK:{value:o.hairK||0},uNumTex:{value:o.numTex},uSpTex:{value:o.spTex},uLong:{value:o.long?1:0},uGlove:{value:c(o.glove||o.skin)}};
+  m.onBeforeCompile=sh=>{
+    Object.assign(sh.uniforms,U);
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vBP;').replace('#include <begin_vertex>','#include <begin_vertex>\nvBP=position;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
+varying vec3 vBP;uniform vec3 uShirt,uPat,uShorts,uSocks,uBoot,uSkin,uHair,uGlove;uniform float uPatK,uHairK,uLong;uniform sampler2D uNumTex,uSpTex;
+`).replace('vec4 diffuseColor = vec4( diffuse, opacity );',`
+vec3 p=vBP;float ax=abs(p.x);vec3 col=uSkin;float rough=0.58;
+bool arm=ax>0.19&&p.y>1.30;
+if(p.y<0.125){col=uBoot;rough=0.32;}
+else if(p.y<0.47){col=uSocks;rough=0.85;if(p.y>0.43)col=mix(uSocks,uPat,0.55);}
+else if(p.y<0.615){col=uSkin;}
+else if(p.y<1.0&&!arm){col=uShorts;rough=0.7;if(p.y<0.64)col*=0.8;if(ax>0.112&&ax<0.124)col=mix(col,uPat,0.6);}
+else if(arm){
+  if(ax<0.34||(uLong>0.5&&ax<0.69)){col=uShirt;rough=0.75;if(ax>0.31&&ax<0.34&&uLong<0.5)col=mix(uShirt,uPat,0.75);}
+  else col=ax>0.69&&uLong>0.5?uGlove:uSkin;}
+else if(p.y<1.505){
+  col=uShirt;rough=0.76;
+  if(uPatK>0.5&&uPatK<1.5&&fract(p.x*36.0)<0.18)col=uPat;
+  if(uPatK>1.5&&uPatK<2.5&&fract(p.y*4.2)<0.36)col=uPat;
+  if(uPatK>2.5&&uPatK<3.5&&fract((p.x+0.04)/0.16)<0.5)col=uPat;
+  if(uPatK>3.5&&uPatK<4.5&&abs(p.x*0.9+(p.y-1.24))<0.05&&p.z>0.0)col=uPat;
+  if(uPatK>4.5&&abs(p.y-1.3-ax*0.6)<0.035&&p.z>0.0)col=uPat;
+  if(p.y>1.475)col=mix(col,uPat,0.85);
+  if(p.z>0.07&&ax<0.13&&p.y>1.2&&p.y<1.34){vec4 s=texture2D(uSpTex,vec2((p.x+0.13)/0.26,(p.y-1.2)/0.14));col=mix(col,s.rgb,s.a);}
+  if(p.z<-0.06&&ax<0.14&&p.y>1.1&&p.y<1.42){vec4 s=texture2D(uNumTex,vec2((0.14-p.x)/0.28,(p.y-1.1)/0.32));col=mix(col,s.rgb,s.a);}
+}else{
+  col=uSkin;
+  float hl=1.745-uHairK*0.05;
+  if(p.y>hl||(p.y>1.62-uHairK*0.04&&p.z<-0.025)||(p.y>1.69&&p.z<0.045&&ax>0.07)){col=uHair;rough=0.9;}
+  if(p.z>0.08&&p.y>1.686&&p.y<1.698&&ax>0.018&&ax<0.05)col=mix(col,uHair,0.6);
+}
+vec4 diffuseColor=vec4(col,opacity);
+`).replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=rough;');
+  };
+  m.customProgramCacheKey=()=>'kit1';
+  return m;
+}
+function loadSkinned(){
+  if(!THREE.GLTFLoader||!THREE.SkeletonUtils)return Promise.resolve(false);
+  return Promise.all([
+    new Promise((res,rej)=>new THREE.GLTFLoader().load('assets/player.glb',res,null,rej)),
+    fetch('assets/clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();})
+  ]).then(([g,cj])=>{
+    const own=n=>g.animations.find(a=>a.name===n),cl={};
+    for(const k in cj)cl[k]=THREE.AnimationClip.parse(cj[k]);
+    SKIN.scene=g.scene;SKIN.clips={idle:own('idle'),walk:cl.so_walk||own('walk'),run:cl.so_run||own('run'),samba:cl.samba||null,sad:own('sad_pose')||null};
+    HIP_H=0.972;ANK=0.084;HIPW=0.082;SKIN.ready=true;return true;
+  }).catch(()=>false);
+}
+const AXZ=new THREE.Vector3(0,0,1),AXY=new THREE.Vector3(0,1,0),AXX=new THREE.Vector3(1,0,0);
+const qDownL=new THREE.Quaternion().setFromAxisAngle(AXZ,-PI/2),qDownR=new THREE.Quaternion().setFromAxisAngle(AXZ,PI/2);
+const qDownLi=qDownL.clone().invert(),qDownRi=qDownR.clone().invert();
+function buildSkinnedRig(kit){
+  const root=THREE.SkeletonUtils.clone(SKIN.scene),mat=kitMaterial(kit);
+  root.traverse(m=>{if(m.isSkinnedMesh){m.material=mat;m.castShadow=true;m.frustumCulled=false;}});
+  const b=n=>root.getObjectByName('mixamorig'+n);
+  const bones={hips:b('Hips'),sp0:b('Spine'),sp1:b('Spine1'),sp2:b('Spine2'),neck:b('Neck'),head:b('Head'),
+    upL:b('LeftUpLeg'),lgL:b('LeftLeg'),ftL:b('LeftFoot'),upR:b('RightUpLeg'),lgR:b('RightLeg'),ftR:b('RightFoot'),
+    shL:b('LeftShoulder'),armL:b('LeftArm'),faL:b('LeftForeArm'),shR:b('RightShoulder'),armR:b('RightArm'),faR:b('RightForeArm')};
+  const hipsRest=bones.hips.position.clone();
+  const mixer=new THREE.AnimationMixer(root),acts={};
+  for(const k in SKIN.clips)if(SKIN.clips[k]){const a=mixer.clipAction(SKIN.clips[k]);a.play();a.setEffectiveWeight(0);acts[k]=a;}
+  return{root,skinned:true,mat,bones,hipsRest,mixer,acts,handL:b('LeftHand'),handR:b('RightHand'),pelvisY:HIP_H};
+}
+const _e=new THREE.Euler(),_v3=new THREE.Vector3(),_q=new THREE.Quaternion(),_q2=new THREE.Quaternion(),_qi=new THREE.Quaternion();
+// action layers that only drive part of the body; everything else keeps the motion capture underneath
+const MASK={[ACT.TRAP]:'legs',[ACT.STUMBLE]:'upper',[ACT.HOLD]:'arms',[ACT.CELEB]:'arms',[ACT.CARD]:'arms'};
+function slerpTo(bone,q,w){if(w>0.001)bone.quaternion.slerp(q,Math.min(1,w));}
+function eul(x,y,z){return _q.setFromEuler(_e.set(x,y,z));}
+function preRot(bone,axis,a){if(Math.abs(a)>1e-4)bone.quaternion.premultiply(_q2.setFromAxisAngle(axis,a));}
+function setAct(a,t,w){if(!a)return;a.setEffectiveWeight(w);if(w>0.001)a.time=((t%a._clip.duration)+a._clip.duration)%a._clip.duration;}
+function applySkinned(e,dt){
+  const r=e.rig;r.root.visible=!e.off;if(e.off)return;
+  r.root.position.set(e.x,0,e.z);r.root.rotation.y=e.face;
+  const P=POSE0;locoPose(e,P,dt);
+  let wA=0;if(e.act){POSE1.set(P);wA=actionPose(e,POSE1);if(wA>0)for(let i=0;i<NCH;i++)P[i]=POSE1[i];}
+  const sp=hyp(e.vx,e.vz),mov=Math.min(1,sp/1.0);
+  // which way the legs run relative to where the body faces: backwards plays the clips in reverse,
+  // sideways turns the hips toward the run while the shoulders stay square
+  const rel=sp>0.4?angD(e.face,Math.atan2(e.vx,e.vz)):0,back=Math.abs(rel)>1.9;
+  const yawT=sp>0.4?clamp(back?angD(0,rel+PI):rel,-1.1,1.1)*Math.min(1,sp/1.5):0;
+  e.yawL=lerp(e.yawL||0,yawT,Math.min(1,(dt||0)*8));
+  const frac=((e.phase/TAU)%1+1)%1,f=back?1-frac:frac,A=r.acts;
+  const samba=e.act===ACT.CELEB&&sp<1.2&&A.samba;
+  const sad=A.sad&&G.state==='goal'&&G.goal&&G.goal.team!=null&&e.team&&e.team.i!==G.goal.team&&!e.isGK;
+  let wR=clamp((sp-2.3)/2.4,0,1),wW=clamp(sp/1.4,0,1)*(1-wR),wI=1-wR-wW;
+  const wSm=samba?1:0,wSd=sad?0.65*(1-mov):0,k=1-wSm;
+  setAct(A.run,f*(A.run?A.run._clip.duration:1),wR*k);setAct(A.walk,f*(A.walk?A.walk._clip.duration:1),wW*k);
+  setAct(A.idle,G.t*0.85+e.i*0.37,wI*k*(1-wSd));setAct(A.sad,0,wSd*k*wI);setAct(A.samba,G.t+e.i,wSm);
+  r.mixer.update(0);
+  const bn=r.bones;bn.hips.position.x=r.hipsRest.x;bn.hips.position.z=r.hipsRest.z;
+  // procedural layers: full actions, or partial masks; the athletic stance takes over when slow
+  const wSt=(e.rdy||0)*(1-Math.min(1,sp/3)),mk=e.act?MASK[e.act]:null,full=e.act&&!mk;
+  const wLeg=Math.max(full||mk==='legs'?wA:0,wSt),wSpi=Math.max(full||mk==='upper'?wA:0,wSt),wArm=samba?0:Math.max(full||mk==='upper'||mk==='arms'?wA:0,wSt);
+  if(wLeg>0.001){
+    slerpTo(bn.hips,eul(P[PRX],P[PRY],P[PRZ]),wLeg);
+    bn.hips.position.lerp(_v3.set(P[PX]*100+r.hipsRest.x,(P[PY]+0.068)*100,P[PZ]*100+r.hipsRest.z),wLeg);
+    slerpTo(bn.upL,eul(P[TL],0,P[HLZ]),wLeg);slerpTo(bn.lgL,eul(P[KL],0,0),wLeg);slerpTo(bn.ftL,eul(P[AL],0,0),wLeg);
+    slerpTo(bn.upR,eul(P[TR],0,P[HRZ]),wLeg);slerpTo(bn.lgR,eul(P[KR],0,0),wLeg);slerpTo(bn.ftR,eul(P[AR],0,0),wLeg);
+  }
+  if(wSpi>0.001){
+    const sx=P[SX]/3,sy=P[SY]/3,sz=P[SZ]/3;
+    slerpTo(bn.sp0,eul(sx,sy,sz),wSpi);slerpTo(bn.sp1,eul(sx,sy,sz),wSpi);slerpTo(bn.sp2,eul(sx,sy,sz),wSpi);
+    slerpTo(bn.neck,eul(P[HX]*0.4,P[HY]*0.4,0),wSpi);slerpTo(bn.head,eul(P[HX]*0.6,P[HY]*0.6,0),wSpi);
+  }
+  if(wArm>0.001){
+    _qi.identity();slerpTo(bn.shL,_qi,wArm);slerpTo(bn.shR,_qi,wArm);
+    slerpTo(bn.armL,eul(P[ALX],0,P[ALZ]).multiply(qDownL),wArm);slerpTo(bn.armR,eul(P[ARX],0,P[ARZ]).multiply(qDownR),wArm);
+    slerpTo(bn.faL,_q2.copy(qDownLi).multiply(eul(P[EL],0,0)).multiply(qDownL),wArm);
+    slerpTo(bn.faR,_q2.copy(qDownRi).multiply(eul(P[ER],0,0)).multiply(qDownR),wArm);
+  }
+  // always-on touches over the capture: hips turned into the run, lean with acceleration, bank into turns, eyes on the ball
+  const free=1-Math.max(wLeg,wA);
+  if(free>0.01){
+    const y=e.yawL*free;preRot(bn.hips,AXY,y);preRot(bn.sp0,AXY,-y*0.45);preRot(bn.sp1,AXY,-y*0.3);preRot(bn.sp2,AXY,-y*0.2);
+    preRot(bn.sp1,AXX,clamp((e.accS||0)*0.014,-0.08,0.12)*free);
+    preRot(bn.hips,AXZ,clamp(-(e.turnV||0)*sp*0.02,-0.25,0.25)*free);
+  }
+  const look=(e.hy||0)*(1-wSpi);preRot(bn.neck,AXY,look*0.4);preRot(bn.head,AXY,look*0.5);
+  r.pelvisY=bn.hips.position.y*0.01-0.068;
+}
+
 /* ================= game state ================= */
 const G={tac:[],oppTac:null,state:'boot',t:0,clock:0,half:1,score:[0,0],teams:[],ents:[],ref:null,ctrl:null,sp:null,timer:0,queue:null,lock:null,lastManual:-9,switchFx:-9,
   set:{home:0,away:1,diff:1,len:1,cam:0,stick:0,form:'4-3-3',ment:0,order:null},firstKick:0,kickTeam:0,stats:null,paused:false,lastSwitch:0,goal:null,introT:0,menuT:0,sound:true,portraitOK:false};
@@ -981,7 +1127,10 @@ function buildTeams(){
         x:0,z:0,vx:0,vz:0,mx:0,mz:0,face:0,speed:0,phase:m.phase,act:0,actT:0,actD:0,
         sprint:false,cool:0,stun:0,tackleCd:0,decT:0,run:0,stamina:1,ipx:0,ipz:0,ipt:9,save:null,holdT:0,slideHit:false,kick:null,ap1:0,ap2:0,ap3:0,
         vmax:(7.35+st.pace*1.75)*(ti===1&&!NET.online?D.spd:1),gkSkill:ti===1&&!NET.online?D.gk:0.88};
-      e.rig=buildRig(mats,{gk,skin:m.skin,hair:m.hair,boot:m.boot,num:m.num,numColor:gk?'#ffffff':club.num});
+      e.rig=SKIN.ready?buildSkinnedRig(gk?{shirt:club.gk,pc:'#111418',patK:0,shorts:'#1b1d22',socks:'#1b1d22',boot:BOOT_HEX[m.boot],skin:SKIN_HEX[m.skin],hair:HAIR_HEX[m.hair],hairK:(m.hair%3)*0.5,numTex:numTex(m.num,'#ffffff'),spTex:sponTex('',''),long:true,glove:'#f2f2f2'}
+        :{shirt:club.shirt,pc:club.pc,patK:KIT_PAT[club.pat]||0,shorts:club.shorts,socks:club.socks,boot:BOOT_HEX[m.boot],skin:SKIN_HEX[m.skin],hair:HAIR_HEX[m.hair],hairK:(m.hair%3)*0.5,numTex:numTex(m.num,club.num),spTex:sponTex(club.sp,club.spc)})
+        :buildRig(mats,{gk,skin:m.skin,hair:m.hair,boot:m.boot,num:m.num,numColor:gk?'#ffffff':club.num});
+      if(e.rig.mat)KIT_MATS.push(e.rig.mat);
       S.add(e.rig.root);team.players.push(e);G.ents.push(e);
     });
     G.teams.push(team);
@@ -989,11 +1138,12 @@ function buildTeams(){
   // referee
   const refM={shirt:new THREE.MeshLambertMaterial({map:shirtTex('#1a1b20','pin','#2a2c33','',null)}),shorts:new THREE.MeshLambertMaterial({color:C3('#111216')}),socks:new THREE.MeshLambertMaterial({color:C3('#111216')}),gk:null,gkShorts:null,glove:null};KIT_MATS.push(refM.shirt,refM.shorts,refM.socks);
   const ref={team:null,i:22,k:0,role:'REF',isGK:false,num:'',x:0,z:-12,vx:0,vz:0,mx:0,mz:0,face:0,speed:0,phase:0,act:0,actT:0,actD:0,ap1:0,ap2:0,ap3:0,vmax:7.6,stamina:1,cool:9,stun:0};
-  ref.rig=buildRig(refM,{gk:false,skin:1,hair:0,boot:0,num:'',numColor:'#ffd447'});
+  ref.rig=SKIN.ready?buildSkinnedRig({shirt:'#1c1d22',pc:'#ffd447',patK:0,shorts:'#111216',socks:'#111216',boot:'#111111',skin:SKIN_HEX[1],hair:HAIR_HEX[0],hairK:0,numTex:numTex('',''),spTex:sponTex('REFEREE','#ffd447')}):buildRig(refM,{gk:false,skin:1,hair:0,boot:0,num:'',numColor:'#ffd447'});
+  if(ref.rig.mat)KIT_MATS.push(ref.rig.mat);
   S.add(ref.rig.root);G.ref=ref;G.ents.push(ref);
   // the card the referee holds up
   const cardM=new THREE.MeshBasicMaterial({color:C3('#ffd447'),side:THREE.DoubleSide});KIT_MATS.push(cardM);
-  ref.card=new THREE.Mesh(new THREE.PlaneGeometry(0.08,0.11),cardM);ref.card.position.set(0,-0.37,0.02);ref.card.visible=false;ref.rig.handR.parent.add(ref.card);
+  ref.card=new THREE.Mesh(new THREE.PlaneGeometry(0.08,0.11),cardM);ref.card.visible=false;if(ref.rig.skinned){ref.card.scale.setScalar(100);ref.card.position.set(0,9,2);ref.rig.handR.add(ref.card);}else{ref.card.position.set(0,-0.37,0.02);ref.rig.handR.parent.add(ref.card);}
   // crowd recolour
   const [ta,tb]=crowdTextures(CLUBS[ids[0]].shirt,CLUBS[ids[1]].shirt);
   if(CROWD.a){CROWD.a.dispose();CROWD.b.dispose();}
@@ -2153,7 +2303,9 @@ const prevBall=new THREE.Vector3();const ballQ=new THREE.Quaternion(),tmpQ=new T
 let crowdFlip=0,crowdState=false,flashT=0;
 function updateVisuals(dt){
   const T=performance.now()/1000;
-  for(const e of G.ents)applyPose(e,dt);
+  for(const e of G.ents){if(e.rig.skinned)applySkinned(e,dt);else applyPose(e,dt);}
+  // the key floodlight's real shadow follows the action
+  KEY.target.position.set(camLook.x,0,camLook.z);KEY.position.set(camLook.x+KEY_DIR.x,KEY_DIR.y,camLook.z+KEY_DIR.z);
   // a held ball sits between the hands of the keeper or thrower
   if(B.owner&&B.held){
     const o=B.owner,r=o.rig;r.root.updateMatrixWorld(true);r.handL.getWorldPosition(vA);r.handR.getWorldPosition(vB);
@@ -2169,7 +2321,7 @@ function updateVisuals(dt){
   let n=0,cn=0;
   for(const e of G.ents){
     if(e.off)continue;
-    for(let k=0;k<4;k++){const [lx,lz]=FLOODS[k];const vx=e.x-lx,vz=e.z-lz,dist=hyp(vx,vz),len=1.8*dist/FLOOD_H*(e.act===ACT.SLIDE||e.act===ACT.FALL||e.act===ACT.DIVE?0.4:1);
+    for(let k=0;k<4;k++){if(k===2&&e.rig.skinned){setFlat(shLong,n++,0,0,0,0,0);continue;}const [lx,lz]=FLOODS[k];const vx=e.x-lx,vz=e.z-lz,dist=hyp(vx,vz),len=1.8*dist/FLOOD_H*(e.act===ACT.SLIDE||e.act===ACT.FALL||e.act===ACT.DIVE?0.4:1);
       setFlat(shLong,n++,e.x+vx/dist*len*0.5,e.z+vz/dist*len*0.5,Math.atan2(vx,vz),0.44,len+0.3);}
     setFlat(shCont,cn++,e.x+Math.sin(e.face)*0.05,e.z+Math.cos(e.face)*0.05,e.face,0.75,0.95);
   }
@@ -2184,7 +2336,7 @@ function updateVisuals(dt){
   if(ind.visible){
     const c=lp.ctrl,pop=1+0.8*Math.exp(-(G.t-lp.switchFx)*9);
     ind.position.x=c.x;ind.position.z=c.z;ind.rotation.y=c.face;ind.scale.setScalar(pop);
-    marker.position.set(c.x,2.35+Math.sin(T*5)*0.07+Math.max(0,c.rig.body.position.y-HIP_H),c.z);marker.rotation.y=T*2;marker.scale.setScalar(pop);
+    marker.position.set(c.x,2.35+Math.sin(T*5)*0.07+Math.max(0,(c.rig.skinned?c.rig.pelvisY:c.rig.body.position.y)-HIP_H),c.z);marker.rotation.y=T*2;marker.scale.setScalar(pop);
   }
   // on defence: who the switch button would pick next
   nextMk.visible=false;
@@ -2640,6 +2792,8 @@ function boot(data){
   if(data&&data.set){Object.assign(G.set,data.set);}
   $('camBtn').textContent=CAMS[G.set.cam].n;
   buildStands();buildBoards();buildFloods();
+  // swap the simple bodies for the motion-captured ones once the model has arrived
+  loadSkinned().then(ok=>{if(ok&&G.state==='menu'){buildTeams();lineup();}});
   buildMenu();resize();
   goMenu();
   $('loading').hidden=true;

@@ -19,6 +19,13 @@
 - `server.js` — Express로 `public/`을 서빙하고 `/ws`에서 1대1 매칭·중계(WebSocket)
 - `render.yaml` — Render 배포 설정 (Blueprint)
 
+## 선수 모델과 동작
+
+- `public/assets/player.glb` — three.js 예제의 X Bot(Mixamo) 모델을 약 1만 폴리곤으로 줄인 것. 유니폼·피부·머리색은 게임의 셰이더가 칠합니다.
+- `public/assets/clips.json` — three.js 예제의 Soldier(걷기·달리기·대기)와 Michelle(삼바, 골 세리머니) 모션캡처 동작을 X Bot 골격에 맞게 변환한 것.
+- 킥·다이빙·태클·슬라이딩·스로인 등 축구 동작은 코드에서 만든 자세를 같은 골격에 섞어 씁니다.
+- 원본 모델과 동작은 Mixamo에서 나온 것으로 three.js 저장소(examples/models/gltf)에 포함된 파일입니다.
+
 ## 로컬 실행
 
 ```
