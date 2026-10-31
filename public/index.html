@@ -85,6 +85,13 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 #stickArea{position:absolute;left:0;top:30%;bottom:0;width:46%;pointer-events:auto}
 #stick{position:absolute;left:calc(var(--sl) + 18px);bottom:calc(18px + var(--sbm));width:128px;height:128px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.05) 0 55%,rgba(255,255,255,.12) 56% 58%,rgba(255,255,255,.04) 59%);box-shadow:0 0 0 1.5px rgba(255,255,255,.28);opacity:.7;transition:opacity .15s;pointer-events:none}
 #stick.on{opacity:1}
+/* tablets and big phones: bring the stick and buttons in from the corners and make them bigger */
+@media (min-height:500px) and (min-width:800px){
+  #ctl #stick{left:calc(var(--sl) + max(18px,6vw));bottom:calc(var(--sbm) + max(18px,13vh));width:156px;height:156px}
+  #ctl #knob{width:64px;height:64px;margin:-32px 0 0 -32px}
+  #ctl #pad{right:calc(var(--sr) + max(0px,4vw));bottom:calc(var(--sbm) + max(8px,11vh));transform:scale(1.18);transform-origin:right bottom}
+  #ctl #stickArea{width:50%;top:25%}
+}
 #knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff 0,#dfe5ee 40%,#9aa6b8 100%);box-shadow:0 4px 12px rgba(0,0,0,.45)}
 #pad{position:absolute;right:var(--sr);bottom:calc(8px + var(--sbm));width:190px;height:184px;pointer-events:none}
 .bt{position:absolute;border-radius:50%;border:none;pointer-events:auto;display:grid;place-items:center;align-content:center;gap:0;padding:0;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.22),rgba(255,255,255,.06) 70%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 6px 16px rgba(0,0,0,.35);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:transform .06s}
@@ -570,7 +577,7 @@ const validOrder=o=>Array.isArray(o)&&o.length===11&&o[0]===0&&[...o].sort((a,b)
 const cleanTac=t=>({form:t&&FORMS[t.form]?t.form:'4-3-3',ment:clamp((t&&t.ment)|0,-1,1),order:validOrder(t&&t.order)});
 const SP_TYPES=['','throw','corner','goalkick','freekick','penalty'];
 const SP_LABELS={kickoff:['패스','패스','패스'],throw:['스로인','스로인','스로인'],corner:['크로스','짧게','낮은 크로스'],goalkick:['패스','패스','패스'],freekick:['패스','스루','슛'],penalty:['슛','슛','슛']};
-const SP_HINT={throw:'패스 버튼: 스로인 · 조이스틱으로 방향',corner:'패스: 크로스 · 스루: 짧은 패스',freekick:'패스·스루로 연결 · 슛을 길게 눌러 직접 프리킥',penalty:'슛을 길게 눌러 차세요 · 조이스틱 위/아래로 방향'};
+const SP_HINT={throw:'패스 버튼: 스로인 · 조이스틱으로 방향',corner:'패스: 크로스 · 스루: 짧은 패스 · 노란 선이 공 궤적',freekick:'조이스틱 위/아래로 조준 · 슛 길게 눌러 파워(밀면 칩슛·감아차기) · 노란 선이 궤적',penalty:'조이스틱 위/아래로 조준 · 슛을 길게 눌러 차세요'};
 const SUR='김이박최정강조윤장임한오서신권황안송류홍전고문양배백허남심노'.split('');
 const GIV=['도윤','시우','하준','지호','준서','은우','건우','현우','민재','지훈','태오','우진','선우','서진','연우','유찬','정민','승현','재윤','한결','이안','로운','시온','준혁','도현','민규','태윤','성빈','진우','하람','동하','윤재'];
 const CAMS=[{h:17,b:26,f:30,n:'방송'},{h:12.5,b:19,f:34,n:'근접'},{h:30,b:44,f:30,n:'와이드'}];
@@ -882,6 +889,39 @@ const ind=new THREE.Group();
 const marker=new THREE.Mesh(new THREE.ConeGeometry(0.17,0.34,4),new THREE.MeshBasicMaterial({color:C3('#ffd447')}));marker.rotation.x=PI;S.add(marker);
 const tgtRing=new THREE.Mesh(new THREE.RingGeometry(0.55,0.64,32),new THREE.MeshBasicMaterial({color:C3('#ffffff'),transparent:true,opacity:.55,depthWrite:false}));tgtRing.rotation.x=-PI/2;tgtRing.position.y=0.035;tgtRing.visible=false;S.add(tgtRing);
 const ind2=new THREE.Mesh(new THREE.RingGeometry(0.6,0.72,36),new THREE.MeshBasicMaterial({color:C3('#5ad1ff'),transparent:true,opacity:.8,depthWrite:false}));ind2.rotation.x=-PI/2;ind2.position.y=0.034;ind2.visible=false;S.add(ind2);
+// set-piece aim: a dotted flight path and a ring where it ends up
+const AIM_N=60,aimDots=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,8,6),new THREE.MeshBasicMaterial({color:C3('#ffd447'),transparent:true,opacity:0.95,depthTest:false}),AIM_N);
+aimDots.renderOrder=6;aimDots.frustumCulled=false;aimDots.visible=false;S.add(aimDots);
+const aimRing=new THREE.Mesh(new THREE.RingGeometry(0.3,0.42,28),new THREE.MeshBasicMaterial({color:C3('#ffd447'),transparent:true,opacity:0.9,side:THREE.DoubleSide,depthTest:false}));
+aimRing.renderOrder=6;aimRing.visible=false;S.add(aimRing);
+const _aimM=new THREE.Matrix4(),_aimS={x:0,y:0,z:0,vx:0,vy:0,vz:0,spin:0};
+function aimPreview(T){
+  aimDots.visible=false;aimRing.visible=false;
+  const pd=LP(),sp=G.sp;
+  if(G.state!=='setpiece'||!sp||!sp.ready||sp.launched||!pd||pd.ti!==sp.team.i||pd.ctrl!==sp.taker||NET.role==='guest')return;
+  const c=sp.taker,inp=pd.inp,kickSp=sp.type==='freekick'||sp.type==='penalty',passing=IN.charging&&(IN.chargeK==='pass'||IN.chargeK==='thru');
+  let v,shot=false;
+  if(kickSp&&!passing){
+    const charging=IN.charging&&IN.chargeK==='shoot';
+    v=shotVel(c,charging?IN.power:0.62,sp.aimZ!=null?sp.aimZ:0.6,charging?IN.shotKind:'normal',true,true);shot=true;
+  }else{
+    const kind=passing&&IN.chargeK==='thru'?'through':'ground',pw=passing&&IN.power>=0.2?IN.power:null;
+    const {best}=pickTarget(c,kind,inp,pw);if(!best)return;
+    const k=sp.type==='throw'?'throw':sp.type==='corner'?(kind==='through'?'ground':'cross'):(sp.type==='freekick'&&kind==='ground'&&hyp(best.x-c.x,best.z-c.z)>30?'lob':kind);
+    v=passVel(c,best,k,null,k==='throw'?null:pw,true);
+  }
+  const s=_aimS;s.x=B.x;s.y=B.y;s.z=B.z;s.vx=v.vx;s.vy=v.vy;s.vz=v.vz;s.spin=v.spin;
+  let n=0,end=null;const ph=(T*2.2)%1;
+  for(let i=1;i<=150&&n<AIM_N;i++){
+    integ(s,1/60);
+    if(shot&&Math.abs(s.x)>=HL){end={x:Math.sign(s.x)*HL,y:s.y,z:s.z};break;}
+    if(i%2===Math.floor(ph*2)%2){_aimM.makeTranslation(s.x,s.y,s.z);aimDots.setMatrixAt(n++,_aimM);}
+    if(!shot&&hyp(s.vx,s.vz)<2.5)break;
+  }
+  aimDots.count=n;aimDots.instanceMatrix.needsUpdate=true;aimDots.visible=n>0;
+  if(shot&&end){aimRing.position.set(end.x,Math.max(0.3,end.y),end.z);aimRing.rotation.set(0,PI/2,0);aimRing.visible=true;}
+  else if(!shot){aimRing.position.set(v.tx,0.03,v.tz);aimRing.rotation.set(-PI/2,0,0);aimRing.visible=true;}
+}
 const nextMk=new THREE.Mesh(new THREE.ConeGeometry(0.12,0.24,4),new THREE.MeshBasicMaterial({color:C3('#ffffff'),transparent:true,opacity:.85}));nextMk.rotation.x=PI;nextMk.visible=false;S.add(nextMk);
 
 /* ================= player models ================= */
@@ -1513,8 +1553,9 @@ function passTo(p,r,kind,pt,pw){
   if(kind!=='throw'){const ax=pt?pt.x:r.x,az=pt?pt.z:r.z;p.aimFace=Math.atan2(ax-p.x,az-p.z);}
   scheduleKick(p,wind,str,()=>{p.aimFace=null;if(kind==='throw')p.ap2=p.actT;passExec(p,r,kind,pt,pw);},kind==='throw'?0:ACT.KICK);
 }
-function passExec(p,r,kind,pt,pw){
-  const human=p.team.human;
+// the ball's launch for a pass; exact leaves out the kicker's error, for drawing the aim line
+function passVel(p,r,kind,pt,pw,exact){
+  const human=p.team.human,g=exact?()=>0:gauss;
   let tx,tz;
   if(pt){tx=pt.x;tz=pt.z;}
   else{
@@ -1528,56 +1569,60 @@ function passExec(p,r,kind,pt,pw){
   const [,pres]=nearestOpp(p);
   let err=(1-p.st.pass)*0.09+(human?0.02:D.passErr)+(pres<2?0.03:0)+d*0.0006;
   if(kind==='through'||kind==='cross')err*=1.2;
-  const ang=Math.atan2(dx,dz)+gauss()*err*0.6;
+  const ang=Math.atan2(dx,dz)+g()*err*0.6;
   const hard=pw!=null&&pw>0.7,lofted=kind==='lob'||kind==='cross'||kind==='throw'||(kind!=='ground'&&kind!=='through'&&d>30)||(kind==='through'&&d>(hard?40:30))||(kind==='ground'&&d>(hard?46:34));
-  const dm=d*(1+gauss()*err*0.5);
+  const dm=d*(1+g()*err*0.5);
   const sx=Math.sin(ang),sz=Math.cos(ang);
   if(!lofted){
     // a longer press drives it in harder
     const vEnd=(kind==='through'?8+dm*0.12:10+dm*0.17)*(pw!=null?lerp(0.78,1.42,pw):1);
     const v=clamp(groundSpeedFor(dm,vEnd),12.5,36);
-    kickBall(p,sx*v,0,sz*v,0);
-  }else{
-    const T=kind==='throw'?0.55+dm*0.035:kind==='cross'?0.72+dm*0.021:0.62+dm*0.024;
-    const vh=dm/T*(1+0.05*T),vy=0.5*GRAV*T-(B.y-BR)/T;
-    kickBall(p,sx*vh,vy,sz*vh,kind==='cross'?gauss()*1.5:0);
+    return{vx:sx*v,vy:0,vz:sz*v,spin:0,tx,tz};
   }
+  const T=kind==='throw'?0.55+dm*0.035:kind==='cross'?0.72+dm*0.021:0.62+dm*0.024;
+  const vh=dm/T*(1+0.05*T),vy=0.5*GRAV*T-(B.y-BR)/T;
+  return{vx:sx*vh,vy,vz:sz*vh,spin:kind==='cross'?g()*1.5:0,tx,tz};
+}
+function passExec(p,r,kind,pt,pw){
+  const k=passVel(p,r,kind,pt,pw,false),tx=k.tx,tz=k.tz;
+  kickBall(p,k.vx,k.vy,k.vz,k.spin);
   B.target={r,x:tx,z:tz};r.team.recv=r;
   {const op=PADS[1-p.team.i];if(op&&op.ctrl&&p.team===r.team&&G.state==='play')autoSwitchDef(op,true);}
   G.stats[p.team.i].pass++;
   if(p.team===r.team&&padOf(r.team)&&!r.isGK)setCtrl(padOf(r.team),r,'recv');
 }
-function shoot(p,power,aimZ,kind){
+// fixed: aimed on purpose at a set piece, so a central aim is kept and the strike is cleaner
+function shoot(p,power,aimZ,kind,fixed){
   if(p.kick||B.owner!==p)return;
   if(p.act===ACT.SKILL)p.act=0;
   p.aimFace=Math.atan2(p.team.dir*HL-p.x,(aimZ==null?0:aimZ*2.5)-p.z);
   const chip=kind==='chip';
-  scheduleKick(p,0.1+0.08*power+(chip?0.04:0),chip?0.45:0.6+0.4*power,()=>{p.aimFace=null;shootExec(p,power,aimZ,kind);},ACT.KICK);
+  scheduleKick(p,0.1+0.08*power+(chip?0.04:0),chip?0.45:0.6+0.4*power,()=>{p.aimFace=null;shootExec(p,power,aimZ,kind,fixed);},ACT.KICK);
 }
-function shootExec(p,power,aimZ,kind){
-  const dir=p.team.dir,gx=dir*HL;
+function shotVel(p,power,aimZ,kind,fixed,exact){
+  const dir=p.team.dir,gx=dir*HL,g=exact?()=>0:gauss;
   const gk=oppOf(p.team).players[0];
   let az=aimZ;
   // a curled shot goes for the far post unless the stick says otherwise
   if(kind==='finesse'&&(az==null||Math.abs(az)<0.25))az=Math.abs(B.z)>1?-Math.sign(B.z)*0.82:(gk.z>0?-0.82:0.82);
-  if(az==null||Math.abs(az)<0.25){az=gk.z>B.z*0.15?-0.72:0.72;az+=rnd(-0.2,0.2);}
+  if(az==null||(!fixed&&Math.abs(az)<0.25)){az=gk.z>B.z*0.15?-0.72:0.72;if(!exact)az+=rnd(-0.2,0.2);}
   const dist=hyp(gx-B.x,B.z);
   const [,pres]=nearestOpp(p);
-  const errScale=(p.team.human?1:D.shoot)*(kind==='finesse'?0.62:kind==='chip'?0.8:1);
-  const errZ=gauss()*(0.25+(1-p.st.shoot)*1.4+dist*0.028+(pres<1.6?0.5:0))*errScale;
+  const errScale=(p.team.human?1:D.shoot)*(kind==='finesse'?0.62:kind==='chip'?0.8:1)*(fixed?0.55:1);
+  const errZ=g()*(0.25+(1-p.st.shoot)*1.4+dist*0.028+(pres<1.6?0.5:0))*errScale;
   const tz=clamp(az,-1,1)*(GW/2-0.45)+errZ;
   if(kind==='chip'){
     // lifted over the keeper, dropping under the bar; held too long it sails over
-    const ty=GH*0.5+power*0.55+gauss()*0.34*errScale+(power>0.85?(power-0.85)*6:0);
+    const ty=GH*0.5+power*0.55+g()*0.34*errScale+(power>0.85?(power-0.85)*6:0);
     const dx=gx+dir*0.3-B.x,dz=tz*0.6-B.z,dh=hyp(dx,dz),T=clamp(0.7+dh*0.042+power*0.2,0.8,2.1);
     const vh=dh/T,vy=(ty-B.y+0.5*GRAV*T*T)/T;
-    kickBall(p,dx/dh*vh,vy,dz/dh*vh,0);
+    return{vx:dx/dh*vh,vy,vz:dz/dh*vh,spin:0};
   }else{
-    let ty=(kind==='finesse'?0.35+power*1.0:0.22+power*1.45)+gauss()*0.28*(1+dist/28)*errScale;
+    let ty=(kind==='finesse'?0.35+power*1.0:0.22+power*1.45)+g()*0.28*(1+dist/28)*errScale;
     if(power>0.86)ty+=(power-0.86)*10;
     ty=Math.max(0.15,ty);
     const speed=(14+power*18*(0.9+p.st.shoot*0.15))*(kind==='finesse'?0.84:1);
-    let az2=tz,spin=power<0.55?-Math.sign(tz-B.z)*2.5:gauss()*0.8;
+    let az2=tz,spin=power<0.55?-Math.sign(tz-B.z)*2.5:g()*0.8;
     if(kind==='finesse'){
       // start it outside the far post and let it bend back in
       const T=hyp(gx-B.x,tz-B.z)/speed,sg=-Math.sign(tz)||1,K=5.5;
@@ -1585,8 +1630,12 @@ function shootExec(p,power,aimZ,kind){
     }
     const dx=gx+dir*0.3-B.x,dz=az2-B.z,dh=hyp(dx,dz),T=dh/speed;
     const vy=(ty-B.y+0.5*GRAV*T*T)/T;
-    kickBall(p,dx/dh*speed,vy,dz/dh*speed,spin);
+    return{vx:dx/dh*speed,vy,vz:dz/dh*speed,spin};
   }
+}
+function shootExec(p,power,aimZ,kind,fixed){
+  const k=shotVel(p,power,aimZ,kind,fixed,false);
+  kickBall(p,k.vx,k.vy,k.vz,k.spin);
   B.shot=B.lastShot={by:p,t:G.t,team:p.team.i,kind:kind||'normal',x0:B.x,z0:B.z};
   G.stats[p.team.i].shots++;
   say(p.name+(kind==='chip'?', 칩슛!':kind==='finesse'?', 감아차기!':', 슈팅!'));AU.excite(0.85);
@@ -2611,7 +2660,10 @@ function userStep(pd,dt){
     if(c!==tk)setCtrl(pd,tk);
     if(G.state==='setpiece'&&(!G.sp.ready||G.sp.launched)){clearEdges(inp);return;}
     c.mx=c.mz=0;
-    if(jm>0.3)c.aimFace=Math.atan2(inp.jx,inp.jy);
+    // free kicks and penalties: the stick's up/down slides the aim across the goal; the yellow line shows the flight
+    const shotSp=G.state==='setpiece'&&(G.sp.type==='freekick'||G.sp.type==='penalty');
+    if(shotSp){if(G.sp.aimZ==null)G.sp.aimZ=B.z>0?-0.6:0.6;G.sp.aimZ=clamp(G.sp.aimZ+inp.jy*dt*1.4,-1.05,1.05);}
+    else if(jm>0.3)c.aimFace=Math.atan2(inp.jx,inp.jy);
     if(G.state==='kickoff'&&!G.kickReady)return; // a press before the whistle waits for it
     // free kicks and penalties shoot on release with the charged power; other set pieces act on press
     const kickSp=G.state==='setpiece'&&(G.sp.type==='freekick'||G.sp.type==='penalty');
@@ -2622,7 +2674,7 @@ function userStep(pd,dt){
       const type=G.state==='kickoff'?'kickoff':G.sp.type;
       c.aimFace=null;
       const aim=Math.abs(inp.jy)>0.3?clamp(inp.jy*1.15,-1,1):null;
-      if(type==='penalty'||(type==='freekick'&&pressed==='shoot')){shoot(c,pressed==='shoot'?inp.power:0.62,aim,pressed==='shoot'?inp.shotKind:'normal');G.sp.launched=true;padHideHint(pd);return;}
+      if(type==='penalty'||(type==='freekick'&&pressed==='shoot')){shoot(c,pressed==='shoot'?inp.power:0.62,G.sp.aimZ!=null?G.sp.aimZ:aim,pressed==='shoot'?inp.shotKind:'normal',G.sp.aimZ!=null);G.sp.launched=true;padHideHint(pd);return;}
       if(type==='freekick'){const {best}=pickTarget(c,pressed==='thru'?'through':'ground',inp,pw);const far=best&&hyp(best.x-c.x,best.z-c.z)>30;passTo(c,best||c.team.players.find(e=>!e.isGK&&!e.off&&e!==c),pressed==='thru'?'through':far?'lob':'ground',null,pw);G.sp.launched=true;padHideHint(pd);return;}
       if(type==='kickoff'){G.state='play';sfx.whistle(0);padHideHint(pd);const {best}=pickTarget(c,'ground',inp,pw);passTo(c,best||c.team.players[6],'ground',null,pw);return;}
       const {best}=pickTarget(c,'ground',inp,pw);
@@ -2809,6 +2861,9 @@ function updateCam(dt){
   const P=CAMS[G.set.cam];
   let tx=bx,tz=bz;
   if(B.owner){tx+=m*Math.sin(B.owner.face)*3.5;tz+=m*Math.cos(B.owner.face)*1.5;}else{tx+=bvx*0.3;tz+=bvz*0.2;}
+  // a set piece near goal frames ball and goal together, from the usual touchline
+  const sp=G.sp;
+  if(st==='setpiece'&&sp&&(sp.type==='freekick'||sp.type==='penalty'||sp.type==='corner')){const gx=m*sp.team.dir*HL;if(Math.abs(gx-bx)<38){tx=lerp(bx,gx,0.55);tz=lerp(bz,0,0.5);}}
   tx=clamp(tx,-HL+4,HL-4);tz=clamp(tz*0.88,-HW+5,HW-2);
   tmpV.set(tx,0,tz);camLook.lerp(tmpV,1-Math.exp(-dt*3.4));
   tmpV.set(camLook.x*0.94,P.h,camLook.z*0.55+P.b);
@@ -2858,7 +2913,7 @@ function updateVisuals(dt){
     marker.position.set(c.x,2.35+Math.sin(T*5)*0.07+Math.max(0,(c.rig.skinned?c.rig.pelvisY:c.rig.body.position.y)-HIP_H),c.z);marker.rotation.y=T*2;marker.scale.setScalar(pop);
   }
   // on defence: who the switch button would pick next
-  nextMk.visible=false;
+  nextMk.visible=false;aimPreview(T);
   const op=NET.online?PADS[1-NET.localTi]:null;ind2.visible=!!(inPlay&&op&&op.ctrl&&G.state!=='goal');if(ind2.visible){ind2.position.x=op.ctrl.x;ind2.position.z=op.ctrl.z;}
   if(inPlay&&!guest&&G.state==='play'&&userMode(lp)==='def'){const L=switchList(lp),nx=L[0]===lp.ctrl?L[1]:L[0];if(nx){nextMk.visible=true;nextMk.position.set(nx.x,2.3+Math.sin(T*6)*0.05,nx.z);}}
   // pass target preview
