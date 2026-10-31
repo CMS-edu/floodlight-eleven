@@ -2720,7 +2720,7 @@ function startReplay(){
   const gl=G.goal;
   const end=Math.min(recW-1,gl.recEnd);const start=Math.max(recW-recN,gl.recAt-130);
   if(end-start<20){afterReplay();return;}
-  RP.start=start;RP.end=end;RP.p=start;RP.slowAt=gl.recAt-34;RP.side=gl.team===0?1:-1;
+  RP.start=start;RP.end=end;RP.p=start;RP.slowAt=gl.recAt-34;RP.side=G.teams[gl.team].dir;RP.cam.set(0,0,0);
   G.state='replay';$('app').classList.add('replay');$('rpTag').hidden=false;$('rpSkip').hidden=false;
   bannerOff();
   for(const m of BOARDS.mats)m.userData.goal=false;netEv('goalfx',[0]);
@@ -2771,10 +2771,11 @@ function updateCam(dt){
     return;
   }
   if(st==='replay'){
+    // low and close to the goal, but from the same touchline as the match camera so left and right never swap
     const s=m*RP.side;
-    tmpV.set(s*(HL+11),4.2,clamp(bz*0.35,-8,8)+(bz>0?-3:3));
+    tmpV.set(clamp(bx+s*5,-HL+6,HL-6),5.5,clamp(bz,-12,12)*0.45+17);
     RP.cam.lerp(tmpV,1-Math.exp(-dt*3));if(RP.cam.lengthSq()<1)RP.cam.copy(tmpV);
-    camLook.lerp(tmpV.set(bx*0.85+s*HL*0.15,Math.max(0.6,B.y*0.6),bz),1-Math.exp(-dt*6));
+    camLook.lerp(tmpV.set(bx+s*1.5,Math.max(0.6,B.y*0.6),bz),1-Math.exp(-dt*6));
     camPlace(m,RP.cam,camLook.x,camLook.y,camLook.z);setFov(36);return;
   }
   if(st==='goal'&&G.goal&&G.goal.scorer&&G.timer>1.0){
