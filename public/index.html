@@ -2292,14 +2292,14 @@ function locomote(e,dt){
   const upd=e.team&&padOf(e.team),user=!!(upd&&e===upd.ctrl&&!upd.lock),own=B.owner===e;
   const sd=hyp(e.mx,e.mz),s=hyp(e.vx,e.vz);
   const agil=(user?1.15:1)*(0.85+0.3*(e.st?e.st.pace:0.8));
-  const ACC=7.2*agil,DEC=10.5*agil;
+  const ACC=(user?9:7.2)*agil,DEC=(user?(sd<0.25?17:13):10.5)*agil;
   if(e.strafe||s<1.0||sd<0.25){
     let dvx=e.mx-e.vx,dvz=e.mz-e.vz;const dl=hyp(dvx,dvz),a=(sd<s?DEC:ACC)*(e.strafe?1.1:1)*dt;
     if(dl>a){dvx*=a/dl;dvz*=a/dl;}
     e.vx+=dvx;e.vz+=dvz;
   }else{
     const th=Math.atan2(e.vx,e.vz),da=angD(th,Math.atan2(e.mx,e.mz)),ad=Math.abs(da);
-    const om=lerp(10,user?4.4:3.4,clamp(s/9,0,1))*(own?0.85:1);
+    const om=lerp(user?12:10,user?5.4:3.4,clamp(s/9,0,1))*(own?0.88:1);
     let tgt=sd;if(ad>2.0)tgt=Math.min(tgt,0.6);else if(ad>1.1)tgt=Math.min(tgt,s*0.7);
     const nth=th+clamp(da,-om*dt,om*dt),ns=Math.max(0,s+clamp(tgt-s,-DEC*dt,ACC*dt));
     e.vx=Math.sin(nth)*ns;e.vz=Math.cos(nth)*ns;
@@ -2317,7 +2317,9 @@ function faceUpdate(e,dt,sp){
   let fa=null,rate=10;
   if(e.aimFace!=null){fa=e.aimFace;rate=14;}
   else if(e.strafe&&e.faceTgt){const tx=e.faceTgt.x-e.x,tz=e.faceTgt.z-e.z;if(hyp(tx,tz)>0.3){fa=Math.atan2(tx,tz);rate=7;}}
-  else if(sp>0.8){fa=Math.atan2(e.vx,e.vz);rate=B.owner===e?8:11;}
+  else if(sp>0.8){fa=Math.atan2(e.vx,e.vz);const pd=e.team&&padOf(e.team),me=!!(pd&&pd.ctrl===e&&!pd.lock);rate=me?(B.owner===e?15:18):B.owner===e?8:11;
+    // and turns toward where the thumb points, not only where he is already going
+    if(me&&hyp(e.mx,e.mz)>1)fa=Math.atan2(e.vx+e.mx*0.35,e.vz+e.mz*0.35);}
   else if(B.owner!==e){const d=hyp(B.x-e.x,B.z-e.z);if(d>0.6){fa=Math.atan2(B.x-e.x,B.z-e.z);rate=5;}}
   if(fa==null){e.turnRate=0;return;}
   const st=angD(e.face,fa)*Math.min(1,dt*rate);e.face+=st;e.turnRate=st/dt;
@@ -3124,8 +3126,8 @@ function stickMove(x,y){
   const dx=x-STK.cx,dy=y-STK.cy,m=hyp(dx,dy),R=STK.R,mm=Math.min(R,m),a=Math.atan2(dy,dx);
   knob.style.transform='translate('+(Math.cos(a)*mm).toFixed(1)+'px,'+(Math.sin(a)*mm).toFixed(1)+'px)';
   const v=m/R;
-  if(v<0.16){IN.jx=IN.jy=0;return;}
-  const g=Math.min(1,(v-0.16)/0.7);IN.jx=Math.cos(a)*g;IN.jy=Math.sin(a)*g;
+  if(v<0.12){IN.jx=IN.jy=0;return;}
+  const g=Math.min(1,(v-0.12)/0.5);IN.jx=Math.cos(a)*g;IN.jy=Math.sin(a)*g;
 }
 area.addEventListener('pointerdown',e=>{
   if(IN.jid!==null)return;IN.jid=e.pointerId;try{area.setPointerCapture(e.pointerId);}catch(_){}
@@ -3139,6 +3141,7 @@ area.addEventListener('pointerup',endStick);area.addEventListener('pointercancel
 // pass, through ball and shot all charge while held and go on release; the defensive uses (switch, tackle) act on press
 function btnDown(k){
   if(IN.btn[k])return;IN.btn[k]=true;
+  if(k!=='sprint'&&navigator.vibrate&&matchMedia('(pointer:coarse)').matches)try{navigator.vibrate(9);}catch(_){}
   if(k in IN.edge)IN.edge[k]=true;
   if(k in IN.chg){
     const um=userMode(LP()),guest=NET.role==='guest';
