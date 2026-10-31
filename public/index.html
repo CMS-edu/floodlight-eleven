@@ -1907,14 +1907,15 @@ function toW(t,lx,lz){return[lx*HL*t.dir,lz*HW*t.dir];}
 function formTarget(e){
   const t=e.team,dir=t.dir,poss=t.inPoss;
   const bx=clamp(B.x*dir/HL,-1,1),bz=clamp(B.z*dir/HW,-1,1);
-  let ax=e.base[0]+bx*0.5+(poss?0.17:-0.1)+t.ment*0.07;
+  let ax=e.base[0]+bx*(poss?0.6:0.5)+(poss?0.25:-0.1)+t.ment*0.07;
   let az=e.base[1]*(poss?1.08:0.8)+bz*(poss?0.22:0.34);
   // full-backs push on when their side has the ball; centre-backs hold a higher line once it is in the other half
   if(e.role==='DF'){if(poss&&e.wide)az=e.base[1]*1.18+bz*0.15;ax=clamp(ax+(poss&&e.wide?0.12:0),-0.9,(poss?(e.wide?0.52:0.32)+(bx>0.25?0.08:0):0.05)+t.ment*0.05+(e.run>0?0.3:0));}
   else if(e.role==='MF')ax=clamp(ax,-0.78,0.62);
   else ax=clamp(ax,-0.35,0.86);
-  if(!poss&&e.role==='DF')ax=lerp(Math.min(ax,bx-0.06),clamp(bx-0.16,-0.86,0.08),0.6);
-  if(!poss&&e.role==='MF')ax=Math.min(ax,clamp(bx-0.16,-0.86,0.08)+0.32);
+  const dline=clamp(bx-0.16-clamp((-bx-0.25)*0.6,0,0.25),-0.86,0.08);
+  if(!poss&&e.role==='DF')ax=lerp(Math.min(ax,bx-0.06),dline,0.6);
+  if(!poss&&e.role==='MF')ax=Math.min(ax,dline+0.32);
   if(!poss){const danger=clamp(1-(hyp(B.x-ownGoalX(t),B.z)-14)/40,0,1);az*=1-0.3*danger;if(e.role!=='FW')ax=Math.min(ax,lerp(ax,bx-0.12,danger*0.6));}
   if(e.role!=='DF'||e.run>0){const lim=Math.max(t.lastLine,bx)-0.012+(e.run>0?0.22:0);ax=Math.min(ax,lim);}
   return toW(t,ax,clamp(az,-0.94,0.94));
@@ -1931,26 +1932,33 @@ function passSafety(e,tx,tz,lofted){
   return m;
 }
 const BACKS=new Set(['LB','RB','LWB','RWB']),WIDE=new Set(['LM','RM','LW','RW']);
-// where a team-mate of the carrier should be, by position (team frame: x toward their goal, z with the base shape)
+// where a team-mate of the carrier should be, by position (team frame: x toward their goal, z with the base shape).
+// The whole side moves up with the ball and the longer it keeps it; in the final third the box fills
 function supportSpot(e){
   const t=e.team,dir=t.dir,bx=clamp(B.x*dir/HL,-1,1),bz=clamp(B.z*dir/HW,-1,1),L=e.lbl,side=Math.sign(e.base[1]),line=Math.min(0.92,t.lastLine);
-  const ballSide=Math.sign(bz)||side||1,same=side===ballSide;
+  const ballSide=Math.sign(bz)||side||1,same=side===ballSide,push=0.06+clamp((t.possT||0)/4,0,1)*0.14+t.ment*0.05;
+  const fin=bx>0.3,build=bx<-0.3;
   let ax,az;
-  if(L==='CB'){ax=clamp(bx-0.34,-0.86,0.18)+t.ment*0.04;az=e.base[1]*(bx<-0.25?1.9:1.25);}                 // split wide to build from the back
-  else if(BACKS.has(L)){ax=clamp(bx+(same?0.02:-0.14),-0.75,0.6);az=side*0.86;                              // width, then the overlap
-    if(e.run>0){ax=clamp(bx+0.3,-0.3,line+0.02);az=side*0.9;}}
-  else if(L==='CDM'){ax=clamp(bx-0.22,-0.7,0.32);az=bz*0.45+e.base[1]*0.6;}                                  // behind the ball, always an outlet
-  else if(L==='CM'){ax=clamp(bx+(same?0.06:-0.04),-0.6,Math.min(0.62,line-0.03));az=e.base[1]*1.25+bz*0.3;  // angles either side, a late run into the box
-    if(e.run>0){ax=Math.min(0.86,line+0.06);az=bz*0.25;}}
-  else if(L==='CAM'){ax=clamp(Math.min(line-0.07,bx+0.24),-0.25,0.8);az=bz*0.45+e.base[1]*0.3;}              // in the pocket between their lines
-  else if(WIDE.has(L)){ax=clamp(Math.max(bx+0.12,e.base[0]+0.15),-0.25,line-0.015);az=side*0.84;             // hug the touchline, go in behind
-    if(e.run>0){ax=Math.min(0.9,line+0.15);az=side*0.6;}
-    else if(bx>0.5&&!same){ax=Math.min(0.88,line);az=-ballSide*0.18;}}                                       // far post when the ball is on the other wing
-  else{ax=line-0.02;az=bz*0.3+e.base[1]*0.6;                                                                  // striker: on the last man's shoulder
-    if(e.run>0){ax=Math.min(0.92,line+0.18);az=bz*0.2+e.base[1]*0.3;}
-    else if(bx>0.5&&Math.abs(bz)>0.35){ax=0.86;az=ballSide*0.14;}}                                           // near post for the cross
-  if(!(e.run>0))ax=Math.min(ax,line-0.01);
-  return toW(t,ax,clamp(az,-0.92,0.92));
+  if(L==='CB'){                                                   // split wide to build, then up to halfway as the rest defence
+    ax=build?bx-0.3:fin?0.16:bx-0.16;az=e.base[1]*(build?1.9:1.3);ax+=push;}
+  else if(BACKS.has(L)){                                          // width, then high up the line; the far one tucks in
+    ax=build?bx+0.08:fin?(same?line-0.02:0.5):bx+(same?0.26:0.12);az=fin&&!same?side*0.55:side*0.88;ax+=push;
+    if(e.run>0){ax=Math.min(0.9,line+0.04);az=side*0.88;}}
+  else if(L==='CDM'){ax=fin?0.4:bx-0.06;az=bz*0.4+e.base[1]*0.5;ax+=push;}          // behind the ball, an outlet
+  else if(L==='CM'){                                              // angles either side; in the final third one to the edge of the box, one arriving
+    ax=fin?(same?0.6:0.76):bx+0.22;az=fin?(same?ballSide*0.4:-ballSide*0.12):e.base[1]*1.2+bz*0.3;ax+=push;
+    if(e.run>0){ax=Math.min(0.86,line+0.06);az=bz*0.2;}}
+  else if(L==='CAM'){ax=fin?0.8:Math.min(line-0.03,bx+0.34);az=fin?bz*0.2:bz*0.45+e.base[1]*0.3;}   // in the pocket, then the box
+  else if(WIDE.has(L)){                                           // hug the touchline, go in behind; in the final third the far one attacks the far post
+    ax=Math.max(bx+0.28,e.base[0]+0.3);az=side*0.84;
+    if(fin){if(same){ax=Math.max(bx-0.05,0.6);az=side*0.8;}else{ax=0.86;az=-ballSide*0.18;}}
+    if(e.run>0){ax=Math.min(0.9,line+0.15);az=side*0.6;}}
+  else{                                                           // striker: on the last man's shoulder, in the box when the ball gets there
+    ax=fin?0.88:line-0.02;az=fin?(Math.abs(bz)>0.35?ballSide*0.12:bz*0.3):bz*0.3+e.base[1]*0.6;
+    if(e.run>0){ax=Math.min(0.92,line+0.18);az=bz*0.2+e.base[1]*0.3;}}
+  const boxMan=fin&&(L==='ST'||L==='CAM'||(WIDE.has(L)&&!same)||(L==='CM'&&!same));
+  if(!(e.run>0))ax=Math.min(ax,Math.max(line-0.01,bx-0.02,boxMan?0.72:-1));
+  return toW(t,clamp(ax,-0.88,0.92),clamp(az,-0.92,0.92));
 }
 // nudge a spot toward grass: away from markers, in sight of the ball, not on top of a team-mate
 function findSpace(e,tx,tz){
@@ -1968,6 +1976,7 @@ function findSpace(e,tx,tz){
 function teamThink(t,dt){
   const o=oppOf(t);
   t.inPoss=B.owner?B.owner.team===t:(B.lastTeam===t.i);
+  if(B.owner)t.possT=B.owner.team===t?(t.possT||0)+dt:0;
   let ll=-1;for(const p of o.players){if(p.isGK)continue;const v=p.x*t.dir/HL;if(v>ll)ll=v;}t.lastLine=ll;
   t.chaser=null;
   // while a thumb is steering the selected player the AI leaves the loose ball to that person
@@ -1996,9 +2005,9 @@ function teamThink(t,dt){
   // the full-back on the ball side round the outside; never more than two at once
   if(B.owner&&B.owner.team===t&&!B.owner.isGK){
     const c=B.owner,[,cn]=nearestOpp(c),bx=c.x*t.dir/HL;
-    if(cn>3.2&&t.players.filter(p=>p.run>0).length<2&&Math.random()<dt*1.5){
+    if(cn>2.4&&t.players.filter(p=>p.run>0).length<(bx>0.3?3:2)&&Math.random()<dt*(bx>0.3?2.4:1.6)){
       const cand=t.players.filter(p=>p!==c&&!p.off&&!p.isGK&&!(p.run>0)&&!((p.runCd||0)>G.t)&&(
-        ((p.lbl==='ST'||WIDE.has(p.lbl))&&bx>-0.45)||((p.lbl==='CM'||p.lbl==='CAM')&&bx>0.2)||
+        ((p.lbl==='ST'||WIDE.has(p.lbl))&&bx>-0.45)||((p.lbl==='CM'||p.lbl==='CAM')&&bx>0.05)||
         (BACKS.has(p.lbl)&&bx>-0.1&&Math.sign(p.base[1])===(Math.sign(c.z*t.dir)||1))));
       if(cand.length){const p=cand[Math.floor(Math.random()*cand.length)];p.run=rnd(2.4,3.6);p.runCd=G.t+p.run+rnd(1.5,3);}
     }
@@ -2066,7 +2075,7 @@ function think(e,dt){
     if(e.run>0)e.run-=dt;
     if(!(e.spT>G.t)||(e.run>0)!==!!e.spRun){
       const [sx,sz]=supportSpot(e);[e.spX,e.spZ]=e.run>0?[sx,sz]:findSpace(e,sx,sz);e.spRun=e.run>0;e.spT=G.t+0.3+Math.random()*0.15;
-      if(!(e.run>0)){const lim=(Math.min(0.92,t.lastLine)-0.01)*HL;if(e.spX*dir>lim)e.spX=lim*dir;}
+      if(!(e.run>0)){const lim=Math.max(Math.min(0.92,t.lastLine)-0.01,B.x*dir/HL-0.02,B.x*dir/HL>0.3&&(e.lbl==='ST'||e.lbl==='CAM'||WIDE.has(e.lbl)||e.lbl==='CM')?0.72:-1)*HL;if(e.spX*dir>lim)e.spX=lim*dir;}
     }
     setMove(e,e.spX,e.spZ,e.run>0||hyp(e.spX-e.x,e.spZ-e.z)>9,!(e.run>0));return;
   }
@@ -2101,7 +2110,7 @@ function think(e,dt){
     const man=e.style==='man',lane=e.style==='lane';
     let m=e.mark&&!e.mark.off&&e.mark!==c&&hyp(e.mark.x-e.x,e.mark.z-e.z)<(man?22:15)?e.mark:null;
     if(!m){let md=man?18:13;for(const o of oppOf(t).players){if(o.isGK||o===c||o.off)continue;const d=hyp(o.x-fx,o.z-fz);if(d<md){md=d;m=o;}}}
-    if(m&&e.role==='DF'&&(m.x*dir/HL)-clamp(B.x*dir/HL-0.16,-0.86,0.08)>0.22)m=null;
+    if(m&&e.role==='DF'&&(m.x*dir/HL)-clamp(B.x*dir/HL-0.16-clamp((-B.x*dir/HL-0.25)*0.6,0,0.25),-0.86,0.08)>0.22)m=null;
     e.mark=m;
     if(m){
       const gx=ownGoalX(t),vx=gx-m.x,vz=-m.z,vl=hyp(vx,vz)||1;
