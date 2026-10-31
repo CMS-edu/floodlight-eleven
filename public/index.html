@@ -467,7 +467,7 @@ if(!window.THREE){$('loading').textContent='3D 엔진을 불러오지 못했습�
 
 /* ================= constants & helpers ================= */
 const PI=Math.PI,TAU=PI*2;
-const HL=52.5,HW=34,GW=8.4,GH=2.75,BR=0.11,GRAV=9.81,BVIS=1.8;
+const HL=48,HW=31,GW=8.5,GH=2.8,BR=0.11,GRAV=9.81,BVIS=1.3;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t, hyp=Math.hypot;
 const rnd=(a=0,b=1)=>a+Math.random()*(b-a);
 const gauss=()=>{let u=0;while(!u)u=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(TAU*Math.random());};
@@ -1401,6 +1401,7 @@ function buildTeams(){
       const e={team,i:ti*11+k,k,role:f.r,isGK:gk,num:m.num,lbl:f.l,name:m.name,st,stars:m.stars,base:f.p,off:false,yellow:0,
         x:0,z:0,vx:0,vz:0,mx:0,mz:0,face:0,speed:0,phase:m.phase,act:0,actT:0,actD:0,
         sprint:false,cool:0,stun:0,tackleCd:0,decT:0,run:0,stamina:1,ipx:0,ipz:0,ipt:9,save:null,holdT:0,slideHit:false,kick:null,ap1:0,ap2:0,ap3:0,
+        wide:/^[LR]/.test(f.l),style:f.r==='DF'?(/^[LR]/.test(f.l)||k%2===0?'man':'zone'):f.r==='MF'?(f.l==='CDM'||(k+ids[ti])%2===0?'lane':'man'):'zone',
         vmax:(7.35+st.pace*1.75)*(ti===1&&!NET.online?D.spd:1),gkSkill:(gk?gkQ(m.ovr):0.88)*(ti===1&&!NET.online?D.gk/0.88:1)};
       e.rig=SKIN.ready?buildSkinnedRig(gk?{shirt:club.gk,pc:'#111418',patK:0,shorts:'#1b1d22',socks:'#1b1d22',boot:BOOT_HEX[m.boot],skin:SKIN_HEX[m.skin],hair:HAIR_HEX[m.hair],hairK:(m.hair%3)*0.5,numTex:numTex(m.num,'#ffffff'),spTex:sponTex('',''),long:true,glove:'#f2f2f2'}
         :{shirt:club.shirt,pc:club.pc,patK:KIT_PAT[club.pat]||0,shorts:club.shorts,socks:club.socks,boot:BOOT_HEX[m.boot],skin:SKIN_HEX[m.skin],hair:HAIR_HEX[m.hair],hairK:(m.hair%3)*0.5,numTex:numTex(m.num,club.num),spTex:sponTex(club.sp,club.spc)})
@@ -1799,11 +1800,12 @@ function formTarget(e){
   const bx=clamp(B.x*dir/HL,-1,1),bz=clamp(B.z*dir/HW,-1,1);
   let ax=e.base[0]+bx*0.5+(poss?0.17:-0.1)+t.ment*0.07;
   let az=e.base[1]*(poss?1.08:0.8)+bz*(poss?0.22:0.34);
-  if(e.role==='DF')ax=clamp(ax,-0.9,(poss?0.3:0.05)+t.ment*0.05);
+  // full-backs push on when their side has the ball; centre-backs hold a higher line once it is in the other half
+  if(e.role==='DF'){if(poss&&e.wide)az=e.base[1]*1.18+bz*0.15;ax=clamp(ax+(poss&&e.wide?0.12:0),-0.9,(poss?(e.wide?0.52:0.32)+(bx>0.25?0.08:0):0.05)+t.ment*0.05+(e.run>0?0.3:0));}
   else if(e.role==='MF')ax=clamp(ax,-0.78,0.62);
   else ax=clamp(ax,-0.35,0.86);
   if(!poss&&e.role==='DF')ax=Math.min(ax,bx-0.06);
-  if(e.role!=='DF'){const lim=Math.max(t.lastLine,bx)-0.012+(e.run>0?0.22:0);ax=Math.min(ax,lim);}
+  if(e.role!=='DF'||e.run>0){const lim=Math.max(t.lastLine,bx)-0.012+(e.run>0?0.22:0);ax=Math.min(ax,lim);}
   return toW(t,ax,clamp(az,-0.94,0.94));
 }
 function teamThink(t,dt){
@@ -1880,6 +1882,8 @@ function think(e,dt){
     // support / runs
     if(e.run>0)e.run-=dt;
     else if((e.role==='FW'||(e.role==='MF'&&Math.random()<0.4))&&Math.random()<dt*0.45&&B.x*dir/HL>-0.3)e.run=rnd(1.8,3.2);
+    // defenders join in: an overlapping full-back, now and then a centre-back late into the box; one at a time
+    else if(e.role==='DF'&&!t.players.some(p=>p!==e&&p.role==='DF'&&p.run>0)&&((e.wide&&B.x*dir/HL>-0.05&&Math.random()<dt*0.35)||(!e.wide&&B.x*dir/HL>0.45&&Math.random()<dt*0.05)))e.run=rnd(2.5,4.2);
     let [fx,fz]=formTarget(e);
     if(e.run>0)fx=clamp(fx+dir*4,-HL+2,HL-4);
     // find space: drift away from nearest marker
@@ -1913,9 +1917,17 @@ function think(e,dt){
   }
   let [fx,fz]=formTarget(e);
   // marking
+  // each player has a habit: tight man-marking, cutting the passing lane to his man, or holding the zone
   if(e.role!=='FW'){
-    let m=null,md=13;for(const o of oppOf(t).players){if(o.isGK||o===c)continue;const d=hyp(o.x-fx,o.z-fz);if(d<md){md=d;m=o;}}
-    if(m){const gx=ownGoalX(t),vx=gx-m.x,vz=-m.z,vl=hyp(vx,vz)||1;const w=e.role==='DF'?0.6:0.42;fx=lerp(fx,m.x+vx/vl*1.6,w);fz=lerp(fz,m.z+vz/vl*1.6,w);}
+    const man=e.style==='man',lane=e.style==='lane';
+    let m=e.mark&&!e.mark.off&&e.mark!==c&&hyp(e.mark.x-e.x,e.mark.z-e.z)<(man?22:15)?e.mark:null;
+    if(!m){let md=man?18:13;for(const o of oppOf(t).players){if(o.isGK||o===c||o.off)continue;const d=hyp(o.x-fx,o.z-fz);if(d<md){md=d;m=o;}}}
+    e.mark=m;
+    if(m){
+      const gx=ownGoalX(t),vx=gx-m.x,vz=-m.z,vl=hyp(vx,vz)||1;
+      if(lane&&hyp(m.x-c.x,m.z-c.z)<30){fx=lerp(fx,c.x+(m.x-c.x)*0.62+vx/vl*0.6,0.8);fz=lerp(fz,c.z+(m.z-c.z)*0.62+vz/vl*0.6,0.8);}
+      else{const w=man?0.9:e.role==='DF'?0.6:0.42,off=man?1.1:1.6;fx=lerp(fx,m.x+vx/vl*off+m.vx*0.2,w);fz=lerp(fz,m.z+vz/vl*off+m.vz*0.2,w);}
+    }
   }
   setMove(e,fx,fz,hyp(fx-e.x,fz-e.z)>8);
 }
