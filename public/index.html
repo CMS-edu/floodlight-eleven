@@ -1004,7 +1004,10 @@ vec4 diffuseColor=vec4(col,opacity);
 function loadSkinned(){
   if(!THREE.GLTFLoader||!THREE.SkeletonUtils)return Promise.resolve(false);
   return Promise.all([
-    new Promise((res,rej)=>new THREE.GLTFLoader().load('assets/player.glb',res,null,rej)),
+    // the model ships as base64 inside JSON so every host (including artifact pages) can serve it
+    fetch('assets/player.json').then(r=>{if(!r.ok)throw new Error('model');return r.json();}).then(j=>new Promise((res,rej)=>{
+      const bin=atob(j.data),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
+      new THREE.GLTFLoader().parse(buf.buffer,'',res,rej);})),
     fetch('assets/clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();})
   ]).then(([g,cj])=>{
     const own=n=>g.animations.find(a=>a.name===n),cl={};
