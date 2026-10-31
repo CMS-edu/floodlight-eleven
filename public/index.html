@@ -1914,6 +1914,7 @@ function formTarget(e){
   else if(e.role==='MF')ax=clamp(ax,-0.78,0.62);
   else ax=clamp(ax,-0.35,0.86);
   if(!poss&&e.role==='DF')ax=Math.min(ax,bx-0.06);
+  if(!poss){const danger=clamp(1-(hyp(B.x-ownGoalX(t),B.z)-14)/40,0,1);az*=1-0.3*danger;if(e.role!=='FW')ax=Math.min(ax,lerp(ax,bx-0.12,danger*0.6));}
   if(e.role!=='DF'||e.run>0){const lim=Math.max(t.lastLine,bx)-0.012+(e.run>0?0.22:0);ax=Math.min(ax,lim);}
   return toW(t,ax,clamp(az,-0.94,0.94));
 }
@@ -1957,13 +1958,26 @@ function setMove(e,tx,tz,sprint,smooth){
   if(smooth&&e.sx!=null&&hyp(tx-e.sx,tz-e.sz)<15){const k=Math.min(1,STEP*3.2);e.sx+=(tx-e.sx)*k;e.sz+=(tz-e.sz)*k;tx=e.sx;tz=e.sz;}
   else{e.sx=tx;e.sz=tz;}
   const dx=tx-e.x,dz=tz-e.z,d=hyp(dx,dz);
-  if(smooth){if(e.settled){if(d>2.6)e.settled=false;}else if(d<0.9)e.settled=true;}else e.settled=false;
+  const dz2=e.team&&B.owner&&B.owner.team!==e.team;if(smooth){if(e.settled){if(d>(dz2?1.2:2.6))e.settled=false;}else if(d<(dz2?0.5:0.9))e.settled=true;}else e.settled=false;
   if(e.settled){e.mx=e.mz=0;e.sprint=false;}
   else{
-    // walk the last metres, jog to reposition, run only when far off or it matters; formation moves ease in
-    const sp=sprint?e.vmax:d>18?e.vmax*0.66:d>7?e.vmax*0.44:e.vmax*0.26;
-    const want=Math.min(sp,(smooth?d*0.75:d*1.5)+0.3);
-    e.mx=d>0.001?dx/d*want:0;e.mz=d>0.001?dz/d*want:0;e.sprint=sprint&&want>e.vmax*0.75;
+    // walk the last metres, jog to reposition, run only when far off or it matters; formation moves ease in.
+    // Defending is different: the nearer the ball gets to goal the harder everyone gets back, and a man
+    // who has been passed by the play sprints to recover
+    let sp=sprint?e.vmax:d>18?e.vmax*0.66:d>7?e.vmax*0.44:e.vmax*0.26,ease=smooth?0.75:1.5;
+    if(e.team&&!e.isGK&&(B.owner?B.owner.team!==e.team:B.lastTeam!==e.team.i)){
+      const gx=ownGoalX(e.team),bg=hyp(B.x-gx,B.z),danger=clamp(1-(bg-14)/40,0,1),beaten=hyp(e.x-gx,e.z)>bg-1;
+      if(beaten&&d>3&&bg<55)sp=e.vmax;
+      else sp=Math.max(sp,d>8?e.vmax*(0.7+0.3*danger):d>2.5?e.vmax*(0.5+0.25*danger):e.vmax*0.3);
+      ease=1.6;
+      if(beaten&&d>3&&bg<55)e.sprintReq=true;
+    }else if(e.team&&!e.isGK&&B.owner&&B.owner.team===e.team){
+      // attacking: the closer the ball gets to their goal, the harder the runs into the box
+      const og=hyp(B.x+ownGoalX(e.team),B.z),threat=clamp(1-(og-16)/40,0,1);
+      sp=Math.max(sp,d>3?e.vmax*(0.45+0.35*threat):e.vmax*0.3);ease=Math.max(ease,0.75+0.8*threat);
+    }
+    const want=Math.min(sp,d*ease+0.3);
+    e.mx=d>0.001?dx/d*want:0;e.mz=d>0.001?dz/d*want:0;e.sprint=(sprint||e.sprintReq)&&want>e.vmax*0.75;e.sprintReq=false;
   }
   // at a jog players keep their eyes on the ball and shuffle; only a long run turns their back
   if(!e.sprint&&B.owner!==e){
