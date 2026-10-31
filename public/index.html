@@ -1645,7 +1645,7 @@ function passVel(p,r,kind,pt,pw,exact){
 function passExec(p,r,kind,pt,pw){
   const k=passVel(p,r,kind,pt,pw,false),tx=k.tx,tz=k.tz;
   kickBall(p,k.vx,k.vy,k.vz,k.spin);
-  B.target={r,x:tx,z:tz};r.team.recv=r;
+  B.target={r,x:tx,z:tz,kind,from:p};r.team.recv=r;
   {const op=PADS[1-p.team.i];if(op&&op.ctrl&&p.team===r.team&&G.state==='play')autoSwitchDef(op,true);}
   G.stats[p.team.i].pass++;
   if(p.team===r.team&&padOf(r.team)&&!r.isGK)setCtrl(padOf(r.team),r,'recv');
@@ -1913,10 +1913,57 @@ function formTarget(e){
   if(e.role==='DF'){if(poss&&e.wide)az=e.base[1]*1.18+bz*0.15;ax=clamp(ax+(poss&&e.wide?0.12:0),-0.9,(poss?(e.wide?0.52:0.32)+(bx>0.25?0.08:0):0.05)+t.ment*0.05+(e.run>0?0.3:0));}
   else if(e.role==='MF')ax=clamp(ax,-0.78,0.62);
   else ax=clamp(ax,-0.35,0.86);
-  if(!poss&&e.role==='DF')ax=Math.min(ax,bx-0.06);
+  if(!poss&&e.role==='DF')ax=lerp(Math.min(ax,bx-0.06),clamp(bx-0.16,-0.86,0.08),0.6);
+  if(!poss&&e.role==='MF')ax=Math.min(ax,clamp(bx-0.16,-0.86,0.08)+0.32);
   if(!poss){const danger=clamp(1-(hyp(B.x-ownGoalX(t),B.z)-14)/40,0,1);az*=1-0.3*danger;if(e.role!=='FW')ax=Math.min(ax,lerp(ax,bx-0.12,danger*0.6));}
   if(e.role!=='DF'||e.run>0){const lim=Math.max(t.lastLine,bx)-0.012+(e.run>0?0.22:0);ax=Math.min(ax,lim);}
   return toW(t,ax,clamp(az,-0.94,0.94));
+}
+/* attacking play: how dangerous a spot is, whether a pass gets there, and where each role goes */
+// value of having the ball at (x,z) for team t: rises toward their goal and the middle
+function zoneVal(t,x,z){const dg=hyp(t.dir*HL-x,z);return 0.6*clamp((x*t.dir/HL+1)/2,0,1)+Math.pow(clamp(1-dg/62,0,1),1.5)*(1-Math.min(1,Math.abs(z)/HW)*0.3)+(dg<18?0.12:0);}
+// seconds to spare before any opponent can reach the ball's path (negative: it gets cut out)
+function passSafety(e,tx,tz,lofted){
+  const d=hyp(tx-e.x,tz-e.z)||1,v=lofted?17:clamp(8+d*0.45,11,24);let m=9;
+  for(const o of oppOf(e.team).players){if(o.off||o.stun>0.4)continue;
+    for(let k=lofted?5:1;k<=6;k++){const u=k/6,px=e.x+(tx-e.x)*u,pz=e.z+(tz-e.z)*u,tb=d*u/v,
+      to=Math.max(0,hyp(o.x-px,o.z-pz)-(o.isGK?1.6:1.0))/(o.vmax*0.9)+0.22;if(to-tb<m)m=to-tb;}}
+  return m;
+}
+const BACKS=new Set(['LB','RB','LWB','RWB']),WIDE=new Set(['LM','RM','LW','RW']);
+// where a team-mate of the carrier should be, by position (team frame: x toward their goal, z with the base shape)
+function supportSpot(e){
+  const t=e.team,dir=t.dir,bx=clamp(B.x*dir/HL,-1,1),bz=clamp(B.z*dir/HW,-1,1),L=e.lbl,side=Math.sign(e.base[1]),line=Math.min(0.92,t.lastLine);
+  const ballSide=Math.sign(bz)||side||1,same=side===ballSide;
+  let ax,az;
+  if(L==='CB'){ax=clamp(bx-0.34,-0.86,0.18)+t.ment*0.04;az=e.base[1]*(bx<-0.25?1.9:1.25);}                 // split wide to build from the back
+  else if(BACKS.has(L)){ax=clamp(bx+(same?0.02:-0.14),-0.75,0.6);az=side*0.86;                              // width, then the overlap
+    if(e.run>0){ax=clamp(bx+0.3,-0.3,line+0.02);az=side*0.9;}}
+  else if(L==='CDM'){ax=clamp(bx-0.22,-0.7,0.32);az=bz*0.45+e.base[1]*0.6;}                                  // behind the ball, always an outlet
+  else if(L==='CM'){ax=clamp(bx+(same?0.06:-0.04),-0.6,Math.min(0.62,line-0.03));az=e.base[1]*1.25+bz*0.3;  // angles either side, a late run into the box
+    if(e.run>0){ax=Math.min(0.86,line+0.06);az=bz*0.25;}}
+  else if(L==='CAM'){ax=clamp(Math.min(line-0.07,bx+0.24),-0.25,0.8);az=bz*0.45+e.base[1]*0.3;}              // in the pocket between their lines
+  else if(WIDE.has(L)){ax=clamp(Math.max(bx+0.12,e.base[0]+0.15),-0.25,line-0.015);az=side*0.84;             // hug the touchline, go in behind
+    if(e.run>0){ax=Math.min(0.9,line+0.15);az=side*0.6;}
+    else if(bx>0.5&&!same){ax=Math.min(0.88,line);az=-ballSide*0.18;}}                                       // far post when the ball is on the other wing
+  else{ax=line-0.02;az=bz*0.3+e.base[1]*0.6;                                                                  // striker: on the last man's shoulder
+    if(e.run>0){ax=Math.min(0.92,line+0.18);az=bz*0.2+e.base[1]*0.3;}
+    else if(bx>0.5&&Math.abs(bz)>0.35){ax=0.86;az=ballSide*0.14;}}                                           // near post for the cross
+  if(!(e.run>0))ax=Math.min(ax,line-0.01);
+  return toW(t,ax,clamp(az,-0.92,0.92));
+}
+// nudge a spot toward grass: away from markers, in sight of the ball, not on top of a team-mate
+function findSpace(e,tx,tz){
+  const c=B.owner;let best=[tx,tz],bs=-1e9;
+  for(let k=0;k<7;k++){
+    const a=k*TAU/6,r=k?4:0,x=clamp(tx+Math.cos(a)*r,-HL+1.5,HL-1.5),z=clamp(tz+Math.sin(a)*r,-HW+1.5,HW-1.5);
+    let open=9;for(const o of oppOf(e.team).players){if(o.off)continue;const d=hyp(o.x-x,o.z-z);if(d<open)open=d;}
+    let crowd=0;for(const m of e.team.players){if(m===e||m.off)continue;const d=hyp(m.x-x,m.z-z);if(d<7)crowd+=7-d;}
+    const lane=c&&c!==e?Math.min(3,laneClear(c.x,c.z,x,z,e.team)):2;
+    const sc=Math.min(open,7)*0.45+lane*0.5-crowd*0.15-r*0.06;
+    if(sc>bs){bs=sc;best=[x,z];}
+  }
+  return best;
 }
 function teamThink(t,dt){
   const o=oppOf(t);
@@ -1945,6 +1992,17 @@ function teamThink(t,dt){
   }
   t.helper=null;
   if(t.help&&B.owner&&B.owner.team!==t){const c=B.owner;let hd=1e9;for(const p of t.players){if(p.isGK||p.off||p.stun>0||p===uc)continue;const d=hyp(p.x-c.x,p.z-c.z);if(d<hd){hd=d;t.helper=p;}}}
+  // with time on the ball, someone goes: strikers and wingers in behind, a midfielder late into the box,
+  // the full-back on the ball side round the outside; never more than two at once
+  if(B.owner&&B.owner.team===t&&!B.owner.isGK){
+    const c=B.owner,[,cn]=nearestOpp(c),bx=c.x*t.dir/HL;
+    if(cn>3.2&&t.players.filter(p=>p.run>0).length<2&&Math.random()<dt*1.5){
+      const cand=t.players.filter(p=>p!==c&&!p.off&&!p.isGK&&!(p.run>0)&&!((p.runCd||0)>G.t)&&(
+        ((p.lbl==='ST'||WIDE.has(p.lbl))&&bx>-0.45)||((p.lbl==='CM'||p.lbl==='CAM')&&bx>0.2)||
+        (BACKS.has(p.lbl)&&bx>-0.1&&Math.sign(p.base[1])===(Math.sign(c.z*t.dir)||1))));
+      if(cand.length){const p=cand[Math.floor(Math.random()*cand.length)];p.run=rnd(2.4,3.6);p.runCd=G.t+p.run+rnd(1.5,3);}
+    }
+  }
   t.press1=t.press2=null;
   if(B.owner&&B.owner.team!==t){
     const c=B.owner,arr=t.players.filter(p=>!p.isGK&&!p.off&&p.stun<=0&&p.act!==ACT.FALL).sort((a,b)=>hyp(a.x-c.x,a.z-c.z)-hyp(b.x-c.x,b.z-c.z));
@@ -2004,17 +2062,13 @@ function think(e,dt){
     const [fx,fz]=formTarget(e);setMove(e,fx,fz,hyp(fx-e.x,fz-e.z)>16);return;
   }
   if(B.owner.team===t){
-    // support / runs
+    // each position has its job when we have the ball (see supportSpot); refreshed a few times a second
     if(e.run>0)e.run-=dt;
-    else if((e.role==='FW'||(e.role==='MF'&&Math.random()<0.4))&&Math.random()<dt*0.45&&B.x*dir/HL>-0.3)e.run=rnd(1.8,3.2);
-    // defenders join in: an overlapping full-back, now and then a centre-back late into the box; one at a time
-    else if(e.role==='DF'&&!t.players.some(p=>p!==e&&p.role==='DF'&&p.run>0)&&((e.wide&&B.x*dir/HL>-0.05&&Math.random()<dt*0.35)||(!e.wide&&B.x*dir/HL>0.45&&Math.random()<dt*0.05)))e.run=rnd(2.5,4.2);
-    let [fx,fz]=formTarget(e);
-    if(e.run>0)fx=clamp(fx+dir*4,-HL+2,HL-4);
-    // find space: drift away from nearest marker
-    const [o,od]=nearestOpp(e);
-    if(o&&od<4){fz+=Math.sign(e.z-o.z||1)*(4-od)*0.6;}
-    setMove(e,fx,clamp(fz,-HW+1.5,HW-1.5),e.run>0||hyp(fx-e.x,fz-e.z)>15);return;
+    if(!(e.spT>G.t)||(e.run>0)!==!!e.spRun){
+      const [sx,sz]=supportSpot(e);[e.spX,e.spZ]=e.run>0?[sx,sz]:findSpace(e,sx,sz);e.spRun=e.run>0;e.spT=G.t+0.3+Math.random()*0.15;
+      if(!(e.run>0)){const lim=(Math.min(0.92,t.lastLine)-0.01)*HL;if(e.spX*dir>lim)e.spX=lim*dir;}
+    }
+    setMove(e,e.spX,e.spZ,e.run>0||hyp(e.spX-e.x,e.spZ-e.z)>9,!(e.run>0));return;
   }
   // defending
   const c=B.owner;
@@ -2047,6 +2101,7 @@ function think(e,dt){
     const man=e.style==='man',lane=e.style==='lane';
     let m=e.mark&&!e.mark.off&&e.mark!==c&&hyp(e.mark.x-e.x,e.mark.z-e.z)<(man?22:15)?e.mark:null;
     if(!m){let md=man?18:13;for(const o of oppOf(t).players){if(o.isGK||o===c||o.off)continue;const d=hyp(o.x-fx,o.z-fz);if(d<md){md=d;m=o;}}}
+    if(m&&e.role==='DF'&&(m.x*dir/HL)-clamp(B.x*dir/HL-0.16,-0.86,0.08)>0.22)m=null;
     e.mark=m;
     if(m){
       const gx=ownGoalX(t),vx=gx-m.x,vz=-m.z,vl=hyp(vx,vz)||1;
@@ -2080,31 +2135,47 @@ function carrierThink(e,dt){
       const ogk=oppOf(t).players[0],off=hyp(ogk.x-gx,ogk.z);
       if(Math.random()<sc*0.85){const kind=off>6&&dG>11&&dG<24&&Math.random()<0.3?'chip':dG>14&&Math.abs(e.z)>6&&Math.random()<0.3?'finesse':null;shoot(e,kind==='chip'?rnd(0.35,0.7):clamp(0.4+dG/55+rnd(-0.05,0.12),0.4,0.84),null,kind);return;}
     }
-    // options
-    let best=null,bs=-1e9,bk='ground';
+    // options: every pass is weighed by what it gains (a more dangerous spot) against whether it gets there
+    const here=zoneVal(t,e.x,e.z),press=nd<2.5;
+    let best=null,bs=-1e9,bk='ground',bpt=null;
     for(const m of t.players){
       if(m===e||m.off)continue;
-      const dx=m.x-e.x,dz=m.z-e.z,d=hyp(dx,dz);if(d<5||d>48)continue;
-      const prog=(m.x-e.x)*dir;
-      const [,open]=nearestOpp(m);
-      const lane=laneClear(e.x,e.z,m.x,m.z,t);
-      let s=(prog>0?prog*0.1:prog*0.16)+Math.min(open,8)*0.11+Math.min(lane,4)*0.22-d*0.01+(m.isGK?-3:0)+(m.role==='FW'?0.2:0)+(m.x*dir/HL>0.55?0.35:0);
-      let kind='ground';
-      if(lane<1.1){if(d>16){s-=0.35;kind='lob';}else s-=1.2;}
-      if(m.run>0&&m.role!=='DF'&&(m.x*dir/HL)>-0.1){s+=0.7;kind='through';}
-      if(lx>0.6&&Math.abs(e.z)>15&&Math.abs(m.z)<14&&(m.x*dir/HL)>0.66){s+=0.6;kind='cross';}
-      if(lx>0.35&&prog<1)s-=0.55;
-      if(s>bs){bs=s;best=m;bk=kind;}
+      const d0=hyp(m.x-e.x,m.z-e.z);if(d0<4||d0>55)continue;
+      // to feet (leading a moving man), or into the space ahead of a runner
+      const runner=m.run>0&&!m.isGK;
+      let tx,tz,kind='ground';
+      if(runner){const sp=hyp(m.vx,m.vz)||1,lead=clamp(5+sp*0.9,5,12);tx=clamp(m.x+m.vx/sp*lead,-HL+2,HL-2);tz=clamp(m.z+m.vz/sp*lead,-HW+2,HW-2);kind='through';}
+      else{const T=d0/18;tx=m.x+m.vx*T*0.8;tz=m.z+m.vz*T*0.8;}
+      const d=hyp(tx-e.x,tz-e.z);
+      let safe=passSafety(e,tx,tz,false),lofted=false;
+      if(safe<0.15&&d>20){const s2=passSafety(e,tx,tz,true);if(s2>safe+0.2){safe=s2;lofted=true;if(kind!=='through')kind='lob';}}
+      // a ball into space only works if the runner wins the race to it
+      if(runner){let od=9;for(const o of oppOf(t).players){if(o.off)continue;const tt=hyp(o.x-tx,o.z-tz)/(o.vmax*0.9)-hyp(m.x-tx,m.z-tz)/(m.vmax*0.9);if(tt<od)od=tt;}safe=Math.min(safe,od);}
+      let open=9;for(const o of oppOf(t).players){if(o.off)continue;const dd=hyp(o.x-tx,o.z-tz);if(dd<open)open=dd;}
+      const gain=zoneVal(t,tx,tz)-here;
+      let s=gain*5+Math.min(open,8)*0.07+clamp(safe,-1,0.45)*2+(safe<0.05?-2.2:0)-(m.isGK?2.5:0)-d*0.004-0.9;
+      if(lofted)s-=0.25;
+      if(gain<-0.02&&!press)s-=0.7+(m.lbl==='CB'?0.3:0);
+      if(runner&&safe>0.1)s+=0.25;
+      if(s>bs){bs=s;best=m;bk=kind;bpt=runner?{x:tx,z:tz}:null;}
     }
-    // dribble value
-    let ahead=99;for(const o of oppOf(t).players){const rx=(o.x-e.x)*dir,rz=o.z-e.z;if(rx>0&&rx<9&&Math.abs(rz)<rx*0.8+1.5){const d=hyp(rx,rz);if(d<ahead)ahead=d;}}
-    let ds=(ahead>8?1.75:ahead>4.5?1.0:-0.3)+(lx>0.3?0.25:0)+(dG<38&&ahead>3?0.6:0);
-    if(nd<2.2)ds-=0.7;
-    const urgency=nd<1.8?0.5:0;
-    if(best&&bs+urgency>ds+0.15){passTo(e,best,bk);return;}
+    // from wide in the final third: a cross to near post, penalty spot or far post, wherever a man is arriving
+    if(lx>0.55&&Math.abs(e.z)>HW*0.33){
+      const sd=Math.sign(e.z),zones=[{x:gx-dir*5.5,z:sd*2.2},{x:gx-dir*11,z:sd*0.5},{x:gx-dir*6.5,z:-sd*3.2}];
+      for(const zn of zones){
+        let r=null,rd=7;for(const m of t.players){if(m===e||m.off||m.isGK)continue;const dd=hyp(m.x+m.vx*0.6-zn.x,m.z+m.vz*0.6-zn.z);if(dd<rd){rd=dd;r=m;}}
+        if(!r)continue;let dn=0;for(const o of oppOf(t).players){if(!o.off&&hyp(o.x-zn.x,o.z-zn.z)<3)dn++;}
+        const sc=0.4+zoneVal(t,zn.x,zn.z)*1.4-dn*0.35-rd*0.08+(lx>0.75?0.3:0)+(press?0.3:0);
+        if(sc>bs){bs=sc;best=r;bk='cross';bpt=zn;}
+      }
+    }
+    // carry it on when there is grass ahead
+    let ahead=99;for(const o of oppOf(t).players){const rx=(o.x-e.x)*dir,rz=o.z-e.z;if(rx>0&&rx<10&&Math.abs(rz)<rx*0.8+1.5){const d=hyp(rx,rz);if(d<ahead)ahead=d;}}
+    const carry=(zoneVal(t,e.x+dir*6,e.z*0.9)-here)*5+(ahead>8?0.9:ahead>4.5?0.35:-0.6)-(press?0.8:0);
+    if(best&&bs>carry+0.1){passTo(e,best,bk,bpt);return;}
   }
   // dribble steering
-  let sx=dir,sz=-e.z*0.025;
+  let sx=dir,sz=lx>0.55&&Math.abs(e.z)>HW*0.4?0:-e.z*0.025;
   for(const o of oppOf(t).players){const dx=e.x-o.x,dz=e.z-o.z,d=hyp(dx,dz);if(d<7&&d>0.01){const w=(7-d)/7*1.6;sx+=dx/d*w*0.6;sz+=dz/d*w;}}
   if(Math.abs(e.z)>HW-4)sz-=Math.sign(e.z)*1.5;
   const sl=hyp(sx,sz)||1;
