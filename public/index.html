@@ -115,13 +115,14 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 .tp-lines::before{content:"";position:absolute;left:0;top:20%;width:15.7%;height:60%;border:2px solid rgba(255,255,255,.5);border-left:0}
 .tp-lines::after{content:"";position:absolute;left:50%;top:50%;width:17%;aspect-ratio:1;border:2px solid rgba(255,255,255,.5);border-radius:50%;transform:translate(-50%,-50%)}
 .tp{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:1px;padding:0;border:0;background:none;cursor:pointer;min-width:44px}
-.tp b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#c3162f;background:var(--kit,#c3162f);color:#fff;font-family:var(--f-num);font-weight:800;font-size:15px;box-shadow:0 0 0 2px rgba(255,255,255,.85),0 3px 8px rgba(0,0,0,.4)}
+.tp b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#c3162f;background:var(--kit,#c3162f);color:var(--num,#fff);font-family:var(--f-num);font-weight:800;font-size:15px;box-shadow:0 0 0 2px rgba(255,255,255,.85),0 3px 8px rgba(0,0,0,.4)}
 .tp span{font-size:10px;font-weight:700;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9)}
 .tp em{font-style:normal;font-family:var(--f-num);font-size:10px;letter-spacing:.08em;color:#e8ffe8;opacity:.85;text-shadow:0 1px 3px rgba(0,0,0,.9)}
 .tp.mis b{box-shadow:0 0 0 2px #ff9f1c,0 3px 8px rgba(0,0,0,.4)}
 .tp.sel b{box-shadow:0 0 0 3px var(--flood),0 0 16px rgba(255,212,71,.8)}
 .tac-side{display:grid;gap:10px;background:rgba(8,13,23,.75);border:1px solid var(--rule);border-radius:10px;padding:14px;min-width:0}
 .tac-side h2{margin:0;font-family:var(--f-num);font-weight:800;font-style:italic;font-size:26px;letter-spacing:.04em;color:var(--flood)}
+.tac-club{margin:-6px 0 0;font-weight:700;font-size:14px}
 .tac-row{display:grid;gap:5px}
 .tac-row>label{font-size:12px;color:var(--mute);font-weight:700}
 .tac-info{margin:0;font-size:12px;line-height:1.5;color:var(--ink);min-height:3em}
@@ -134,6 +135,63 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 .ol-join button{text-align:center}
 .ol-code{margin:0;text-align:center;font-family:var(--f-num);font-weight:800;font-size:40px;letter-spacing:.25em;color:var(--flood)}
 .ol-code:empty{display:none}
+.hub{display:grid;grid-template-columns:minmax(250px,0.8fr) minmax(0,1.2fr);gap:clamp(12px,2.6vw,28px);max-width:1040px;width:100%;height:100%;margin:0 auto;padding:12px 2px;box-sizing:border-box;min-height:0}
+.hub-l{display:grid;gap:clamp(6px,1.5vh,11px);align-content:center;min-width:0;min-height:0;overflow:auto;scrollbar-width:none}
+.hub-l::-webkit-scrollbar{display:none}
+.brand.sm .a{font-size:clamp(20px,4.6vh,36px)}
+.brand.sm .b{font-size:clamp(26px,6.4vh,50px)}
+.hub-season{margin:0;font-family:var(--f-num);font-weight:700;letter-spacing:.1em;color:var(--flood);font-size:14px}
+.hub-club{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:rgba(8,13,23,.72);border:1px solid var(--rule);min-width:0}
+.hub-club div{min-width:0}
+.hub-club b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-club span{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.hub-next{display:grid;gap:4px;padding:7px 10px;border-radius:10px;background:rgba(255,212,71,.07);border:1px solid rgba(255,212,71,.35);min-width:0}
+.hn-k{font-size:11px;color:var(--mute);font-weight:700}
+.hn-m{display:flex;align-items:center;gap:7px;font-size:14px;min-width:0}
+.hn-m b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hn-m i{font-style:normal;color:var(--mute);font-family:var(--f-num);font-size:13px;flex:0 0 auto}
+.hn-m .crest{flex:0 0 auto}
+.hub .go{margin-top:0;padding:10px 18px;font-size:16px}
+.hub .go[hidden]{display:none}
+.hub .go-row{gap:8px}
+.hub .row{grid-template-columns:56px minmax(0,1fr);gap:8px}
+.hub .seg button{min-width:0;padding:6px 4px;font-size:12px}
+.hub-more{display:flex;gap:6px}
+.hub-more button{flex:1 1 0;padding:7px 4px;border-radius:7px;border:1px solid var(--rule);background:var(--glass-hi);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.hub-r{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;min-width:0;background:rgba(8,13,23,.78);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.hub-tabs{display:flex;border-bottom:1px solid var(--rule)}
+.hub-tabs button{flex:1;padding:9px 6px;background:none;border:0;border-bottom:2px solid transparent;font-size:13px;font-weight:700;color:var(--mute);cursor:pointer}
+.hub-tabs button[aria-pressed="true"]{color:var(--flood);border-bottom-color:var(--flood)}
+.hub-body{position:relative;isolation:isolate;overflow:auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.lt{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.lt th{position:sticky;top:0;z-index:1;background:#0c121e;color:var(--mute);font-weight:700;font-size:11px;padding:6px 4px;text-align:center}
+.lt td{padding:4px;text-align:center;border-top:1px solid var(--rule);white-space:nowrap}
+.lt .l{text-align:left}
+.lt td.l{max-width:0;width:44%;overflow:hidden;text-overflow:ellipsis}
+.lt .crest{display:inline-grid;vertical-align:middle;width:15px;height:17px;font-size:0;margin-right:6px}
+.lt tr.top td:first-child{box-shadow:inset 3px 0 0 #3aa0ff}
+.lt tr.rel td:first-child{box-shadow:inset 3px 0 0 #ff4d5e}
+.lt tr.me td{background:rgba(255,212,71,.13);color:var(--flood)}
+.lt-key{margin:0;padding:6px 10px 8px;font-size:11px;color:var(--mute);display:flex;gap:12px}
+.lt-key i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+.fx-h{margin:0;padding:8px 10px 4px;font-size:11px;color:var(--mute);font-weight:700}
+.fx{display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:6px;padding:5px 10px;font-size:12px;border-top:1px solid var(--rule)}
+.fx span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx .r{text-align:right}
+.fx b{text-align:center;font-family:var(--f-num);font-size:14px;font-variant-numeric:tabular-nums}
+.fx.me{background:rgba(255,212,71,.12)}
+.crest.big{width:38px;height:44px;font-size:12px}
+#pick,#friendly{background:rgba(4,7,13,.9)}
+.pick-card{width:min(780px,100%)}
+.card .pick-sub,.card .pick-warn{text-align:left}
+.pick-warn{color:#ff9f1c}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px}
+.card .pick-grid .club{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:8px;row-gap:1px;width:auto;padding:6px 8px;justify-items:start;align-items:center;border:1px solid var(--rule)}
+.pick-grid .club .crest{grid-row:1/3;width:24px;height:28px;font-size:8px}
+.pick-grid .club span{font-family:var(--f-ui);font-size:12px;letter-spacing:0;line-height:1.15;max-width:100%;word-break:keep-all}
+.fr{width:min(380px,100%)}
+.card label{display:grid;gap:4px;font-size:12px;color:var(--mute);font-weight:700}
+.card select{width:100%;padding:9px 10px;border-radius:7px;border:1px solid var(--rule);background:#141b28;color:var(--ink);font-size:14px;font-family:var(--f-ui)}
 .rec{margin:12px 0 0;font-family:var(--f-num);font-size:15px;letter-spacing:.06em;color:var(--mute);font-variant-numeric:tabular-nums}
 .help{margin:6px 0 0;color:var(--mute);font-size:12px;line-height:1.55;max-width:34ch}
 .m-right{display:grid;gap:clamp(8px,2.2vh,14px);min-width:0;background:rgba(8,13,23,.6);border:1px solid var(--rule);border-radius:10px;padding:clamp(10px,2.4vh,16px)}
@@ -179,12 +237,19 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 #loading{position:absolute;inset:0;display:grid;place-items:center;background:var(--night);font-family:var(--f-num);letter-spacing:.2em;color:var(--mute);font-size:14px}
 @media (max-height:420px){
   .m-wrap{grid-template-columns:minmax(200px,0.85fr) minmax(0,1.35fr);padding-block:8px}
+  .hub{padding-block:8px}
+  .brand.sm{display:none}
+  .hub .go{padding:9px 14px;font-size:15px}
+  .pick-grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
+  .card .pick-grid .club{padding:4px 7px}
   .help{display:none}
   .club{width:56px;padding:4px 2px}
   .seg button{padding:6px 4px}
 }
 @media (max-width:640px) and (orientation:portrait){
   .m-wrap{grid-template-columns:1fr}
+  .hub{grid-template-columns:1fr;height:auto}
+  .hub-r{height:60vh}
 }
 @media (prefers-reduced-motion:reduce){
   #banner{transition:none}
@@ -231,28 +296,50 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
   </div>
 
   <section id="menu" class="ov">
-    <div class="m-wrap">
-      <div class="m-left">
-        <div class="brand"><span class="a">FLOODLIGHT</span><span class="b">ELEVEN</span></div>
-        <p class="tagline">야간 리그 · 11 대 11 솔로 매치</p>
-        <div class="go-row"><button class="go" id="goBtn"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg>킥오프</button><button class="go alt" id="olBtn">1대1 온라인</button></div>
-        <p class="rec" id="rec">전적 0승 0무 0패</p>
-        <p class="help" id="help">왼쪽 조이스틱으로 이동, 오른쪽 버튼으로 패스·스루·슛·질주. 슛은 길게 눌러 파워를 모읍니다. 수비 때는 패스가 선수 교체(흰 화살표 선수로), 슛이 태클로 바뀝니다.</p>
-      </div>
-      <div class="m-right">
-        <div class="row"><label>내 팀</label><div class="clubs" id="clubH"></div></div>
-        <div class="row"><label>상대 팀</label><div class="clubs" id="clubA"></div></div>
+    <div class="hub">
+      <div class="hub-l">
+        <div class="brand sm"><span class="a">FLOODLIGHT</span><span class="b">ELEVEN</span></div>
+        <p class="hub-season" id="hubSeason">2025-26 시즌</p>
+        <div class="hub-club" id="hubClub"></div>
+        <div class="hub-next" id="hubNext"></div>
+        <div class="go-row"><button class="go" id="goBtn"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg>경기 시작</button><button class="go alt" id="simBtn">결과만 보기</button></div>
         <div class="row"><label>난이도</label><div class="seg" id="segD"></div></div>
         <div class="row"><label>경기 시간</label><div class="seg" id="segL"></div></div>
-        <p class="vs" id="vsLine"></p>
+        <div class="hub-more"><button id="friendBtn">친선 경기</button><button id="olBtn">1대1 온라인</button><button id="newSeasonBtn">새 시즌</button></div>
       </div>
+      <div class="hub-r">
+        <div class="hub-tabs" id="hubTabs"><button data-tab="table">순위</button><button data-tab="fix">일정·결과</button><button data-tab="sc">득점</button></div>
+        <div class="hub-body" id="hubBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pick" class="ov" hidden>
+    <div class="card pick-card">
+      <h2>PREMIER LEAGUE</h2>
+      <p class="r-msg pick-sub">시즌을 함께할 클럽을 고르세요. 38라운드를 치르고 순위표에서 우승을 다퉈요.</p>
+      <p class="r-msg pick-warn" id="pickNote" hidden>새 클럽을 고르면 지금 시즌 기록은 지워져요.</p>
+      <div class="pick-grid" id="pickGrid"></div>
+      <button id="pickBack" hidden>돌아가기</button>
+    </div>
+  </section>
+
+  <section id="friendly" class="ov" hidden>
+    <div class="card fr">
+      <h2>FRIENDLY</h2>
+      <p class="r-msg">리그 기록과 상관없이 아무 팀끼리나 붙어 보세요.</p>
+      <label>내 팀<select id="frH"></select></label>
+      <label>상대 팀<select id="frA"></select></label>
+      <p class="r-msg" id="frMsg"></p>
+      <div class="r-b"><button id="frBack">돌아가기</button><button class="pri" id="frGo">다음</button></div>
     </div>
   </section>
 
   <section id="online" class="ov" hidden>
     <div class="card ol">
       <h2>1 VS 1</h2>
-      <p class="r-msg ol-sub">내 팀 <b id="olTeam">-</b> · 상대와 11대11로 겨뤄요. 조종하지 않는 선수는 AI가 움직여요.</p>
+      <p class="r-msg ol-sub">상대와 11대11로 겨뤄요. 조종하지 않는 선수는 AI가 움직여요.</p>
+      <label class="ol-club">내 팀<select id="olClub"></select></label>
       <button class="pri" id="olQuick">빠른 매칭</button>
       <button id="olCreate">방 만들기</button>
       <button id="olTac">전술: 4-3-3 · 균형</button>
@@ -268,6 +355,7 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
       <div class="tac-pitch" id="tacPitch"></div>
       <div class="tac-side">
         <h2>TACTICS</h2>
+        <p class="tac-club" id="tacTitle"></p>
         <div class="tac-row"><label>포메이션</label><div class="seg" id="segF"></div></div>
         <div class="tac-row"><label>운영</label><div class="seg" id="segM"></div></div>
         <p class="tac-info" id="tacInfo"></p>
@@ -330,13 +418,57 @@ const ACT_LIM=[0,0.55,1.0,1.62,2.0,99,0.6,99,99,0.38,0.3,0.55,0.55,0.6,1.7];
 const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
 
+// Premier League 2025-26 clubs. Starting XIs are listed in the order of each club's formation slots
+// (keeper, defenders left to right, midfield, attack); [name, shirt number, role, overall].
+// Squads reflect the summer 2025 transfer window as best known and may be out of date: edit here.
 const CLUBS=[
- {id:'SNH',name:'서울 나이트호크스',shirt:'#c3162f',shorts:'#15161c',socks:'#c3162f',num:'#ffffff',pat:'pin',pc:'#7c0d1e',sp:'NOVA',spc:'#ffffff',gk:'#a6e22e',rating:85},
- {id:'BMF',name:'부산 마린 FC',shirt:'#1b57cf',shorts:'#f4f6fb',socks:'#1b57cf',num:'#ffffff',pat:'hoop',pc:'#2f6fe6',sp:'KORU AIR',spc:'#ffffff',gk:'#f39c1a',rating:83},
- {id:'IHC',name:'인천 하버시티',shirt:'#eceee9',shorts:'#13294b',socks:'#eceee9',num:'#13294b',pat:'sash',pc:'#13294b',sp:'PIXEL',spc:'#13294b',gk:'#e0457b',rating:81},
- {id:'DJV',name:'대전 볼츠',shirt:'#f2c21c',shorts:'#141414',socks:'#141414',num:'#141414',pat:'bolt',pc:'#141414',sp:'ORBIT',spc:'#141414',gk:'#7d4ee0',rating:80},
- {id:'GJE',name:'광주 에메랄드',shirt:'#0b9480',shorts:'#ffffff',socks:'#0b9480',num:'#ffffff',pat:'stripe',pc:'#08806e',sp:'SOLACE',spc:'#ffffff',gk:'#ff6f3c',rating:79},
+ {id:'ARS',name:'아스널',form:'4-3-3',shirt:'#db0007',pc:'#ffffff',pat:'sleeves',shorts:'#ffffff',socks:'#ffffff',num:'#ffffff',gk:'#f2c94c',
+  xi:[['라야',1,'GK',86],['칼라피오리',33,'DF',83],['가브리엘',6,'DF',87],['살리바',2,'DF',88],['팀버',12,'DF',84],['라이스',41,'MF',87],['수비멘디',36,'MF',86],['외데고르',8,'MF',87],['마르티넬리',11,'FW',83],['요케레스',14,'FW',85],['사카',7,'FW',88]]},
+ {id:'AVL',name:'아스톤 빌라',form:'4-2-3-1',shirt:'#670e36',pc:'#95bfe5',pat:'sleeves',shorts:'#ffffff',socks:'#670e36',num:'#ffffff',gk:'#2bb3c0',
+  xi:[['E.마르티네스',23,'GK',85],['디뉴',12,'DF',79],['파우 토레스',14,'DF',81],['콘사',4,'DF',82],['캐시',2,'DF',79],['카마라',44,'MF',81],['틸레만스',8,'MF',82],['로저스',27,'MF',83],['맥긴',7,'FW',80],['왓킨스',11,'FW',83],['말런',17,'FW',80]]},
+ {id:'BOU',name:'본머스',form:'4-2-3-1',shirt:'#da291c',pc:'#111111',pat:'stripe',shorts:'#111111',socks:'#111111',num:'#ffffff',gk:'#9be15d',
+  xi:[['페트로비치',1,'GK',79],['트뤼페르',3,'DF',77],['세네시',5,'DF',79],['디아키테',18,'DF',76],['A.스미스',15,'DF',74],['애덤스',12,'MF',78],['A.스콧',8,'MF',79],['타베르니에',16,'MF',79],['클라위버르트',19,'FW',79],['에바니우송',9,'FW',79],['세메뇨',24,'FW',83]]},
+ {id:'BRE',name:'브렌트퍼드',form:'4-2-3-1',shirt:'#e30613',pc:'#ffffff',pat:'stripe',shorts:'#111111',socks:'#e30613',num:'#111111',gk:'#7d4ee0',
+  xi:[['켈러허',1,'GK',79],['히키',2,'DF',76],['판덴베르흐',4,'DF',78],['콜린스',22,'DF',77],['카요데',33,'DF',77],['헨더슨',6,'MF',77],['야르몰류크',18,'MF',75],['담스고르',24,'MF',79],['샤데',7,'FW',78],['이고르 티아구',9,'FW',79],['와타라',19,'FW',77]]},
+ {id:'BHA',name:'브라이턴',form:'4-2-3-1',shirt:'#0057b8',pc:'#ffffff',pat:'stripe',shorts:'#ffffff',socks:'#0057b8',num:'#0057b8',gk:'#f39c1a',
+  xi:[['페르브뤼헌',1,'GK',79],['더카위퍼르',25,'DF',77],['덩크',5,'DF',78],['판헤케',29,'DF',80],['벨트만',34,'DF',75],['발레바',20,'MF',82],['힌셜우드',13,'MF',77],['뤼테르',14,'MF',78],['미토마',22,'FW',81],['웰벡',18,'FW',78],['민테',17,'FW',79]]},
+ {id:'BUR',name:'번리',form:'4-2-3-1',shirt:'#6c1d45',pc:'#99d6ea',pat:'sleeves',shorts:'#ffffff',socks:'#6c1d45',num:'#ffffff',gk:'#2bd66b',
+  xi:[['두브라우카',1,'GK',77],['하트먼',3,'DF',73],['에스테브',5,'DF',75],['에크달',18,'DF',74],['워커',2,'DF',79],['컬런',24,'MF',75],['우고추쿠',8,'MF',74],['플레밍',19,'MF',74],['앤서니',11,'FW',75],['포스터',9,'FW',73],['에드워즈',10,'FW',72]]},
+ {id:'CHE',name:'첼시',form:'4-2-3-1',shirt:'#034694',pc:'#d1d3d4',pat:'',shorts:'#034694',socks:'#ffffff',num:'#ffffff',gk:'#ff6f3c',
+  xi:[['산체스',1,'GK',80],['쿠쿠레야',3,'DF',83],['찰로바',23,'DF',80],['포파나',29,'DF',80],['제임스',24,'DF',84],['카이세도',25,'MF',87],['엔소',8,'MF',85],['파머',10,'MF',87],['네투',7,'FW',82],['주앙 페드루',20,'FW',82],['이스테방',41,'FW',80]]},
+ {id:'CRY',name:'크리스털 팰리스',form:'3-4-3',shirt:'#1b458f',pc:'#c4122e',pat:'stripe',shorts:'#1b458f',socks:'#1b458f',num:'#ffffff',gk:'#f2c94c',
+  xi:[['헨더슨',1,'GK',82],['리처즈',26,'DF',78],['게히',6,'DF',83],['라크루아',5,'DF',82],['미첼',3,'MF',79],['워튼',20,'MF',81],['가마다',18,'MF',79],['무뇨스',2,'MF',81],['피노',10,'FW',79],['마테타',14,'FW',82],['사르',7,'FW',81]]},
+ {id:'EVE',name:'에버턴',form:'4-2-3-1',shirt:'#003399',pc:'#ffffff',pat:'',shorts:'#ffffff',socks:'#ffffff',num:'#ffffff',gk:'#e0457b',
+  xi:[['픽퍼드',1,'GK',83],['미콜렌코',16,'DF',77],['브랜스웨이트',32,'DF',81],['타코우스키',6,'DF',80],['오브라이언',15,'DF',77],['게예',27,'MF',78],['가너',37,'MF',77],['듀스버리홀',22,'MF',79],['그릴리시',18,'FW',81],['배리',11,'FW',77],['은디아예',10,'FW',81]]},
+ {id:'FUL',name:'풀럼',form:'4-2-3-1',shirt:'#f5f5f5',pc:'#111111',pat:'',shorts:'#111111',socks:'#f5f5f5',num:'#111111',gk:'#2bb3c0',
+  xi:[['레노',1,'GK',82],['로빈슨',33,'DF',79],['배시',3,'DF',78],['안데르센',5,'DF',80],['테테',2,'DF',78],['베리',16,'MF',79],['루키치',20,'MF',77],['스미스 로',32,'MF',79],['이워비',17,'FW',79],['히메네스',7,'FW',79],['윌슨',8,'FW',77]]},
+ {id:'LEE',name:'리즈 유나이티드',form:'4-3-3',shirt:'#f7f7f2',pc:'#1d428a',pat:'',shorts:'#f7f7f2',socks:'#f7f7f2',num:'#1d428a',gk:'#9be15d',
+  xi:[['페리',1,'GK',77],['구드문드손',3,'DF',75],['로던',6,'DF',75],['스트라위크',5,'DF',76],['보글',2,'DF',74],['슈타흐',18,'MF',77],['암파두',4,'MF',76],['다나카',22,'MF',77],['오카포르',19,'FW',77],['캘버트르윈',9,'FW',77],['에런슨',11,'FW',76]]},
+ {id:'LIV',name:'리버풀',form:'4-2-3-1',shirt:'#c8102e',pc:'#f6eb61',pat:'',shorts:'#c8102e',socks:'#c8102e',num:'#ffffff',gk:'#2bd66b',
+  xi:[['알리송',1,'GK',88],['케르케즈',6,'DF',81],['반다이크',4,'DF',88],['코나테',5,'DF',85],['프림퐁',30,'DF',83],['흐라번베르흐',38,'MF',85],['맥알리스터',10,'MF',86],['비르츠',7,'MF',87],['각포',18,'FW',84],['이사크',9,'FW',88],['살라',11,'FW',89]]},
+ {id:'MCI',name:'맨체스터 시티',form:'4-2-3-1',shirt:'#6cabdd',pc:'#1c2c5b',pat:'',shorts:'#ffffff',socks:'#6cabdd',num:'#1c2c5b',gk:'#f39c1a',
+  xi:[['돈나룸마',25,'GK',88],['오라일리',33,'DF',77],['그바르디올',24,'DF',85],['디아스',3,'DF',86],['누네스',27,'DF',80],['로드리',16,'MF',89],['레인더르스',4,'MF',84],['셰르키',10,'MF',82],['도쿠',11,'FW',83],['홀란',9,'FW',91],['포든',47,'FW',84]]},
+ {id:'MUN',name:'맨체스터 유나이티드',form:'3-4-3',shirt:'#da291c',pc:'#111111',pat:'',shorts:'#ffffff',socks:'#111111',num:'#ffffff',gk:'#7d4ee0',
+  xi:[['라먼스',31,'GK',77],['요로',15,'DF',79],['더리흐트',4,'DF',81],['쇼',23,'DF',78],['도르구',13,'MF',76],['카세미루',18,'MF',79],['브루누 페르난드스',8,'MF',86],['달로트',2,'MF',79],['쿠냐',10,'FW',82],['셰슈코',30,'FW',80],['음뵈모',19,'FW',83]]},
+ {id:'NEW',name:'뉴캐슬',form:'4-3-3',shirt:'#f5f5f5',pc:'#111111',pat:'stripe',shorts:'#111111',socks:'#111111',num:'#ffffff',gk:'#9be15d',
+  xi:[['포프',22,'GK',82],['홀',3,'DF',79],['번',33,'DF',80],['티아우',12,'DF',80],['트리피어',2,'DF',79],['토날리',8,'MF',85],['기마랑이스',39,'MF',86],['조엘린통',7,'MF',81],['고든',10,'FW',84],['볼테마데',27,'FW',81],['엘랑가',20,'FW',80]]},
+ {id:'NFO',name:'노팅엄 포레스트',form:'4-2-3-1',shirt:'#e53233',pc:'#ffffff',pat:'',shorts:'#ffffff',socks:'#e53233',num:'#ffffff',gk:'#2bb3c0',
+  xi:[['셀스',26,'GK',81],['N.윌리엄스',3,'DF',78],['무리요',5,'DF',82],['밀렌코비치',31,'DF',81],['아이나',34,'DF',77],['상가레',6,'MF',78],['앤더슨',8,'MF',81],['깁스화이트',10,'MF',83],['허드슨오도이',7,'FW',78],['우드',11,'FW',80],['은도예',14,'FW',79]]},
+ {id:'SUN',name:'선덜랜드',form:'4-2-3-1',shirt:'#eb172b',pc:'#ffffff',pat:'stripe',shorts:'#111111',socks:'#eb172b',num:'#111111',gk:'#f2c94c',
+  xi:[['루프스',22,'GK',76],['레이니우두',17,'DF',77],['밸러드',5,'DF',75],['무키엘레',20,'DF',77],['흄',32,'DF',74],['자카',34,'MF',82],['사디키',27,'MF',76],['르페',28,'MF',77],['탈비',7,'FW',75],['이시도르',18,'FW',77],['아딩그라',24,'FW',76]]},
+ {id:'TOT',name:'토트넘',form:'4-2-3-1',shirt:'#f7f7f7',pc:'#132257',pat:'',shorts:'#132257',socks:'#f7f7f7',num:'#132257',gk:'#e0457b',
+  xi:[['비카리오',1,'GK',83],['우도기',13,'DF',79],['판더벤',37,'DF',84],['로메로',17,'DF',84],['포로',23,'DF',82],['팔리냐',6,'MF',82],['베리발',15,'MF',78],['시몬스',7,'MF',83],['존슨',22,'FW',80],['히샤를리송',9,'FW',77],['쿠두스',20,'FW',82]]},
+ {id:'WHU',name:'웨스트햄',form:'4-2-3-1',shirt:'#7a263a',pc:'#1bb1e7',pat:'sleeves',shorts:'#ffffff',socks:'#ffffff',num:'#ffffff',gk:'#9be15d',
+  xi:[['헤르만센',1,'GK',77],['디우프',12,'DF',77],['킬먼',3,'DF',78],['토디보',25,'DF',79],['완비사카',29,'DF',78],['소우첵',28,'MF',79],['마테우스 페르난드스',18,'MF',77],['파케타',10,'MF',82],['서머빌',7,'FW',79],['윌슨',9,'FW',76],['보언',20,'FW',82]]},
+ {id:'WOL',name:'울버햄튼',form:'3-4-3',shirt:'#fdb913',pc:'#111111',pat:'',shorts:'#111111',socks:'#fdb913',num:'#111111',gk:'#2bb3c0',
+  xi:[['조제 사',1,'GK',79],['아그바두',18,'DF',76],['S.부에노',4,'DF',75],['모스케라',15,'DF',76],['H.부에노',3,'MF',75],['안드레',7,'MF',78],['주앙 고메스',8,'MF',80],['도허티',2,'MF',74],['황희찬',11,'FW',76],['스트란 라르센',9,'FW',79],['벨가르드',27,'FW',76]]},
 ];
+for(const c of CLUBS){c.rating=Math.round(c.xi.reduce((a,p)=>a+p[3],0)/11);c.sp='';c.spc='#ffffff';}
+const hexRGB=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const lum=h=>{const [r,g,b]=hexRGB(h);return(0.299*r+0.587*g+0.114*b)/255;};
+// second kit: white for dark home shirts, charcoal for light ones
+const awayKit=c=>lum(c.shirt)>0.55?{shirt:'#232a37',pc:'#3d4658',pat:'',shorts:'#232a37',socks:'#232a37',num:'#ffffff'}:{shirt:'#f3f3ef',pc:c.shirt,pat:'',shorts:'#f3f3ef',socks:'#f3f3ef',num:c.shirt};
+const kitClash=(a,b)=>{const x=hexRGB(a.shirt),y=hexRGB(b.shirt);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2])<130||(lum(a.shirt)>0.8&&lum(b.shirt)>0.8);};
 const DIFFS=[
  {name:'아마추어',spd:0.9,react:0.42,passErr:0.085,shoot:1.4,tackle:0.7,gk:0.7,dec:0.62,press2:false},
  {name:'프로',spd:0.97,react:0.3,passErr:0.055,shoot:1.0,tackle:1.25,gk:0.84,dec:0.42,press2:true},
@@ -358,6 +490,8 @@ const FORMS={
    {p:[-0.45,-0.16],r:'MF',l:'CDM'},{p:[-0.45,0.16],r:'MF',l:'CDM'},{p:[-0.2,0],r:'MF',l:'CAM'},{p:[-0.1,-0.58],r:'FW',l:'LW'},{p:[0.07,0],r:'FW',l:'ST'},{p:[-0.1,0.58],r:'FW',l:'RW'}],
  '3-5-2':[GKS,{p:[-0.68,-0.35],r:'DF',l:'CB'},{p:[-0.72,0],r:'DF',l:'CB'},{p:[-0.68,0.35],r:'DF',l:'CB'},{p:[-0.35,-0.7],r:'MF',l:'LWB'},
    {p:[-0.38,-0.2],r:'MF',l:'CM'},{p:[-0.48,0],r:'MF',l:'CDM'},{p:[-0.38,0.2],r:'MF',l:'CM'},{p:[-0.35,0.7],r:'MF',l:'RWB'},{p:[0.05,-0.12],r:'FW',l:'ST'},{p:[0.02,0.14],r:'FW',l:'ST'}],
+ '3-4-3':[GKS,{p:[-0.68,-0.35],r:'DF',l:'CB'},{p:[-0.72,0],r:'DF',l:'CB'},{p:[-0.68,0.35],r:'DF',l:'CB'},{p:[-0.36,-0.7],r:'MF',l:'LWB'},
+   {p:[-0.42,-0.16],r:'MF',l:'CM'},{p:[-0.42,0.16],r:'MF',l:'CM'},{p:[-0.36,0.7],r:'MF',l:'RWB'},{p:[-0.06,-0.5],r:'FW',l:'LW'},{p:[0.06,0],r:'FW',l:'ST'},{p:[-0.06,0.5],r:'FW',l:'RW'}],
  '5-3-2':[GKS,{p:[-0.56,-0.68],r:'DF',l:'LWB'},{p:[-0.7,-0.3],r:'DF',l:'CB'},{p:[-0.73,0],r:'DF',l:'CB'},{p:[-0.7,0.3],r:'DF',l:'CB'},
    {p:[-0.56,0.68],r:'DF',l:'RWB'},{p:[-0.42,0],r:'MF',l:'CDM'},{p:[-0.34,0.3],r:'MF',l:'CM'},{p:[-0.34,-0.3],r:'MF',l:'CM'},{p:[0.04,-0.12],r:'FW',l:'ST'},{p:[0.01,0.14],r:'FW',l:'ST'}],
 };
@@ -954,7 +1088,7 @@ function applyPose(e,dt){
 // shorts, socks, boots, skin and hair from the bind-pose position, so the kit follows the body whatever it does.
 const SKIN={ready:false,scene:null,clips:{}};
 const SKIN_HEX=['#f0c8a4','#e1ae84','#c78c62','#a06a45','#6b4430'],HAIR_HEX=['#17110d','#2b1d13','#4a3020','#8a6233','#cfb27a','#0d0d0d'],BOOT_HEX=['#111111','#f4f4f4','#ff3b5c','#27c8ff','#c8ff2b','#ff9f1c'];
-const KIT_PAT={pin:1,hoop:2,stripe:3,sash:4,bolt:5};
+const KIT_PAT={pin:1,hoop:2,stripe:3,sash:4,bolt:5,sleeves:6};
 const texCache={};
 function labelTex(key,w,h,draw){if(texCache[key])return texCache[key];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return texCache[key]=t;}
 const numTex=(n,color)=>labelTex('n'+n+color,128,128,(g,w,h)=>{g.clearRect(0,0,w,h);if(n===''||n==null)return;g.fillStyle=color;g.font='800 104px "Saira Condensed","Arial Narrow",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(n),w/2,h/2+6);});
@@ -977,7 +1111,7 @@ else if(p.y<0.47){col=uSocks;rough=0.85;if(p.y>0.43)col=mix(uSocks,uPat,0.55);}
 else if(p.y<0.615){col=uSkin;}
 else if(p.y<1.0&&!arm){col=uShorts;rough=0.7;if(p.y<0.64)col*=0.8;if(ax>0.112&&ax<0.124)col=mix(col,uPat,0.6);}
 else if(arm){
-  if(ax<0.34||(uLong>0.5&&ax<0.69)){col=uShirt;rough=0.75;if(ax>0.31&&ax<0.34&&uLong<0.5)col=mix(uShirt,uPat,0.75);}
+  if(ax<0.34||(uLong>0.5&&ax<0.69)){col=uPatK>5.5&&uLong<0.5?uPat:uShirt;rough=0.75;if(ax>0.31&&ax<0.34&&uLong<0.5)col=mix(col,uPatK>5.5?uShirt:uPat,0.75);}
   else col=ax>0.69&&uLong>0.5?uGlove:uSkin;}
 else if(p.y<1.505){
   col=uShirt;rough=0.76;
@@ -985,7 +1119,7 @@ else if(p.y<1.505){
   if(uPatK>1.5&&uPatK<2.5&&fract(p.y*4.2)<0.36)col=uPat;
   if(uPatK>2.5&&uPatK<3.5&&fract((p.x+0.04)/0.16)<0.5)col=uPat;
   if(uPatK>3.5&&uPatK<4.5&&abs(p.x*0.9+(p.y-1.24))<0.05&&p.z>0.0)col=uPat;
-  if(uPatK>4.5&&abs(p.y-1.3-ax*0.6)<0.035&&p.z>0.0)col=uPat;
+  if(uPatK>4.5&&uPatK<5.5&&abs(p.y-1.3-ax*0.6)<0.035&&p.z>0.0)col=uPat;
   if(p.y>1.475)col=mix(col,uPat,0.85);
   if(p.z>0.07&&ax<0.13&&p.y>1.2&&p.y<1.34){vec4 s=texture2D(uSpTex,vec2((p.x+0.13)/0.26,(p.y-1.2)/0.14));col=mix(col,s.rgb,s.a);}
   if(p.z<-0.06&&ax<0.14&&p.y>1.1&&p.y<1.42){vec4 s=texture2D(uNumTex,vec2((0.14-p.x)/0.28,(p.y-1.1)/0.32));col=mix(col,s.rgb,s.a);}
@@ -1091,24 +1225,27 @@ function applySkinned(e,dt){
 
 /* ================= game state ================= */
 const G={tac:[],oppTac:null,state:'boot',t:0,clock:0,half:1,score:[0,0],teams:[],ents:[],ref:null,ctrl:null,sp:null,timer:0,queue:null,lock:null,lastManual:-9,switchFx:-9,
-  set:{home:0,away:1,diff:1,len:1,cam:0,stick:0,form:'4-3-3',ment:0,order:null},firstKick:0,kickTeam:0,stats:null,paused:false,lastSwitch:0,goal:null,introT:0,menuT:0,sound:true,portraitOK:false};
+  set:{home:0,away:1,diff:1,len:1,cam:0,stick:0,tacs:{}},mode:'friendly',venue:0,goalLog:[],lgRes:null,firstKick:0,kickTeam:0,stats:null,paused:false,lastSwitch:0,goal:null,introT:0,menuT:0,sound:true,portraitOK:false};
 const B={x:0,y:BR,z:0,vx:0,vy:0,vz:0,spin:0,owner:null,held:false,last:null,lastTeam:-1,shot:null,kicker:null,kickT:-9,target:null};
 let D=DIFFS[1];
 const TRAJ=new Float32Array(61*3);
 const RS={x:0,y:0,z:0,vx:0,vy:0,vz:0,spin:0};
 
 function newStats(){const z=()=>({shots:0,onT:0,pass:0,passOk:0,poss:0,tack:0,fouls:0,yel:0,red:0});return[z(),z()];}
-// a club's squad: names, numbers, looks and attributes come from the club seed, so both online players build the same squad
+// a club's squad: the real starting XI (names, numbers, overall) with looks seeded from the club, so both online players build the same squad
 function makeRoster(ci){
-  const club=CLUBS[ci],rr=seeded(1000+ci*97),rate=club.rating/100,j=()=>rr()*0.12-0.06;
-  return FORM.map((f,k)=>{const r=f.r;return{k,nat:r,num:f.n,name:makeName(rr),
-    st:{pace:clamp(rate+j()+(r==='FW'?0.04:r==='DF'?-0.03:0),0.6,0.99),shoot:clamp((r==='FW'?0.88:r==='MF'?0.76:0.55)*rate/0.82+j()*0.8,0.4,0.98),
-      pass:clamp((r==='MF'?0.9:r==='FW'?0.78:0.72)*rate/0.82+j()*0.8,0.5,0.98),tackle:clamp((r==='DF'?0.88:r==='MF'?0.74:0.45)*rate/0.82+j()*0.8,0.3,0.98),
-      drib:clamp((r==='FW'?0.86:r==='MF'?0.8:0.6)*rate/0.82+j()*0.8,0.4,0.98)},
-    phase:rr()*TAU,skin:Math.floor(rr()*SKINS.length),hair:Math.floor(rr()*HAIRS.length),boot:Math.floor(rr()*BOOTS.length)};});
+  const club=CLUBS[ci],rr=seeded(1000+ci*97),slots=FORMS[club.form]||FORMS['4-3-3'];
+  return club.xi.map(([name,num,r,ovr],k)=>{const q=ovr/100,j=()=>rr()*0.06-0.03,wide=/^[LR]/.test(slots[k].l)?0.04:0;
+    return{k,nat:r,num,name,ovr,
+      st:{pace:clamp(q+j()+(r==='FW'?0.04:r==='DF'?-0.03:0)+wide,0.6,0.99),shoot:clamp((r==='FW'?0.88:r==='MF'?0.76:0.55)*q/0.82+j(),0.4,0.98),
+        pass:clamp((r==='MF'?0.9:r==='FW'?0.78:0.72)*q/0.82+j(),0.5,0.98),tackle:clamp((r==='DF'?0.88:r==='MF'?0.74:0.45)*q/0.82+j(),0.3,0.98),
+        drib:clamp((r==='FW'?0.86:r==='MF'?0.8:0.6)*q/0.82+j(),0.4,0.98)},
+      phase:rr()*TAU,skin:Math.floor(rr()*SKINS.length),hair:Math.floor(rr()*HAIRS.length),boot:Math.floor(rr()*BOOTS.length)};});
 }
-const myTac=()=>cleanTac({form:G.set.form,ment:G.set.ment,order:G.set.order});
-const cpuTac=()=>({form:FORM_KEYS[Math.floor(Math.random()*FORM_KEYS.length)],ment:[-1,0,0,1][Math.floor(Math.random()*4)],order:IDENT.slice()});
+const gkQ=o=>clamp(0.88+(o-82)*0.008,0.8,0.95);
+const myTac=()=>tacOf(G.set.home);
+// the CPU lines up in its usual shape; a stronger side goes for it, a weaker one sits deeper
+const cpuTac=()=>{const t=clubTac(G.set.away),d=CLUBS[G.set.away].rating-CLUBS[G.set.home].rating;t.ment=clamp((d>2?1:d<-2?-1:0)+(Math.random()<0.25?(Math.random()<0.5?-1:1):0),-1,1);return t;};
 
 function makeName(r){return SUR[Math.floor(r()*SUR.length)]+GIV[Math.floor(r()*GIV.length)];}
 function clearTeams(){
@@ -1119,9 +1256,11 @@ function clearTeams(){
 const KIT_MATS=[];
 function buildTeams(){
   clearTeams();
-  const ids=[G.set.home,G.set.away];
+  const ids=[G.set.home,G.set.away],vis=G.venue===1?0:1,kits=ids.map(ci=>CLUBS[ci]);
+  // the visitors change into their second kit when the colours are too close
+  if(kitClash(kits[1-vis],kits[vis]))kits[vis]=Object.assign({},kits[vis],awayKit(kits[vis]));
   for(let ti=0;ti<2;ti++){
-    const club=CLUBS[ids[ti]],mats=kitMats(club),rr=seeded(1000+ids[ti]*97);KIT_MATS.push(...Object.values(mats));
+    const club=kits[ti],mats=kitMats(club),rr=seeded(1000+ids[ti]*97);KIT_MATS.push(...Object.values(mats));
     const tac=cleanTac(G.tac[ti]),slots=FORMS[tac.form],roster=makeRoster(ids[ti]);
     const team={i:ti,club,dir:ti===0?1:-1,human:ti===0,players:[],chaser:null,recv:null,press1:null,press2:null,inPoss:false,lastLine:0,form:tac.form,ment:tac.ment};
     slots.forEach((f,k)=>{
@@ -1129,7 +1268,7 @@ function buildTeams(){
       const e={team,i:ti*11+k,k,role:f.r,isGK:gk,num:m.num,lbl:f.l,name:m.name,st,base:f.p,off:false,yellow:0,
         x:0,z:0,vx:0,vz:0,mx:0,mz:0,face:0,speed:0,phase:m.phase,act:0,actT:0,actD:0,
         sprint:false,cool:0,stun:0,tackleCd:0,decT:0,run:0,stamina:1,ipx:0,ipz:0,ipt:9,save:null,holdT:0,slideHit:false,kick:null,ap1:0,ap2:0,ap3:0,
-        vmax:(7.35+st.pace*1.75)*(ti===1&&!NET.online?D.spd:1),gkSkill:ti===1&&!NET.online?D.gk:0.88};
+        vmax:(7.35+st.pace*1.75)*(ti===1&&!NET.online?D.spd:1),gkSkill:(gk?gkQ(m.ovr):0.88)*(ti===1&&!NET.online?D.gk/0.88:1)};
       e.rig=SKIN.ready?buildSkinnedRig(gk?{shirt:club.gk,pc:'#111418',patK:0,shorts:'#1b1d22',socks:'#1b1d22',boot:BOOT_HEX[m.boot],skin:SKIN_HEX[m.skin],hair:HAIR_HEX[m.hair],hairK:(m.hair%3)*0.5,numTex:numTex(m.num,'#ffffff'),spTex:sponTex('',''),long:true,glove:'#f2f2f2'}
         :{shirt:club.shirt,pc:club.pc,patK:KIT_PAT[club.pat]||0,shorts:club.shorts,socks:club.socks,boot:BOOT_HEX[m.boot],skin:SKIN_HEX[m.skin],hair:HAIR_HEX[m.hair],hairK:(m.hair%3)*0.5,numTex:numTex(m.num,club.num),spTex:sponTex(club.sp,club.spc)})
         :buildRig(mats,{gk,skin:m.skin,hair:m.hair,boot:m.boot,num:m.num,numColor:gk?'#ffffff':club.num});
@@ -1148,7 +1287,7 @@ function buildTeams(){
   const cardM=new THREE.MeshBasicMaterial({color:C3('#ffd447'),side:THREE.DoubleSide});KIT_MATS.push(cardM);
   ref.card=new THREE.Mesh(new THREE.PlaneGeometry(0.08,0.11),cardM);ref.card.visible=false;if(ref.rig.skinned){ref.card.scale.setScalar(100);ref.card.position.set(0,9,2);ref.rig.handR.add(ref.card);}else{ref.card.position.set(0,-0.37,0.02);ref.rig.handR.parent.add(ref.card);}
   // crowd recolour
-  const [ta,tb]=crowdTextures(CLUBS[ids[0]].shirt,CLUBS[ids[1]].shirt);
+  const [ta,tb]=crowdTextures(CLUBS[ids[G.venue===1?1:0]].shirt,CLUBS[ids[G.venue===1?0:1]].shirt);
   if(CROWD.a){CROWD.a.dispose();CROWD.b.dispose();}
   CROWD.a=ta;CROWD.b=tb;
   for(const m of CROWD.mats){const rp=m.map.repeat.clone();if(m.userData.base){m.userData.base.dispose();m.userData.alt.dispose();}else m.map.dispose();m.map=ta.clone();m.map.needsUpdate=true;m.map.repeat.copy(rp);m.userData.alt=tb.clone();m.userData.alt.needsUpdate=true;m.userData.alt.repeat.copy(rp);m.userData.base=m.map;}
@@ -1928,6 +2067,7 @@ function onGoal(ti){netEv('goalfx',[1]);
   if(!sc){own=true;sc=team.players[9];}
   G.stats[ti].onT++;
   G.goal={team:ti,scorer:sc,own,recEnd:recW+38,recAt:recW};
+  if(!own)G.goalLog.push({ci:ti===0?G.set.home:G.set.away,name:sc.name});
   G.kickTeam=1-ti;
   hudScore();
   AU.roar();sfx.whistle(1);
@@ -1971,13 +2111,14 @@ function startMatch(){
   // pads: offline the CPU plays team 1; online the host's browser also takes the guest's input for team 1
   PADS[0]=mkPad(0,NET.localTi===0?IN:IN2);PADS[1]=NET.online?mkPad(1,NET.localTi===1?IN:IN2):null;
   G.teams[1].human=NET.online;
-  G.score=[0,0];G.clock=0;G.half=1;G.stats=newStats();G.firstKick=Math.random()<0.5?0:1;G.kickTeam=G.firstKick;
+  G.score=[0,0];G.clock=0;G.half=1;G.stats=newStats();G.goalLog=[];G.lgRes=null;G.firstKick=Math.random()<0.5?0:1;G.kickTeam=G.firstKick;
   recW=0;recN=0;
   hudInit();hudScore();
   $('menu').hidden=true;$('hud').hidden=false;$('result').hidden=true;$('pause').hidden=true;
   G.state='intro';G.introT=0;
   resetKickoffPositionsOnly();
-  banner(CLUBS[G.set.home].id+'  VS  '+CLUBS[G.set.away].id,CLUBS[G.set.home].name+' vs '+CLUBS[G.set.away].name+' · '+DIFFS[G.set.diff].name,2600);
+  const lg=!NET.online&&G.mode==='league'&&LG.s?'프리미어리그 '+(LG.s.md+1)+'R '+(G.venue?'원정':'홈')+' · ':'';
+  banner(CLUBS[G.set.home].id+'  VS  '+CLUBS[G.set.away].id,lg+CLUBS[G.set.home].name+' vs '+CLUBS[G.set.away].name+(NET.online?'':' · '+DIFFS[G.set.diff].name),2600);
   AU.start();
 }
 function resetKickoffPositionsOnly(){resetKickoff(G.kickTeam);G.state='intro';hideHint();}
@@ -1990,6 +2131,10 @@ function fullTime(){
   sfx.whistle(2);G.state='full';
   const r=G.score[0]>G.score[1]?'w':G.score[0]<G.score[1]?'l':'d';
   if(!NET.online){const rec=getRec();rec[r]++;lsSet('fl11-rec',JSON.stringify(rec));}
+  // a league fixture goes into the table, then the rest of the round is played out
+  if(!NET.online&&G.mode==='league'&&LG.s){const md=LG.s.md,f=userFixture(md);
+    if(f&&G.set.home===LG.s.club&&G.set.away===f.opp){const [gh,ga]=f.home?[G.score[0],G.score[1]]:[G.score[1],G.score[0]];
+      recordResult(md,f.h,f.a,gh,ga,G.goalLog);finishRound();const T=leagueTable(),pos=T.findIndex(x=>x.i===LG.s.club);G.lgRes={md,pos:pos+1,pts:T[pos].pts};}}
   showResult(true);
 }
 function getRec(){try{const r=JSON.parse(lsGet('fl11-rec')||'null');if(r&&typeof r.w==='number')return r;}catch(e){}return{w:0,d:0,l:0};}
@@ -2270,7 +2415,7 @@ function updateCam(dt){
   }
   if(st==='intro'){
     G.introT+=dt;const u=clamp(G.introT/3.4,0,1),e=u*u*(3-2*u);
-    const p0=new THREE.Vector3(-HL-30,46,72),p1=new THREE.Vector3(10,30,64),p2=new THREE.Vector3(0,CAMS[G.set.cam].h,CAMS[G.set.cam].b);
+    const p0=new THREE.Vector3(-HL+2,44,36),p1=new THREE.Vector3(-12,34,44),p2=new THREE.Vector3(0,CAMS[G.set.cam].h,CAMS[G.set.cam].b);
     camPos.copy(p0).multiplyScalar((1-e)*(1-e)).addScaledVector(p1,2*e*(1-e)).addScaledVector(p2,e*e);
     camLook.set(0,0,lerp(0,-1.5,e));setFov(lerp(40,CAMS[G.set.cam].f,e));
     camPlace(m,camPos,camLook.x,camLook.y,camLook.z);
@@ -2382,7 +2527,7 @@ let lastClk='',lastMode='',miniTick=0;
 const mini=$('mini'),mg=mini.getContext('2d');
 function hudInit(){
   const h=CLUBS[G.set.home],a=CLUBS[G.set.away];
-  $('nH').textContent=h.id;$('nA').textContent=a.id;$('kH').style.background=h.shirt;$('kA').style.background=a.shirt;
+  $('nH').textContent=h.id;$('nA').textContent=a.id;$('kH').style.background=G.teams[0].club.shirt;$('kA').style.background=G.teams[1].club.shirt;
   lastMode='';lastClk='';
 }
 function hudScore(){$('sH').textContent=G.score[0];$('sA').textContent=G.score[1];}
@@ -2429,14 +2574,15 @@ function showResult(full){
   const rows=[[Math.round(st[0].poss/tp*100)+'%','점유율',Math.round(st[1].poss/tp*100)+'%'],[st[0].shots,'슈팅',st[1].shots],[st[0].onT,'유효 슈팅',st[1].onT],[st[0].passOk+'/'+st[0].pass,'패스 성공',st[1].passOk+'/'+st[1].pass],[st[0].tack,'태클 성공',st[1].tack],[st[0].fouls||0,'파울',st[1].fouls||0],[(st[0].yel||0)+' / '+(st[0].red||0),'경고 / 퇴장',(st[1].yel||0)+' / '+(st[1].red||0)]];
   $('rStats').innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('');
   let msg='';
-  if(full){msg=G.score[0]>G.score[1]?'승리! '+DIFFS[G.set.diff].name+' 난이도를 꺾었습니다.':G.score[0]<G.score[1]?'패배. 다음 경기에서 설욕하세요.':'무승부로 끝났습니다.';const r=getRec();msg+='  · 전적 '+r.w+'승 '+r.d+'무 '+r.l+'패';}
+  if(full&&G.lgRes&&!NET.online){const L=G.lgRes;msg=(G.score[0]>G.score[1]?'승점 3점!':G.score[0]<G.score[1]?'패배.':'승점 1점.')+' '+(L.md+1)+'라운드 종료 · 현재 '+L.pos+'위 (승점 '+L.pts+')'+(L.md===37?' · 시즌 종료':'');}
+  else if(full){msg=G.score[0]>G.score[1]?'승리! '+DIFFS[G.set.diff].name+' 난이도를 꺾었습니다.':G.score[0]<G.score[1]?'패배. 다음 경기에서 설욕하세요.':'무승부로 끝났습니다.';if(!NET.online){const r=getRec();msg+='  · 전적 '+r.w+'승 '+r.d+'무 '+r.l+'패';}}
   else msg='후반전은 '+(G.firstKick===0?a.name:h.name)+'의 킥오프로 시작합니다.';
   $('rMsg').textContent=msg;
-  $('rMain').textContent=full?'다시 경기하기':'후반전 시작';
+  $('rMain').textContent=full?(G.lgRes?'리그 화면으로':'다시 경기하기'):'후반전 시작';$('rAlt').hidden=false;
   if(NET.online){
     $('rMain').hidden=full||NET.role==='guest';$('rAlt').textContent=full?'메인 메뉴':'경기 나가기';
     if(!full)$('rMsg').textContent+=NET.role==='guest'?' 잠시 후 자동으로 시작해요.':' 7초 뒤 자동으로 시작해요.';
-  }else{$('rMain').hidden=false;$('rAlt').textContent='메인 메뉴';}
+  }else{$('rMain').hidden=false;$('rAlt').textContent='메인 메뉴';$('rAlt').hidden=full&&!!G.lgRes;}
   netEv('result',[full,G.stats,G.score,G.firstKick]);
   $('result').hidden=false;
 }
@@ -2520,26 +2666,108 @@ function skipCine(){if(NET.role==='guest')return;if(G.state==='replay')afterRepl
 document.addEventListener('gesturestart',e=>e.preventDefault());
 addEventListener('blur',()=>{for(const k in IN.btn)IN.btn[k]=false;IN.charging=false;IN.jid=null;IN.jx=IN.jy=0;stickHome();});
 
-/* ================= menu ================= */
-function crestHTML(c){const bg=c.pat==='stripe'||c.pat==='pin'?`repeating-linear-gradient(90deg,${c.shirt} 0 5px,${c.pc} 5px 8px)`:c.pat==='hoop'?`repeating-linear-gradient(0deg,${c.shirt} 0 6px,${c.pc} 6px 9px)`:c.pat==='sash'?`linear-gradient(120deg,${c.shirt} 0 40%,${c.pc} 40% 58%,${c.shirt} 58%)`:`linear-gradient(160deg,${c.shirt} 0 55%,${c.pc} 55%)`;return `<span class="crest" style="background:${bg};color:${c.num}">${c.id}</span>`;}
+/* ================= menu: league hub ================= */
+function crestHTML(c,big){
+  const s=c.shirt,p=c.pc,bg=c.pat==='stripe'||c.pat==='pin'?`repeating-linear-gradient(90deg,${s} 0 5px,${p} 5px 9px)`:c.pat==='hoop'?`repeating-linear-gradient(0deg,${s} 0 6px,${p} 6px 9px)`
+    :c.pat==='sleeves'?`linear-gradient(90deg,${p} 0 24%,${s} 24% 76%,${p} 76%)`:c.pat==='sash'?`linear-gradient(120deg,${s} 0 40%,${p} 40% 58%,${s} 58%)`:`linear-gradient(170deg,${s} 0 64%,${c.shorts} 64%)`;
+  return `<span class="crest${big?' big':''}" style="background:${bg};color:${c.num}">${c.id}</span>`;
+}
+const clubOvr=ci=>CLUBS[ci].rating;
+/* the league season: 20 clubs, 38 rounds, kept in this browser */
+const LG={s:null};
+function lgSave(){if(LG.s)lsSet('fl11-season',JSON.stringify(LG.s));}
+function lgLoad(){try{const s=JSON.parse(lsGet('fl11-season')||'null');if(s&&s.v===1&&CLUBS[s.club]&&Array.isArray(s.fx)&&s.fx.length===38)LG.s=s;}catch(e){}}
+function makeFixtures(seed){
+  // circle method: every club meets every other club once per half, home and away swapped in the second half
+  const rr=seeded(seed),t=[...Array(20).keys()];
+  for(let i=t.length-1;i>0;i--){const j=Math.floor(rr()*(i+1));[t[i],t[j]]=[t[j],t[i]];}
+  const first=[];let arr=t.slice();
+  for(let r=0;r<19;r++){
+    const pairs=[];
+    for(let i=0;i<10;i++){let h=arr[i],a=arr[19-i];if(i===0?r%2===1:i%2===1)[h,a]=[a,h];pairs.push([h,a]);}
+    first.push(pairs);arr=[arr[0],arr[19],...arr.slice(1,19)];
+  }
+  return first.concat(first.map(p=>p.map(([h,a])=>[a,h])));
+}
+function newSeason(club){const seed=(Date.now()%2147483647)>>>0;LG.s={v:1,club,md:0,seed,fx:makeFixtures(seed),res:{},goals:{}};lgSave();}
+const resKey=(md,h,a)=>md+':'+h+':'+a;
+function poisson(l){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+// a simulated score: goal expectation from the gap in squad overall, plus home advantage
+function simGoals(h,a){const d=(clubOvr(h)-clubOvr(a))/8;return[poisson(Math.max(0.2,1.38*Math.exp(0.42*d)+0.12)),poisson(Math.max(0.15,1.12*Math.exp(-0.42*d)))];}
+function addScorer(ci,name){const k=ci+'|'+name;LG.s.goals[k]=(LG.s.goals[k]||0)+1;}
+function simScorers(ci,n){
+  // strikers score most, then wide forwards and the No.10; better players more often
+  const xi=CLUBS[ci].xi,sl=FORMS[CLUBS[ci].form],w=xi.map((p,k)=>(sl[k].l==='ST'?7:p[2]==='FW'?4:sl[k].l==='CAM'?3:p[2]==='MF'?1.6:p[2]==='DF'?0.45:0)*Math.pow(p[3]/80,5)),tot=w.reduce((a,b)=>a+b,0);
+  for(let g=0;g<n;g++){let r=Math.random()*tot;for(let i=0;i<xi.length;i++){r-=w[i];if(r<=0){addScorer(ci,xi[i][0]);break;}}}
+}
+function recordResult(md,h,a,gh,ga,scorers){LG.s.res[resKey(md,h,a)]=[gh,ga];if(scorers)scorers.forEach(s=>addScorer(s.ci,s.name));else{simScorers(h,gh);simScorers(a,ga);}}
+function userFixture(md){const s=LG.s;if(!s||md>=38)return null;const p=s.fx[md].find(([h,a])=>h===s.club||a===s.club);return p?{h:p[0],a:p[1],home:p[0]===s.club,opp:p[0]===s.club?p[1]:p[0]}:null;}
+function finishRound(){const s=LG.s,md=s.md;for(const [h,a] of s.fx[md])if(!s.res[resKey(md,h,a)]){const [gh,ga]=simGoals(h,a);recordResult(md,h,a,gh,ga);}s.md++;lgSave();}
+function leagueTable(){
+  const T=CLUBS.map((c,i)=>({i,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0})),s=LG.s;
+  if(s)for(const k in s.res){const [,h,a]=k.split(':').map(Number),[gh,ga]=s.res[k],H=T[h],A=T[a];H.p++;A.p++;H.gf+=gh;H.ga+=ga;A.gf+=ga;A.ga+=gh;
+    if(gh>ga){H.w++;H.pts+=3;A.l++;}else if(gh<ga){A.w++;A.pts+=3;H.l++;}else{H.d++;A.d++;H.pts++;A.pts++;}}
+  return T.sort((x,y)=>y.pts-x.pts||(y.gf-y.ga)-(x.gf-x.ga)||y.gf-x.gf||x.i-y.i);
+}
+let hubTab='table';
+function renderHub(){
+  const s=LG.s;if(!s){renderPick(false);return;}
+  const c=CLUBS[s.club],T=leagueTable(),pos=T.findIndex(r=>r.i===s.club)+1,me=T[pos-1];
+  $('hubSeason').textContent=s.md<38?`2025-26 시즌 · ${s.md+1}라운드`:'2025-26 시즌 종료';
+  $('hubClub').innerHTML=`${crestHTML(c,true)}<div><b>${c.name}</b><span>${pos}위 · 승점 ${me.pts} · ${me.w}승 ${me.d}무 ${me.l}패 · OVR ${c.rating}</span></div>`;
+  const f=userFixture(s.md);
+  if(f){
+    $('hubNext').innerHTML=`<span class="hn-k">다음 경기 · ${f.home?'홈':'원정'}</span><div class="hn-m">${crestHTML(CLUBS[f.h])}<b>${CLUBS[f.h].name}</b><i>vs</i><b>${CLUBS[f.a].name}</b>${crestHTML(CLUBS[f.a])}</div><span class="hn-k">상대 OVR ${clubOvr(f.opp)} · ${CLUBS[f.opp].form}</span>`;
+    $('goBtn').hidden=false;$('simBtn').hidden=false;
+  }else{
+    const champ=CLUBS[T[0].i];
+    $('hubNext').innerHTML=`<span class="hn-k">시즌 종료</span><div class="hn-m">${crestHTML(champ)}<b>우승 ${champ.name}</b></div><span class="hn-k">${c.name} 최종 ${pos}위 · 새 시즌을 시작해 보세요</span>`;
+    $('goBtn').hidden=true;$('simBtn').hidden=true;
+  }
+  document.querySelectorAll('#hubTabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===hubTab));
+  $('hubBody').innerHTML=hubTab==='table'?tableHTML(T):hubTab==='fix'?fixHTML():scorersHTML();
+  const body=$('hubBody');body.scrollTop=0;
+  if(hubTab==='table'){const r=body.querySelector('tr.me');if(r)body.scrollTop=Math.max(0,r.getBoundingClientRect().top-body.getBoundingClientRect().top-body.clientHeight/2);}
+}
+function tableHTML(T){
+  return '<table class="lt"><thead><tr><th>#</th><th class="l">클럽</th><th>경기</th><th>승</th><th>무</th><th>패</th><th>득실</th><th>승점</th></tr></thead><tbody>'+
+    T.map((r,i)=>{const c=CLUBS[r.i],gd=r.gf-r.ga;return `<tr class="${r.i===LG.s.club?'me ':''}${i<4?'top':i>=17?'rel':''}"><td>${i+1}</td><td class="l">${crestHTML(c)}<span>${c.name}</span></td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${gd>0?'+':''}${gd}</td><td><b>${r.pts}</b></td></tr>`;}).join('')+'</tbody></table><p class="lt-key"><span><i style="background:#3aa0ff"></i>챔피언스리그</span><span><i style="background:#ff4d5e"></i>강등</span></p>';
+}
+function fixHTML(){
+  const s=LG.s,out=[],last=s.md>0?s.md-1:null;
+  for(const md of [last,s.md<38?s.md:null]){
+    if(md==null)continue;
+    out.push(`<p class="fx-h">${md+1}라운드 ${md===last?'결과':'일정'}</p>`+s.fx[md].map(([h,a])=>{const r=s.res[resKey(md,h,a)],mine=h===s.club||a===s.club;
+      return `<div class="fx${mine?' me':''}"><span class="r">${CLUBS[h].name}</span><b>${r?r[0]+' - '+r[1]:'vs'}</b><span>${CLUBS[a].name}</span></div>`;}).join(''));
+  }
+  return out.join('');
+}
+function scorersHTML(){
+  const g=Object.entries(LG.s.goals).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  if(!g.length)return '<p class="fx-h">아직 득점 기록이 없어요.</p>';
+  return '<table class="lt"><thead><tr><th>#</th><th class="l">선수</th><th class="l">클럽</th><th>골</th></tr></thead><tbody>'+
+    g.map(([k,n],i)=>{const [ci,name]=k.split('|');return `<tr class="${+ci===LG.s.club?'me':''}"><td>${i+1}</td><td class="l">${name}</td><td class="l">${CLUBS[+ci].name}</td><td><b>${n}</b></td></tr>`;}).join('')+'</tbody></table>';
+}
+function renderPick(canBack){
+  $('pickGrid').innerHTML=CLUBS.map((c,i)=>`<button class="club" data-i="${i}">${crestHTML(c)}<span>${c.name}</span><em>OVR ${c.rating}</em></button>`).join('');
+  $('pickBack').hidden=!canBack;$('pickNote').hidden=!canBack;$('pick').hidden=false;
+}
+$('pickGrid').addEventListener('click',e=>{const b=e.target.closest('.club');if(!b)return;newSeason(+b.dataset.i);$('pick').hidden=true;hubTab='table';goMenu();});
+$('pickBack').addEventListener('click',()=>{$('pick').hidden=true;});
+$('hubTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;hubTab=b.dataset.tab;renderHub();});
+$('simBtn').addEventListener('click',()=>{finishRound();hubTab='fix';goMenu();});
+$('newSeasonBtn').addEventListener('click',()=>renderPick(true));
 function buildMenu(){
-  const mk=(el,key)=>{el.innerHTML=CLUBS.map((c,i)=>`<button class="club" data-i="${i}" aria-pressed="false">${crestHTML(c)}<span>${c.id}</span><em>OVR ${c.rating}</em></button>`).join('');
-    el.querySelectorAll('.club').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i;const other=key==='home'?'away':'home';if(G.set[other]===i)G.set[other]=G.set[key];G.set[key]=i;G.set.order=null;syncMenu();menuPreview();}));};
-  mk($('clubH'),'home');mk($('clubA'),'away');
   $('segD').innerHTML=DIFFS.map((d,i)=>`<button data-i="${i}">${d.name}</button>`).join('');
   $('segL').innerHTML=LENS.map((d,i)=>`<button data-i="${i}">${d.label}</button>`).join('');
   $('segD').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{G.set.diff=+b.dataset.i;syncMenu();}));
   $('segL').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{G.set.len=+b.dataset.i;syncMenu();}));
+  const opts=CLUBS.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');$('frH').innerHTML=opts;$('frA').innerHTML=opts;$('olClub').innerHTML=opts;
   syncMenu();
 }
 function syncMenu(){
-  $('clubH').querySelectorAll('.club').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.i===G.set.home));
-  $('clubA').querySelectorAll('.club').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.i===G.set.away));
   $('segD').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.i===G.set.diff));
   $('segL').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.i===G.set.len));
-  const h=CLUBS[G.set.home],a=CLUBS[G.set.away];
-  $('vsLine').innerHTML=`<span><b>${h.name}</b> vs <b>${a.name}</b></span><span>전후반 각 ${LENS[G.set.len].m/2}분</span>`;
-  const r=getRec();$('rec').textContent='전적 '+r.w+'승 '+r.d+'무 '+r.l+'패';
   lsSet('fl11-set',JSON.stringify(G.set));
 }
 let previewTimer=null;
@@ -2554,31 +2782,64 @@ function goMenu(){
   if(NET.ws||NET.online)netLeave();
   PADS[0]=PADS[1]=null;$('online').hidden=true;
   G.state='menu';$('menu').hidden=false;$('hud').hidden=true;$('result').hidden=true;$('pause').hidden=true;$('app').classList.remove('replay');
-  bannerOff();hideHint();syncMenu();buildTeams();lineup();
+  bannerOff();hideHint();syncMenu();
+  // the stadium behind the hub shows your club against the next opponent
+  const f=LG.s&&userFixture(LG.s.md);
+  if(LG.s){G.set.home=LG.s.club;G.set.away=f?f.opp:(LG.s.club+1)%CLUBS.length;G.venue=f&&!f.home?1:0;}
+  G.tac=[myTac(),clubTac(G.set.away)];
+  renderHub();buildTeams();lineup();
 }
-$('goBtn').addEventListener('click',()=>{
-  AU.start();
+function goFullscreen(){
   const el=document.documentElement;
   if(matchMedia('(pointer:coarse)').matches&&el.requestFullscreen&&!document.fullscreenElement){el.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{});}catch(e){}}).catch(()=>{});}
+}
+$('goBtn').addEventListener('click',()=>{
+  AU.start();goFullscreen();
+  const f=LG.s&&userFixture(LG.s.md);if(!f)return;
+  G.mode='league';G.set.home=LG.s.club;G.set.away=f.opp;G.venue=f.home?0:1;
   openTac('solo');
 });
-/* tactics: formation, mentality and who plays where (tap two players to swap them) */
+$('friendBtn').addEventListener('click',()=>{const h=LG.s?LG.s.club:G.set.home;$('frH').value=h;$('frA').value=(G.set.away!==h?G.set.away:(h+1)%CLUBS.length);$('friendly').hidden=false;});
+$('frBack').addEventListener('click',()=>{$('friendly').hidden=true;});
+$('frGo').addEventListener('click',()=>{
+  const h=+$('frH').value,a=+$('frA').value;if(h===a){$('frMsg').textContent='서로 다른 두 팀을 골라 주세요.';return;}
+  AU.start();goFullscreen();$('friendly').hidden=true;$('frMsg').textContent='';
+  G.mode='friendly';G.set.home=h;G.set.away=a;G.venue=0;openTac('solo');
+});
+/* tactics: formation, mentality and who plays where (tap two players to swap them); kept per club */
+const clubTac=ci=>({form:CLUBS[ci].form,ment:0,order:IDENT.slice()});
+function tacOf(ci){const t=G.set.tacs&&G.set.tacs[ci];return t?cleanTac(t):clubTac(ci);}
+// fit the squad to another formation: same role (a wing-back counts as a full-back), then the same side and depth;
+// best fits are handed out first, then pairs of players swap while that brings the side closer to its usual shape
+function autoOrder(ci,form){
+  const roster=makeRoster(ci),slots=FORMS[form],home=FORMS[CLUBS[ci].form],side=l=>l[0]==='L'?-1:l[0]==='R'?1:0,
+    rank={GK:0,DF:1,MF:2,FW:3},fam=l=>/WB$|^[LR]B$/.test(l)?'FB':l,order=[0],used=new Set([0]),pairs=[];
+  const cost=(k,r)=>{const a=home[r],b=slots[k];return(fam(a.l)===fam(b.l)?-0.3:Math.abs(rank[roster[r].nat]-rank[b.r])*6)+Math.abs(side(a.l)-side(b.l))*2+Math.abs(a.p[0]-b.p[0])+Math.abs(a.p[1]-b.p[1]);};
+  for(let k=1;k<11;k++)for(let r=1;r<11;r++)pairs.push([cost(k,r),k,r]);
+  pairs.sort((x,y)=>x[0]-y[0]);
+  for(const [,k,r] of pairs)if(order[k]==null&&!used.has(r)){order[k]=r;used.add(r);}
+  for(let pass=0,better=true;better&&pass<20;pass++){better=false;
+    for(let i=1;i<11;i++)for(let j=i+1;j<11;j++)if(cost(i,order[j])+cost(j,order[i])<cost(i,order[i])+cost(j,order[j])-1e-6){[order[i],order[j]]=[order[j],order[i]];better=true;}}
+  return order;
+}
 let tacSel=-1,tacMode='solo';
 function openTac(mode){tacMode=mode;tacSel=-1;if(mode==='solo')G.oppTac=cpuTac();renderTac();$('tac').hidden=false;}
+function curTac(){G.set.tacs=G.set.tacs||{};return G.set.tacs[G.set.home]=tacOf(G.set.home);}
 function renderTac(){
-  const roster=makeRoster(G.set.home),slots=FORMS[G.set.form]||FORMS['4-3-3'],order=G.set.order=validOrder(G.set.order);
+  const T=curTac(),roster=makeRoster(G.set.home),slots=FORMS[T.form],order=T.order;
   let h='<div class="tp-lines"></div>';
   slots.forEach((f,k)=>{
     const m=roster[order[k]],x=6+(f.p[0]+0.95)/1.07*86,y=50+f.p[1]*46,mis=m.nat!==f.r&&k>0;
-    h+=`<button class="tp${k===tacSel?' sel':''}${mis?' mis':''}" data-k="${k}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;--kit:${CLUBS[G.set.home].shirt}"><b>${m.num}</b><span>${m.name}</span><em>${f.l}</em></button>`;
+    h+=`<button class="tp${k===tacSel?' sel':''}${mis?' mis':''}" data-k="${k}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;--kit:${CLUBS[G.set.home].shirt};--num:${CLUBS[G.set.home].num}"><b>${m.num}</b><span>${m.name}</span><em>${f.l}</em></button>`;
   });
   $('tacPitch').innerHTML=h;
-  $('segF').innerHTML=FORM_KEYS.map(k=>`<button data-f="${k}" aria-pressed="${k===G.set.form}">${k}</button>`).join('');
-  $('segM').innerHTML=MENTS.map(m=>`<button data-m="${m.v}" aria-pressed="${m.v===G.set.ment}">${m.n}</button>`).join('');
+  $('segF').innerHTML=FORM_KEYS.map(k=>`<button data-f="${k}" aria-pressed="${k===T.form}">${k}</button>`).join('');
+  $('segM').innerHTML=MENTS.map(m=>`<button data-m="${m.v}" aria-pressed="${m.v===T.ment}">${m.n}</button>`).join('');
   let info='선수 두 명을 차례로 누르면 자리를 바꿔요. 주황 테두리는 원래 포지션이 아닌 선수예요.';
-  if(tacSel>=0){const m=roster[order[tacSel]],s=m.st,pct=v=>Math.round(v*100);info=`${m.num} ${m.name} · 속도 ${pct(s.pace)} 슈팅 ${pct(s.shoot)} 패스 ${pct(s.pass)} 태클 ${pct(s.tackle)} 드리블 ${pct(s.drib)}`;}
+  if(tacSel>=0){const m=roster[order[tacSel]],s=m.st,pct=v=>Math.round(v*100);info=`${m.num} ${m.name} · OVR ${m.ovr} · 속도 ${pct(s.pace)} 슈팅 ${pct(s.shoot)} 패스 ${pct(s.pass)} 태클 ${pct(s.tackle)} 드리블 ${pct(s.drib)}`;}
   $('tacInfo').textContent=info;
-  $('tacOpp').innerHTML=tacMode==='solo'?`<span>상대 <b>${CLUBS[G.set.away].name}</b></span><span>${G.oppTac.form} · ${MENTS.find(m=>m.v===G.oppTac.ment).n}</span>`:'<span>온라인 경기에서 이 전술로 나가요</span>';
+  $('tacOpp').innerHTML=tacMode==='solo'?`<span>${G.mode==='league'?(G.venue===0?'홈 · ':'원정 · '):'친선 · '}상대 <b>${CLUBS[G.set.away].name}</b></span><span>${G.oppTac.form} · ${MENTS.find(m=>m.v===G.oppTac.ment).n}</span>`:'<span>온라인 경기에서 이 전술로 나가요</span>';
+  $('tacTitle').textContent=CLUBS[G.set.home].name;
   $('tacGo').textContent=tacMode==='solo'?'경기 시작':'저장';
   lsSet('fl11-set',JSON.stringify(G.set));
 }
@@ -2586,14 +2847,14 @@ $('tacPitch').addEventListener('click',e=>{
   const b=e.target.closest('.tp');if(!b)return;const k=+b.dataset.k;
   if(k===0){tacSel=-1;renderTac();$('tacInfo').textContent='골키퍼는 자리를 바꿀 수 없어요.';return;}
   if(tacSel<0||tacSel===k)tacSel=tacSel===k?-1:k;
-  else{const o=G.set.order;[o[tacSel],o[k]]=[o[k],o[tacSel]];tacSel=-1;}
+  else{const o=curTac().order;[o[tacSel],o[k]]=[o[k],o[tacSel]];tacSel=-1;}
   renderTac();
 });
-$('segF').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;G.set.form=b.dataset.f;tacSel=-1;renderTac();});
-$('segM').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;G.set.ment=+b.dataset.m;renderTac();});
-$('tacReset').addEventListener('click',()=>{G.set.order=null;tacSel=-1;renderTac();});
+$('segF').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const T=curTac();T.form=b.dataset.f;T.order=autoOrder(G.set.home,T.form);tacSel=-1;renderTac();});
+$('segM').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;curTac().ment=+b.dataset.m;renderTac();});
+$('tacReset').addEventListener('click',()=>{G.set.tacs[G.set.home]=clubTac(G.set.home);tacSel=-1;renderTac();});
 $('tacBack').addEventListener('click',()=>{$('tac').hidden=true;});
-$('tacGo').addEventListener('click',()=>{$('tac').hidden=true;if(tacMode==='solo'){AU.start();startMatch();}else $('olTac').textContent='전술: '+G.set.form+' · '+MENTS.find(m=>m.v===G.set.ment).n;});
+$('tacGo').addEventListener('click',()=>{$('tac').hidden=true;if(tacMode==='solo'){AU.start();startMatch();}else{const t=myTac();$('olTac').textContent='전술: '+t.form+' · '+MENTS.find(m=>m.v===t.ment).n;}});
 function togglePause(){
   if(['menu','boot','half','full'].includes(G.state))return;
   if(NET.online){$('pause').hidden=!$('pause').hidden;$('pRestart').hidden=true;return;}
@@ -2615,6 +2876,7 @@ $('pause').addEventListener('click',e=>{const a=e.target.dataset&&e.target.datas
 });
 $('rMain').addEventListener('click',()=>{
   if(G.state==='half'){$('result').hidden=true;G.half=2;G.clock=45;G.kickTeam=1-G.firstKick;resetKickoff(G.kickTeam);G.state='kickoff';G.kickReady=false;banner('2ND HALF','후반전 시작',1600);}
+  else if(G.lgRes){hubTab='fix';goMenu();}
   else startMatch();
 });
 $('rAlt').addEventListener('click',goMenu);
@@ -2668,6 +2930,7 @@ function netMsg(d){
   }
 }
 function hostStart(gc,gtac){
+  G.mode='online';G.venue=0;
   let away=clamp(gc|0,0,CLUBS.length-1);if(away===G.set.home)away=(away+1)%CLUBS.length;
   G.set.away=away;NET.online=true;NET.started=true;NET.localTi=0;NET.mirror=false;
   G.tac=[myTac(),cleanTac(gtac)];
@@ -2675,6 +2938,7 @@ function hostStart(gc,gtac){
   $('online').hidden=true;startMatch();
 }
 function guestStart(m){
+  G.mode='online';G.venue=0;
   G.tac=[cleanTac(m.tac&&m.tac[0]),cleanTac(m.tac&&m.tac[1])];
   G.set.home=m.home;G.set.away=m.away;G.set.len=m.len;NET.online=true;NET.started=true;NET.localTi=1;NET.mirror=true;NET.snaps=[];
   $('online').hidden=true;startMatch();
@@ -2743,7 +3007,9 @@ function guestEv(k,a){
   }
 }
 $('olTac').addEventListener('click',()=>openTac('online'));
-$('olBtn').addEventListener('click',()=>{AU.start();$('olTac').textContent='전술: '+G.set.form+' · '+MENTS.find(m=>m.v===G.set.ment).n;$('olTeam').textContent=CLUBS[G.set.home].name;$('olCode').textContent='';lobbyMsg('빠른 매칭이나 방 코드로 상대를 만나세요.');$('online').hidden=false;});
+const olTacLabel=()=>{const t=myTac();$('olTac').textContent='전술: '+t.form+' · '+MENTS.find(m=>m.v===t.ment).n;};
+$('olClub').addEventListener('change',()=>{G.set.home=+$('olClub').value;olTacLabel();});
+$('olBtn').addEventListener('click',()=>{AU.start();$('olClub').value=G.set.home;olTacLabel();$('olCode').textContent='';lobbyMsg('빠른 매칭이나 방 코드로 상대를 만나세요.');$('online').hidden=false;});
 $('olQuick').addEventListener('click',()=>netOpen(()=>netSend({t:'quick'})));
 $('olCreate').addEventListener('click',()=>netOpen(()=>netSend({t:'create'})));
 $('olJoin').addEventListener('click',()=>{const code=$('olIn').value.replace(/\D/g,'');if(code.length!==4){lobbyMsg('방 코드 4자리를 입력해 주세요.');return;}netOpen(()=>netSend({t:'join',code}));});
@@ -2791,8 +3057,10 @@ function frame(now){
 
 /* ================= boot ================= */
 function boot(data){
-  try{const s=JSON.parse(lsGet('fl11-set')||'null');if(s&&CLUBS[s.home]&&CLUBS[s.away]&&s.home!==s.away){G.set.home=s.home;G.set.away=s.away;G.set.diff=clamp(s.diff|0,0,2);G.set.len=clamp(s.len|0,0,2);G.set.cam=clamp(s.cam|0,0,2);G.set.stick=s.stick===1?1:0;G.set.form=FORMS[s.form]?s.form:'4-3-3';G.set.ment=clamp(s.ment|0,-1,1);G.set.order=s.order||null;}}catch(e){}
-  if(data&&data.set){Object.assign(G.set,data.set);}
+  try{const s=JSON.parse(lsGet('fl11-set')||'null');if(s){G.set.diff=clamp(s.diff|0,0,2);G.set.len=clamp(s.len|0,0,2);G.set.cam=clamp(s.cam|0,0,2);G.set.stick=s.stick===1?1:0;
+    if(s.tacs&&typeof s.tacs==='object')for(const k in s.tacs)if(CLUBS[k])G.set.tacs[k]=cleanTac(s.tacs[k]);}}catch(e){}
+  lgLoad();
+  if(data&&data.set){Object.assign(G.set,data.set);if(!G.set.tacs)G.set.tacs={};}
   $('camBtn').textContent=CAMS[G.set.cam].n;
   buildStands();buildBoards();buildFloods();
   // swap the simple bodies for the motion-captured ones once the model has arrived
