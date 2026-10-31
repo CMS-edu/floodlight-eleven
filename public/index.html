@@ -1898,17 +1898,19 @@ function setMove(e,tx,tz,sprint,smooth){
   if(smooth&&e.sx!=null&&hyp(tx-e.sx,tz-e.sz)<15){const k=Math.min(1,STEP*3.2);e.sx+=(tx-e.sx)*k;e.sz+=(tz-e.sz)*k;tx=e.sx;tz=e.sz;}
   else{e.sx=tx;e.sz=tz;}
   const dx=tx-e.x,dz=tz-e.z,d=hyp(dx,dz);
-  if(smooth){if(e.settled){if(d>1.5)e.settled=false;}else if(d<0.4)e.settled=true;}else e.settled=false;
+  if(smooth){if(e.settled){if(d>2.6)e.settled=false;}else if(d<0.9)e.settled=true;}else e.settled=false;
   if(e.settled){e.mx=e.mz=0;e.sprint=false;}
   else{
-    const sp=sprint?e.vmax:(d>14?e.vmax*0.8:e.vmax*0.6);
-    const want=Math.min(sp,d*1.5+0.3);
+    // walk the last metres, jog to reposition, run only when far off or it matters; formation moves ease in
+    const sp=sprint?e.vmax:d>18?e.vmax*0.66:d>7?e.vmax*0.44:e.vmax*0.26;
+    const want=Math.min(sp,(smooth?d*0.75:d*1.5)+0.3);
     e.mx=d>0.001?dx/d*want:0;e.mz=d>0.001?dz/d*want:0;e.sprint=sprint&&want>e.vmax*0.75;
   }
   // at a jog players keep their eyes on the ball and shuffle; only a long run turns their back
   if(!e.sprint&&B.owner!==e){
-    const bx=B.x-e.x,bz=B.z-e.z,bl=hyp(bx,bz)||1,cosA=d>0.01?(dx*bx+dz*bz)/(d*bl):1;
-    e.strafe=d<7||cosA>-0.25;if(e.strafe&&!e.faceTgt)e.faceTgt=B;
+    const bx=B.x-e.x,bz=B.z-e.z,bl=hyp(bx,bz)||1,cosA=d>0.01?(dx*bx+dz*bz)/(d*bl):1,v=hyp(e.mx,e.mz);
+    // shuffle sideways or back only at a walk or slow jog; anything quicker, turn and run
+    e.strafe=v<3.3&&(d<7||cosA>-0.25)&&!(cosA<-0.3&&v>2.2);if(e.strafe&&!e.faceTgt)e.faceTgt=B;
   }else e.strafe=false;
 }
 function think(e,dt){
@@ -1926,7 +1928,7 @@ function think(e,dt){
       if(d<1.8){e.strafe=true;e.faceTgt=B;}
       return;
     }
-    const [fx,fz]=formTarget(e);setMove(e,fx,fz,hyp(fx-e.x,fz-e.z)>10);return;
+    const [fx,fz]=formTarget(e);setMove(e,fx,fz,hyp(fx-e.x,fz-e.z)>16);return;
   }
   if(B.owner.team===t){
     // support / runs
@@ -1939,7 +1941,7 @@ function think(e,dt){
     // find space: drift away from nearest marker
     const [o,od]=nearestOpp(e);
     if(o&&od<4){fz+=Math.sign(e.z-o.z||1)*(4-od)*0.6;}
-    setMove(e,fx,clamp(fz,-HW+1.5,HW-1.5),e.run>0||hyp(fx-e.x,fz-e.z)>9);return;
+    setMove(e,fx,clamp(fz,-HW+1.5,HW-1.5),e.run>0||hyp(fx-e.x,fz-e.z)>15);return;
   }
   // defending
   const c=B.owner;
@@ -1979,7 +1981,7 @@ function think(e,dt){
       else{const w=man?0.9:e.role==='DF'?0.6:0.42,off=man?1.1:1.6;fx=lerp(fx,m.x+vx/vl*off+m.vx*0.2,w);fz=lerp(fz,m.z+vz/vl*off+m.vz*0.2,w);}
     }
   }
-  setMove(e,fx,fz,hyp(fx-e.x,fz-e.z)>8);
+  setMove(e,fx,fz,hyp(fx-e.x,fz-e.z)>(e.style==='man'?9:13));
 }
 function carrierThink(e,dt){
   if(e.kick||e.act===ACT.SKILL)return;
@@ -2238,7 +2240,7 @@ function locomote(e,dt){
   const upd=e.team&&padOf(e.team),user=!!(upd&&e===upd.ctrl&&!upd.lock),own=B.owner===e;
   const sd=hyp(e.mx,e.mz),s=hyp(e.vx,e.vz);
   const agil=(user?1.15:1)*(0.85+0.3*(e.st?e.st.pace:0.8));
-  const ACC=8.5*agil,DEC=15*agil;
+  const ACC=7.2*agil,DEC=10.5*agil;
   if(e.strafe||s<1.0||sd<0.25){
     let dvx=e.mx-e.vx,dvz=e.mz-e.vz;const dl=hyp(dvx,dvz),a=(sd<s?DEC:ACC)*(e.strafe?1.1:1)*dt;
     if(dl>a){dvx*=a/dl;dvz*=a/dl;}
