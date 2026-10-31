@@ -1543,6 +1543,7 @@ function passExec(p,r,kind,pt,pw){
     kickBall(p,sx*vh,vy,sz*vh,kind==='cross'?gauss()*1.5:0);
   }
   B.target={r,x:tx,z:tz};r.team.recv=r;
+  {const op=PADS[1-p.team.i];if(op&&op.ctrl&&p.team===r.team&&G.state==='play')autoSwitchDef(op,true);}
   G.stats[p.team.i].pass++;
   if(p.team===r.team&&padOf(r.team)&&!r.isGK)setCtrl(padOf(r.team),r,'recv');
 }
@@ -2553,29 +2554,50 @@ function doUserAction(pd,kind,power,sk){
   if(k==='ground'&&lx>0.58&&Math.abs(c.z)>14&&best.x*dir/HL>0.66&&Math.abs(best.z)<14)k='cross';
   passTo(c,best,k,null,pw);
 }
-// defenders ranked for the switch button: closest to where the ball will be, goal-side first
+// where the defence has to get to: the carrier a moment ahead, the end of an opponent's pass, or where a loose ball is going
+function switchPoint(pd){
+  const o=B.owner;
+  if(o)return[o.x+o.vx*0.4,o.z+o.vz*0.4];
+  if(B.target&&B.target.r&&B.target.r.team.i!==pd.ti)return[B.target.x,B.target.z];
+  const p=trajAt(0.45);return[p.x,p.z];
+}
+// seconds for a defender to engage there: distance at his speed, helped by already running that way,
+// worse when he is behind the ball (chasing back) or still on the ground
+function engageT(p,fx,fz,gx){
+  const dx=fx-p.x,dz=fz-p.z,d=hyp(dx,dz),vt=d>0.1?(dx*p.vx+dz*p.vz)/d:0;
+  let t=d/(p.vmax*0.85)-clamp(vt,-3,7)*0.05+0.15;
+  if(p.stun>0)t+=p.stun;if(p.act===ACT.FALL||p.act===ACT.SLIDE)t+=0.8;
+  if((p.x-fx)*(gx-fx)<-1)t+=0.7;
+  return t;
+}
 function switchList(pd){
-  const t=G.teams[pd.ti],o=B.owner;let fx,fz;
-  if(o){fx=o.x+o.vx*0.3;fz=o.z+o.vz*0.3;}else{const p=trajAt(0.45);fx=p.x;fz=p.z;}
-  const gx=ownGoalX(t);
+  const t=G.teams[pd.ti],[fx,fz]=switchPoint(pd),gx=ownGoalX(t);
   return t.players.filter(p=>!p.isGK&&!p.off&&p.stun<0.6&&p.act!==ACT.FALL)
-    .map(p=>({p,s:hyp(p.x-fx,p.z-fz)+((p.x-fx)*(gx-fx)>0?-2.5:1.5)}))
-    .sort((a,b)=>a.s-b.s).map(q=>q.p);
+    .map(p=>({p,s:engageT(p,fx,fz,gx)})).sort((a,b)=>a.s-b.s).map(q=>q.p);
 }
 function switchPlayer(pd){
-  const c=pd.ctrl,list=switchList(pd);if(list.length<2)return;
-  let pick;
-  if(G.t-pd.lastManual<0.8){const i=list.indexOf(c);pick=list[(i+1)%Math.min(list.length,4)];}  // tap again: next of the best four
-  else pick=list[0]===c?list[1]:list[0];
+  const c=pd.ctrl,list=switchList(pd),inp=pd.inp;if(list.length<2)return;
+  let pick=null;const jm=hyp(inp.jx,inp.jy);
+  if(jm>0.5&&c){
+    // the stick points at the man you want: best match in that direction among the nearer ones
+    let bs=-1e9;
+    for(const p of list.slice(0,7)){if(p===c)continue;const vx=p.x-c.x,vz=p.z-c.z,d=hyp(vx,vz)||1,cos=(vx*inp.jx+vz*inp.jy)/(d*jm);
+      if(cos<0.45)continue;const sc=cos*2-d*0.025;if(sc>bs){bs=sc;pick=p;}}
+  }
+  if(!pick){
+    if(G.t-pd.lastManual<0.8){const i=list.indexOf(c);pick=list[(i+1)%Math.min(list.length,4)];}  // tap again: next of the best four
+    else pick=list[0]===c?list[1]:list[0];
+  }
   pd.lastManual=G.t;setCtrl(pd,pick);
 }
+// changed: the ball just moved on (a pass played, possession lost). Only hand over when the other man is clearly
+// quicker to the action, and never straight after the player picked someone himself
 function autoSwitchDef(pd,changed){
-  const c=pd.ctrl;if(!c)return;
+  const c=pd.ctrl;if(!c||G.t-pd.lastManual<0.9)return;
   const list=switchList(pd);if(!list.length)return;
   const best=list[0];if(best===c)return;
-  const o=B.owner,fx=o?o.x:B.x,fz=o?o.z:B.z;
-  const cd=hyp(c.x-fx,c.z-fz),bd=hyp(best.x-fx,best.z-fz);
-  if((changed&&cd>5&&bd+3<cd)||(cd>10&&bd+5<cd))setCtrl(pd,best,'auto');
+  const [fx,fz]=switchPoint(pd),gx=ownGoalX(G.teams[pd.ti]),tc=engageT(c,fx,fz,gx),tb=engageT(best,fx,fz,gx),cd=hyp(c.x-fx,c.z-fz);
+  if((changed&&tc-tb>0.4&&cd>4)||(tc-tb>0.9&&cd>7))setCtrl(pd,best,'auto');
 }
 function padHint(pd,text){if(pd===LP())showHint(text);else if(pd)netEv('hint',[text]);}
 function padHideHint(pd){if(pd===LP())hideHint();else if(pd)netEv('hhint',[]);}
@@ -2652,7 +2674,7 @@ function userStep(pd,dt){
       else if(d<5.5){c.face=Math.atan2(tx+(opp?opp.vx*0.25:B.vx*0.2)-c.x,tz+(opp?opp.vz*0.25:B.vz*0.2)-c.z);startSlide(c);}
       else{c.act=ACT.POKE;c.actT=0;}
     }
-    if(G.t-pd.lastSwitch>1.2&&jm<0.3&&!locked)autoSwitchDef(pd,false);
+    if(G.t-pd.lastSwitch>0.8&&jm<0.3&&!locked)autoSwitchDef(pd,false);
   }
   // loose ball: hand control to whoever gets there first
   if(!B.owner&&G.t-pd.lastSwitch>0.7&&!(B.target&&B.target.r===c)&&B.kicker!==c&&!locked){
