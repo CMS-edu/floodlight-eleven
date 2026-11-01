@@ -799,45 +799,85 @@ function crowdTextures(homeHex,awayHex){
   return [draw(false),draw(true)];
 }
 const STAND_GROUPS=[];
+/* 3D crowd: tens of thousands of low-poly supporters, instanced. Bodies take a shirt colour per person, heads a skin tone;
+   rows darken toward the back and under the roof. On their feet (goals, big moments) they bounce and a second body with
+   raised arms takes over */
+const CROWD3={seats:[],bodies:null,armsUp:null,heads:null,uT:{value:0},uJ:{value:0},home:'#c3162f',away:'#1b57cf'};
+function mergeGeos(list){
+  const pos=[],nor=[];
+  for(let g of list){g=g.index?g.toNonIndexed():g;g.computeVertexNormals();pos.push(...g.attributes.position.array);nor.push(...g.attributes.normal.array);}
+  const m=new THREE.BufferGeometry();m.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));m.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));return m;
+}
+function crowdBodyGeo(up){
+  const torso=new THREE.CylinderGeometry(0.16,0.21,0.62,6,1,true);torso.scale(1,1,0.66);torso.translate(0,0.68,0);
+  if(!up)return mergeGeos([torso]);
+  const arm=x=>{const a=new THREE.BoxGeometry(0.085,0.5,0.085);a.translate(0,0.25,0);a.rotateZ(x*0.32);a.translate(x*0.17,0.92,-0.02);return a;};
+  return mergeGeos([torso,arm(1),arm(-1)]);
+}
+function crowdMat(){
+  const m=new THREE.MeshLambertMaterial({color:0xffffff});
+  m.onBeforeCompile=sh=>{sh.uniforms.uT=CROWD3.uT;sh.uniforms.uJ=CROWD3.uJ;
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aPh;uniform float uT,uJ;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.y+=uJ*max(0.0,sin(uT*8.5+aPh))*0.3+sin(uT*1.3+aPh)*0.012;');};
+  return m;
+}
+const CROWD_PAL=['#3a5a9a','#8a2f2f','#d8a83a','#2f7a52','#5d4a86','#7a7f88'],SKIN3=['#f0c8a4','#dcae84','#b9875e','#8a5a3c','#5f3d2a'];
+function buildCrowd3(){
+  const S3=CROWD3.seats,n=S3.length,rr=seeded(4242);
+  const ph=new Float32Array(n);for(let i=0;i<n;i++)ph[i]=rr()*TAU;
+  const mk=(geo)=>{geo.setAttribute('aPh',new THREE.InstancedBufferAttribute(ph,1));const m=new THREE.InstancedMesh(geo,crowdMat(),n);m.frustumCulled=false;S.add(m);return m;};
+  const head=new THREE.OctahedronGeometry(0.135,0);head.rotateY(PI/4);head.scale(1,0.88,1);head.translate(0,1.12,0);
+  CROWD3.bodies=mk(crowdBodyGeo(false));CROWD3.armsUp=mk(crowdBodyGeo(true));CROWD3.heads=mk(head);CROWD3.armsUp.visible=false;
+  const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),SC=new THREE.Vector3(),c=new THREE.Color();
+  for(let i=0;i<n;i++){const st=S3[i];SC.set(st.w,st.h,st.w);M.compose(st.p,st.q,SC);
+    CROWD3.bodies.setMatrixAt(i,M);CROWD3.armsUp.setMatrixAt(i,M);CROWD3.heads.setMatrixAt(i,M);
+    CROWD3.heads.setColorAt(i,c.set(SKIN3[st.skin]).convertSRGBToLinear().multiplyScalar(st.l));}
+  recolorCrowd(CROWD3.home,CROWD3.away);
+}
+// shirts follow the clubs playing: mostly home colours, some away fans, neutrals in between
+function recolorCrowd(home,away){
+  CROWD3.home=home;CROWD3.away=away;if(!CROWD3.bodies)return;
+  const c=new THREE.Color();
+  CROWD3.seats.forEach((st,i)=>{const hex=st.cat===0?home:st.cat===1?away:st.cat===2?'#dcdad4':st.cat===3?'#1d2028':CROWD_PAL[st.cat-4];
+    c.set(hex).convertSRGBToLinear().multiplyScalar(st.l);CROWD3.bodies.setColorAt(i,c);CROWD3.armsUp.setColorAt(i,c);});
+  CROWD3.bodies.instanceColor.needsUpdate=true;CROWD3.armsUp.instanceColor.needsUpdate=true;if(CROWD3.heads.instanceColor)CROWD3.heads.instanceColor.needsUpdate=true;
+}
 function buildStands(){
-  const [ta,tb]=crowdTextures('#c3162f','#1b57cf');CROWD.a=ta;CROWD.b=tb;
   const concrete=new THREE.MeshLambertMaterial({color:C3('#262b35')});
   const darkM=new THREE.MeshLambertMaterial({color:C3('#11141b')});
   const roofM=new THREE.MeshLambertMaterial({color:C3('#1a1e26'),side:THREE.DoubleSide});
   const trussM=new THREE.MeshLambertMaterial({color:C3('#3b414c')});
   const stripM=new THREE.MeshBasicMaterial({color:C3('#fff4d8')});
   const seatM=new THREE.MeshLambertMaterial({color:C3('#262f44'),vertexColors:true,side:THREE.DoubleSide});
-  // one supporters material for the whole ground: rows carry their own texture offsets
-  const crowdM=new THREE.MeshLambertMaterial({map:ta.clone(),alphaTest:0.45,side:THREE.DoubleSide,vertexColors:true});
-  crowdM.map.needsUpdate=true;CROWD.mats.push(crowdM);
-  const rr=seeded(91);
+  const rr=seeded(91),mobile=matchMedia('(pointer:coarse)').matches;
   const mk=(len,place)=>{
     const g=new THREE.Group();
-    const P=[],C=[],U=[],SP=[],SC=[];
+    const SP=[],SC=[],seats=[];
     const quad=(A,a,b,c,d)=>{A.push(...a,...b,...c,...a,...c,...d);};
     // a tier of rows: tread and riser for each step, a band of people standing on it facing the pitch
+    let upper=false;const maxX=len>150?HL+16:len/2;
     const tier=(z0,y0,z1,y1,rows,light0,light1)=>{
       const dz=(z1-z0)/rows,dy=(y1-y0)/rows,X=len/2;
       for(let r=0;r<rows;r++){
         const z=z0+r*dz,y=y0+r*dy,t=r/(rows-1),l=lerp(light0,light1,t)*(0.92+rr()*0.08);
         quad(SP,[-X,y,z],[X,y,z],[X,y,z+dz],[-X,y,z+dz]);quad(SP,[-X,y,z+dz],[X,y,z+dz],[X,y+dy,z+dz],[-X,y+dy,z+dz]);
         for(let k=0;k<12;k++)SC.push(l*0.8,l*0.8,l*0.85);
-        // people: aisles stay lined up because every row starts on an aisle boundary of the strip
-        const u0=Math.floor(rr()*4)*0.25,u1=u0+len/(SEATS*SEAT_W),zf=z+dz*0.45,h=1.45;
-        quad(P,[-X,y,zf],[X,y,zf],[X,y+h,zf],[-X,y+h,zf]);
-        U.push(u0,0,u1,0,u1,1,u0,0,u1,1,u0,1);
-        for(let k=0;k<6;k++)C.push(l,l,l);
+        // a supporter in each seat (an aisle every 16, a few empty seats), only along the stretch the cameras see
+        const step=upper&&mobile?0.78:0.62,span=Math.min(X,maxX);
+        for(let x=-span+step/2,k=0;x<span;x+=step,k++){
+          if(k%16===15||rr()<0.06)continue;
+          const q=rr(),cat=q<0.44?0:q<0.52?1:q<0.62?2:q<0.8?3:4+Math.floor(rr()*6);
+          seats.push({x:x+(rr()-0.5)*0.08,y,z:z+dz*0.42,w:0.92+rr()*0.18,h:0.92+rr()*0.16,l,cat,skin:Math.floor(rr()*5),turn:(rr()-0.5)*0.4});
+        }
       }
     };
     const wall=(z,y0,y1,m)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(len,y1-y0),m);p.position.set(0,(y0+y1)/2,z);p.rotation.y=PI;g.add(p);return p;};
     wall(0.2,0,1.3,concrete);
     tier(0.6,1.3,20,11,22,0.8,0.6);
     const band=wall(20.4,11,14.6,null);band.material=new THREE.MeshBasicMaterial({map:null,color:C3('#0c0f15')});BAND_MESHES.push({m:band,len});
-    tier(21,14.6,44,32,26,0.56,0.32);
+    upper=true;tier(21,14.6,44,32,26,0.56,0.32);
     const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(SP,3));sg.setAttribute('color',new THREE.Float32BufferAttribute(SC,3));sg.computeVertexNormals();
     g.add(new THREE.Mesh(sg,seatM));
-    const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(P,3));cg.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));cg.setAttribute('color',new THREE.Float32BufferAttribute(C,3));cg.computeVertexNormals();
-    g.add(new THREE.Mesh(cg,crowdM));
     wall(44.4,0,36,darkM);
     const roof=new THREE.Mesh(new THREE.PlaneGeometry(len,40),roofM);roof.rotation.x=-PI/2+0.08;roof.position.set(0,37.5,30);g.add(roof);
     const strip=new THREE.Mesh(new THREE.PlaneGeometry(len*0.96,0.5),stripM);strip.position.set(0,36.6,10.4);strip.rotation.x=PI/2-0.3;g.add(strip);
@@ -847,11 +887,16 @@ function buildStands(){
     for(let i=0;i<ribs;i++){M4.makeTranslation(-len/2+(i+0.5)*len/ribs,36.2,28);rib.setMatrixAt(i,M4);}
     g.add(rib);
     place(g);S.add(g);STAND_GROUPS.push(g);
+    // seats into world space for the shared crowd meshes
+    g.updateMatrixWorld(true);const gq=new THREE.Quaternion();g.getWorldQuaternion(gq);
+    for(const st of seats){const p=new THREE.Vector3(st.x,st.y,st.z).applyMatrix4(g.matrixWorld),q=gq.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),PI+st.turn));
+      CROWD3.seats.push({p,q,w:st.w,h:st.h,l:st.l*0.95,cat:st.cat,skin:st.skin});}
   };
   mk(2*(HL+46),g=>{g.rotation.y=PI;g.position.set(0,0,-(HW+6.5));});
   mk(2*(HL+46),g=>{g.position.set(0,0,HW+6.5);});
   mk(2*(HW+6.5),g=>{g.rotation.y=PI/2;g.position.set(HL+7.5,0,0);});
   mk(2*(HW+6.5),g=>{g.rotation.y=-PI/2;g.position.set(-(HL+7.5),0,0);});
+  buildCrowd3();
 }
 const BAND_MESHES=[];
 
@@ -1520,9 +1565,7 @@ function buildTeams(){
   const cardM=new THREE.MeshBasicMaterial({color:C3('#ffd447'),side:THREE.DoubleSide});KIT_MATS.push(cardM);
   ref.card=new THREE.Mesh(new THREE.PlaneGeometry(0.08,0.11),cardM);ref.card.visible=false;if(ref.rig.skinned){ref.card.scale.setScalar(100);ref.card.position.set(0,9,2);ref.rig.handR.add(ref.card);}else{ref.card.position.set(0,-0.37,0.02);ref.rig.handR.parent.add(ref.card);}
   // crowd recolour
-  const [ta,tb]=crowdTextures(CLUBS[ids[G.venue===1?1:0]].shirt,CLUBS[ids[G.venue===1?0:1]].shirt);
-  if(CROWD.a){CROWD.a.dispose();CROWD.b.dispose();}
-  CROWD.a=ta;CROWD.b=tb;
+  recolorCrowd(CLUBS[ids[G.venue===1?1:0]].shirt,CLUBS[ids[G.venue===1?0:1]].shirt);
   for(const m of CROWD.mats){const rp=m.map.repeat.clone();m.map.wrapS=THREE.RepeatWrapping;if(m.userData.base){m.userData.base.dispose();m.userData.alt.dispose();}else m.map.dispose();m.map=ta.clone();m.map.needsUpdate=true;m.map.repeat.copy(rp);m.userData.alt=tb.clone();m.userData.alt.needsUpdate=true;m.userData.alt.repeat.copy(rp);m.userData.base=m.map;}
 }
 const players=()=>G.ents.filter(e=>e.team);
@@ -1908,7 +1951,8 @@ function formTarget(e){
   const t=e.team,dir=t.dir,poss=t.inPoss;
   const bx=clamp(B.x*dir/HL,-1,1),bz=clamp(B.z*dir/HW,-1,1);
   let ax=e.base[0]+bx*(poss?0.6:0.5)+(poss?0.25:-0.1)+t.ment*0.07;
-  let az=e.base[1]*(poss?1.08:0.8)+bz*(poss?0.22:0.34);
+  const far=Math.sign(e.base[1])&&Math.sign(e.base[1])!==Math.sign(bz);
+  let az=e.base[1]*(poss?1.08:0.82)+bz*(poss?0.22:far?0.16:0.3);
   // full-backs push on when their side has the ball; centre-backs hold a higher line once it is in the other half
   if(e.role==='DF'){if(poss&&e.wide)az=e.base[1]*1.18+bz*0.15;ax=clamp(ax+(poss&&e.wide?0.12:0),-0.9,(poss?(e.wide?0.52:0.32)+(bx>0.25?0.08:0):0.05)+t.ment*0.05+(e.run>0?0.3:0));}
   else if(e.role==='MF')ax=clamp(ax,-0.78,0.62);
@@ -1916,7 +1960,7 @@ function formTarget(e){
   const dline=clamp(bx-0.16-clamp((-bx-0.25)*0.6,0,0.25),-0.86,0.08);
   if(!poss&&e.role==='DF')ax=lerp(Math.min(ax,bx-0.06),dline,0.6);
   if(!poss&&e.role==='MF')ax=Math.min(ax,dline+0.32);
-  if(!poss){const danger=clamp(1-(hyp(B.x-ownGoalX(t),B.z)-14)/40,0,1);az*=1-0.3*danger;if(e.role!=='FW')ax=Math.min(ax,lerp(ax,bx-0.12,danger*0.6));}
+  if(!poss){const danger=clamp(1-(hyp(B.x-ownGoalX(t),B.z)-14)/40,0,1);az*=1-0.15*danger;if(e.role!=='FW')ax=Math.min(ax,lerp(ax,bx-0.12,danger*0.6));}
   if(e.role!=='DF'||e.run>0){const lim=Math.max(t.lastLine,bx)-0.012+(e.run>0?0.22:0);ax=Math.min(ax,lim);}
   return toW(t,ax,clamp(az,-0.94,0.94));
 }
@@ -2031,19 +2075,20 @@ function setMove(e,tx,tz,sprint,smooth){
     // walk the last metres, jog to reposition, run only when far off or it matters; formation moves ease in.
     // Defending is different: the nearer the ball gets to goal the harder everyone gets back, and a man
     // who has been passed by the play sprints to recover
-    let sp=sprint?e.vmax:d>18?e.vmax*0.66:d>7?e.vmax*0.44:e.vmax*0.26,ease=smooth?0.75:1.5;
+    let sp=sprint?e.vmax:d>18?e.vmax*0.66:d>7?e.vmax*0.44:e.vmax*0.26,ease=smooth?0.75:1.5,floor=0;
     if(e.team&&!e.isGK&&(B.owner?B.owner.team!==e.team:B.lastTeam!==e.team.i)){
       const gx=ownGoalX(e.team),bg=hyp(B.x-gx,B.z),danger=clamp(1-(bg-14)/40,0,1),beaten=hyp(e.x-gx,e.z)>bg-1;
-      if(beaten&&d>3&&bg<55)sp=e.vmax;
-      else sp=Math.max(sp,d>8?e.vmax*(0.7+0.3*danger):d>2.5?e.vmax*(0.5+0.25*danger):e.vmax*0.3);
-      ease=1.6;
-      if(beaten&&d>3&&bg<55)e.sprintReq=true;
+      const rec=beaten&&d>6&&bg<55;
+      if(rec)sp=e.vmax;
+      else sp=Math.max(sp,d>8?e.vmax*(0.66+0.3*danger):d>0.8?e.vmax*(0.45+0.25*danger):e.vmax*0.3);
+      ease=2.2;floor=d>0.5?2.8:0;
+      if(rec)e.sprintReq=true;
     }else if(e.team&&!e.isGK&&B.owner&&B.owner.team===e.team){
       // attacking: the closer the ball gets to their goal, the harder the runs into the box
       const og=hyp(B.x+ownGoalX(e.team),B.z),threat=clamp(1-(og-16)/40,0,1);
       sp=Math.max(sp,d>3?e.vmax*(0.45+0.35*threat):e.vmax*0.3);ease=Math.max(ease,0.75+0.8*threat);
     }
-    const want=Math.min(sp,d*ease+0.3);
+    const want=Math.max(Math.min(sp,d*ease+0.3),Math.min(sp,floor));
     e.mx=d>0.001?dx/d*want:0;e.mz=d>0.001?dz/d*want:0;e.sprint=(sprint||e.sprintReq)&&want>e.vmax*0.75;e.sprintReq=false;
   }
   // at a jog players keep their eyes on the ball and shuffle; only a long run turns their back
@@ -3132,6 +3177,8 @@ function updateVisuals(dt){
   crowdFlip+=dt;
   const want=hype>0?(Math.floor(T*(hype>0.9?6:3))%2===0):(Math.floor(T*0.7)%7===0);
   if(want!==crowdState){crowdState=want;for(const m of CROWD.mats){if(!m.userData.alt)continue;m.map=want?m.userData.alt:m.userData.base;}}
+  CROWD3.uT.value=T;CROWD3.uJ.value=lerp(CROWD3.uJ.value,hype>0.9?1:hype>0?0.45:0,Math.min(1,dt*4));
+  if(CROWD3.bodies){const up=hype>0.9;CROWD3.armsUp.visible=up;CROWD3.bodies.visible=!up;}
   // camera flashes
   flashT-=dt;
   for(const f of FLASHES){if(f.t>0){f.t-=dt;if(f.t<=0)f.s.visible=false;}}
