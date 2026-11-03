@@ -221,6 +221,63 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
 .fx.me{background:rgba(255,212,71,.12)}
 .crest.big{width:38px;height:44px;font-size:12px}
 #pick,#friendly{background:rgba(4,7,13,.9)}
+.card .pick-legal{text-align:left;font-size:11px}
+.rec-bar{display:flex;gap:6px;align-items:center;padding:6px 8px;position:sticky;top:0;z-index:2;background:#0c121e;border-bottom:1px solid var(--rule)}
+.rec-cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.rec-cats::-webkit-scrollbar{display:none}
+.rec-cats button,.rec-mine{flex:0 0 auto;padding:5px 9px;border-radius:999px;border:1px solid var(--rule);background:var(--glass-hi);font-size:11px;font-weight:700;color:var(--mute);white-space:nowrap;cursor:pointer}
+.rec-cats button[aria-pressed="true"],.rec-mine[aria-pressed="true"]{color:#16120a;background:var(--flood);border-color:transparent}
+.rec-d{margin:0;padding:6px 10px 2px;font-size:11px;color:var(--mute)}
+.rec-bar .rec-d{padding:0}
+.lt.rec td.sm{font-size:11px;color:var(--mute);max-width:0;width:30%;overflow:hidden;text-overflow:ellipsis}
+.lt tr[data-p]{cursor:pointer}
+.lt tr[data-p]:hover td{background:rgba(255,255,255,.05)}
+#sqClub{padding:6px 8px;border-radius:7px;border:1px solid var(--rule);background:#141b28;color:var(--ink);font-size:12px;font-family:var(--f-ui);max-width:60%}
+.sq-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.lt.sq th{position:static;white-space:nowrap;padding:6px 7px}
+.lt.sq td{padding:5px 7px}
+.lt.sq td.l{max-width:none;width:auto;white-space:nowrap}
+.lt.sq td:first-child,.lt.sq th:first-child{position:sticky;left:0;background:#0c121e;z-index:1}
+.sq-n{font-style:normal;font-family:var(--f-num);color:var(--mute);display:inline-block;min-width:22px}
+#pcard{z-index:6;background:rgba(4,7,13,.9)}
+.pc-card{width:min(780px,100%);gap:10px}
+.pc-head{display:flex;align-items:center;gap:12px;min-width:0}
+.pc-num{font-family:var(--f-num);font-weight:800;font-size:34px;color:var(--flood);min-width:40px;text-align:center}
+.pc-name{min-width:0}
+.pc-name b{display:block;font-size:20px}
+.pc-name span{font-size:12px;color:var(--mute)}
+.pc-big{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pc-big div{background:var(--glass-hi);border-radius:8px;padding:6px 4px;text-align:center}
+.pc-big b{display:block;font-family:var(--f-num);font-size:22px;font-variant-numeric:tabular-nums}
+.pc-big span{font-size:11px;color:var(--mute)}
+.pc-badges{display:flex;flex-wrap:wrap;gap:4px}
+.pc-badges i{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:rgba(255,212,71,.14);color:var(--flood)}
+.pc-chart svg{width:100%;height:74px;display:block}
+.pc-chart .rec-d{padding:0 0 4px}
+.pc-gl{stroke:rgba(255,255,255,.12);stroke-width:1}
+.pc-g{fill:#fff}
+.pc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.pc-sec h4{margin:0 0 4px;font-size:12px;color:var(--flood)}
+.pc-sec div{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-top:1px solid var(--rule)}
+.pc-sec div span{color:var(--mute)}
+.pc-sec div b{font-family:var(--f-num);font-size:14px;font-variant-numeric:tabular-nums}
+.rb8{fill:#f2c94c;color:#f2c94c}.rb7{fill:#5fd88a;color:#5fd88a}.rb6{fill:#8fa4bb;color:#c9d4e0}.rb5{fill:#ff6b6b;color:#ff6b6b}
+.r-tabs{display:flex;gap:4px}
+.card .r-tabs button{flex:1;padding:6px 8px;border-radius:7px;font-size:12px;text-align:center}
+.card .r-tabs button[aria-pressed="true"]{background:var(--flood);color:#16120a;border-color:transparent}
+#rPl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rp-col h4{margin:0 0 4px;font-size:12px;color:var(--mute)}
+.rp{display:grid;grid-template-columns:22px minmax(0,1fr) auto 32px;gap:6px;align-items:center;font-size:12px;padding:3px 0;border-top:1px solid var(--rule)}
+.rp i{font-style:normal;font-family:var(--f-num);color:var(--mute)}
+.rp span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp em{font-style:normal;font-size:10px;font-weight:700;color:var(--flood)}
+.rp b{font-family:var(--f-num);font-size:14px;text-align:right}
+.rp.motm span{color:var(--flood);font-weight:700}
+#rFun div{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:8px;font-size:12px;padding:4px 0;border-top:1px solid var(--rule);align-items:baseline}
+#rFun span{color:var(--mute)}
+#rFun b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rFun b i{font-style:normal;color:var(--mute);font-weight:400;font-size:11px}
+#rFun em{font-style:normal;font-family:var(--f-num);color:var(--flood)}
 .pick-card{width:min(780px,100%)}
 .card .pick-sub,.card .pick-warn{text-align:left}
 .pick-warn{color:#ff9f1c}
@@ -350,7 +407,7 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
         <div class="hub-more"><button id="friendBtn">친선 경기</button><button id="olBtn">1대1 온라인</button><button id="newSeasonBtn">새 시즌</button></div>
       </div>
       <div class="hub-r">
-        <div class="hub-tabs" id="hubTabs"><button data-tab="table">순위</button><button data-tab="fix">일정·결과</button><button data-tab="sc">득점</button></div>
+        <div class="hub-tabs" id="hubTabs"><button data-tab="table">순위</button><button data-tab="fix">일정·결과</button><button data-tab="rec">기록</button><button data-tab="squad">선수단</button></div>
         <div class="hub-body" id="hubBody"></div>
       </div>
     </div>
@@ -360,10 +417,15 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
     <div class="card pick-card">
       <h2>PREMIER LEAGUE</h2>
       <p class="r-msg pick-sub">시즌을 함께할 클럽을 고르세요. 38라운드를 치르고 순위표에서 우승을 다퉈요.</p>
+      <p class="r-msg pick-legal">비공식 팬 게임이에요. 프리미어리그·각 구단과 관련이 없고, 능력치와 기록은 게임 속 추정치예요.</p>
       <p class="r-msg pick-warn" id="pickNote" hidden>새 클럽을 고르면 지금 시즌 기록은 지워져요.</p>
       <div class="pick-grid" id="pickGrid"></div>
       <button id="pickBack" hidden>돌아가기</button>
     </div>
+  </section>
+
+  <section id="pcard" class="ov" hidden>
+    <div class="card pc-card"><div id="pcBody"></div><button class="pri" id="pcClose">닫기</button></div>
   </section>
 
   <section id="friendly" class="ov" hidden>
@@ -463,7 +525,8 @@ button:focus-visible{outline:2px solid var(--flood);outline-offset:2px}
       <p class="r-k" id="rK">HALF TIME</p>
       <div class="r-sc"><span class="n" id="rH">-</span><span class="v" id="rV">0 : 0</span><span class="n" id="rA">-</span></div>
       <p class="r-msg" id="rMsg"></p>
-      <table id="rStats"></table>
+      <div class="r-tabs" id="rTabs"><button data-rt="team" aria-pressed="true">팀 기록</button><button data-rt="pl" aria-pressed="false">선수 평점</button><button data-rt="fun" aria-pressed="false">괴랄 기록</button></div>
+      <table id="rStats"></table><div id="rPl" hidden></div><div id="rFun" hidden></div>
       <div class="r-b"><button class="pri" id="rMain">후반전 시작</button><button id="rAlt">메인 메뉴</button></div>
     </div>
   </section>
@@ -1542,7 +1605,7 @@ function buildTeams(){
     const team={i:ti,club,dir:ti===0?1:-1,human:ti===0,players:[],chaser:null,recv:null,press1:null,press2:null,inPoss:false,lastLine:0,form:tac.form,ment:tac.ment};
     slots.forEach((f,k)=>{
       const m=roster[tac.order[k]],gk=k===0,st=m.st;
-      const e={team,i:ti*11+k,k,role:f.r,isGK:gk,num:m.num,lbl:f.l,name:m.name,st,stars:m.stars,base:f.p,off:false,yellow:0,
+      const e={team,i:ti*11+k,k,role:f.r,isGK:gk,num:m.num,lbl:f.l,name:m.name,st,stars:m.stars,base:f.p,off:false,yellow:0,ms:newMS(),ovr:m.ovr||80,rcvFrom:null,rcvT:-9,
         x:0,z:0,vx:0,vz:0,mx:0,mz:0,face:0,speed:0,phase:m.phase,act:0,actT:0,actD:0,
         sprint:false,cool:0,stun:0,tackleCd:0,decT:0,run:0,stamina:1,ipx:0,ipz:0,ipt:9,save:null,holdT:0,slideHit:false,kick:null,ap1:0,ap2:0,ap3:0,
         wide:/^[LR]/.test(f.l),style:f.r==='DF'?(/^[LR]/.test(f.l)||k%2===0?'man':'zone'):f.r==='MF'?(f.l==='CDM'||(k+ids[ti])%2===0?'lane':'man'):'zone',
@@ -1621,7 +1684,7 @@ function ballCollide(){
   if(Math.abs(B.x)>HL+4.25){B.x=Math.sign(B.x)*(HL+4.25);B.vx*=-0.3;B.vz*=0.6;}
 }
 let postCd=0;
-function hitPost(){if(G.t-postCd<0.3)return;postCd=G.t;sfx.post();if(G.state==='play'&&B.shot){say('골대를 강타합니다!');AU.excite(0.9);}B.shot=null;}
+function hitPost(){if(G.t-postCd<0.3)return;postCd=G.t;sfx.post();{const ls=B.lastShot;if(G.state==='play'&&ls&&G.t-ls.t<2.5&&!ls.post){ls.post=true;MSx(ls.by,'woodwork');}}if(G.state==='play'&&B.shot){say('골대를 강타합니다!');AU.excite(0.9);}B.shot=null;}
 function bulge(s,z,y,a){const g=GOALS.find(q=>q.s===s);g.amp=a;g.bz=z;g.by=y;g.t=0;}
 
 function kickBall(p,vx,vy,vz,spin){
@@ -1630,6 +1693,21 @@ function kickBall(p,vx,vy,vz,spin){
   if(B.y<BR)B.y=BR;
   p.cool=0.3;
   sfx.kick(hyp(vx,vy,vz));
+}
+
+/* ================= player match stats ================= */
+// every player keeps a running sheet for the match; ratings, contribution and season totals are built from it
+const MS_KEYS=['goals','assists','shots','onT','xg','woodwork','overBar','longGoal','shotKmh','passes','passOk','keyPasses','crosses','backPasses','throughs',
+  'tackles','tackleWon','interceptions','lostBall','saves','bigSaves','conceded','fouls','fouled','yel','red','skillTries','skills','stepovers',
+  'dist','sprint','topKmh','longRun','falls','idle','headers','ownGoals','min'];
+const MS_MAX=new Set(['longGoal','shotKmh','topKmh','longRun']);
+function newMS(){const o={};for(const k of MS_KEYS)o[k]=0;return o;}
+const MSx=(e,k,v=1)=>{if(e&&e.ms)e.ms[k]+=v;};
+const MSmax=(e,k,v)=>{if(e&&e.ms&&v>e.ms[k])e.ms[k]=v;};
+// expected goals from the angle the goal mouth opens from the spot; less for headers and under pressure
+function xgOf(p,x,z,head){
+  const dx=Math.abs(p.team.dir*HL-x),dz=Math.abs(z),open=Math.atan2(GW*dx,dx*dx+dz*dz-GW*GW/4);
+  let v=1/(1+Math.exp(4.9-5.5*open));const [,pr]=nearestOpp(p);if(pr<1.5)v*=0.75;if(head)v*=0.7;return clamp(v,0.01,0.9);
 }
 
 /* ================= actions ================= */
@@ -1688,7 +1766,8 @@ function passVel(p,r,kind,pt,pw,exact){
 function passExec(p,r,kind,pt,pw){
   const k=passVel(p,r,kind,pt,pw,false),tx=k.tx,tz=k.tz;
   kickBall(p,k.vx,k.vy,k.vz,k.spin);
-  B.target={r,x:tx,z:tz,kind,from:p};r.team.recv=r;
+  B.target={r,x:tx,z:tz,kind,from:p};
+  if(p.ms){p.ms.passes++;if(kind==='cross')p.ms.crosses++;if(kind==='through')p.ms.throughs++;if((tx-p.x)*p.team.dir<-3)p.ms.backPasses++;}r.team.recv=r;
   {const op=PADS[1-p.team.i];if(op&&op.ctrl&&p.team===r.team&&G.state==='play')autoSwitchDef(op,true);}
   G.stats[p.team.i].pass++;
   if(p.team===r.team&&padOf(r.team)&&!r.isGK)setCtrl(padOf(r.team),r,'recv');
@@ -1737,13 +1816,15 @@ function shotVel(p,power,aimZ,kind,fixed,exact){
 }
 function shootExec(p,power,aimZ,kind,fixed){
   const k=shotVel(p,power,aimZ,kind,fixed,false);
+  MSx(p,'shots');MSx(p,'xg',xgOf(p,B.x,B.z,false));MSmax(p,'shotKmh',Math.round(hyp(k.vx,k.vy,k.vz)*3.6));
+  if(p.rcvFrom&&p.rcvFrom.team===p.team&&G.t-p.rcvT<4)MSx(p.rcvFrom,'keyPasses');
   kickBall(p,k.vx,k.vy,k.vz,k.spin);
   B.shot=B.lastShot={by:p,t:G.t,team:p.team.i,kind:kind||'normal',x0:B.x,z0:B.z};
   G.stats[p.team.i].shots++;
   say(p.name+(kind==='chip'?', 칩슛!':kind==='finesse'?', 감아차기!':', 슈팅!'));AU.excite(0.85);
 }
 function header(e){
-  e.act=ACT.HEAD;e.actT=0;e.cool=0.45;e.kick=null;
+  e.act=ACT.HEAD;e.actT=0;e.cool=0.45;e.kick=null;MSx(e,'headers');
   const dir=e.team.dir,gx=dir*HL,dG=hyp(gx-e.x,e.z);
   let vx,vy,vz;
   if(dG<17&&(gx-e.x)*dir>2){
@@ -1751,7 +1832,8 @@ function header(e){
     const dx=gx+dir*0.3-B.x,dz=tz-B.z,dh=hyp(dx,dz),T=dh/sp;
     vx=dx/dh*sp;vz=dz/dh*sp;vy=(ty-B.y+0.5*GRAV*T*T)/T;
     B.owner=null;B.held=false;B.vx=vx;B.vy=vy;B.vz=vz;B.spin=0;B.last=e;B.lastTeam=e.team.i;B.kicker=e;B.kickT=G.t;B.target=null;
-    B.shot=B.lastShot={by:e,t:G.t,team:e.team.i};G.stats[e.team.i].shots++;say(e.name+'의 헤더!');AU.excite(0.9);
+    B.shot=B.lastShot={by:e,t:G.t,team:e.team.i};G.stats[e.team.i].shots++;MSx(e,'shots');MSx(e,'xg',xgOf(e,e.x,e.z,true));
+    if(e.rcvFrom&&e.rcvFrom.team===e.team&&G.t-e.rcvT<4)MSx(e.rcvFrom,'keyPasses');say(e.name+'의 헤더!');AU.excite(0.9);
   }else{
     const a=(dir>0?PI/2:-PI/2)+rnd(-0.7,0.7);const sp=rnd(9,13);
     B.owner=null;B.held=false;B.vx=Math.sin(a)*sp;B.vz=Math.cos(a)*sp;B.vy=rnd(1.5,3.5);B.spin=0;B.last=e;B.lastTeam=e.team.i;B.kicker=e;B.kickT=G.t;B.shot=null;B.target=null;
@@ -1762,6 +1844,9 @@ function gainBall(e){
   const prevTeam=B.lastTeam,tgt=B.target,bsp=hyp(B.vx,B.vy,B.vz),by=B.y;
   B.owner=e;B.held=false;B.shot=null;B.target=null;B.vx=B.vy=B.vz=0;B.spin=0;
   if(tgt&&tgt.r.team===e.team&&B.kicker&&B.kicker.team===e.team&&B.kicker!==e)G.stats[e.team.i].passOk++;
+  // who it came from (for assists and key passes), or an interception
+  if(tgt&&tgt.from&&tgt.from.team===e.team&&tgt.from!==e){MSx(tgt.from,'passOk');e.rcvFrom=tgt.from;e.rcvT=G.t;}
+  else{if(tgt&&tgt.from&&tgt.from.team!==e.team&&!e.isGK)MSx(e,'interceptions');if(!(B.kicker&&B.kicker.team===e.team))e.rcvFrom=null;}
   B.last=e;B.lastTeam=e.team.i;e.team.recv=null;e.kick=null;
   if(e.isGK&&inOwnBox(e)){
     B.held=true;e.holdT=0;
@@ -1782,6 +1867,7 @@ function tryTackle(d,c){
   const dist=hyp(B.x-d.x,B.z-d.z);
   d.act=ACT.POKE;d.actT=0;
   if(dist>1.75){d.tackleCd=0.6;return false;}
+  MSx(d,'tackles');
   let p=0.46+(d.st.tackle-c.st.drib)*0.9-(dist>1.2?0.12:0);
   if(d.isGK)p=0.55*d.gkSkill+0.1;
   const fx=Math.sin(c.face),fz=Math.cos(c.face),dot=((d.x-c.x)*fx+(d.z-c.z)*fz)/Math.max(0.1,hyp(d.x-c.x,d.z-c.z));
@@ -1791,7 +1877,7 @@ function tryTackle(d,c){
   if(Math.random()<clamp(p,0.08,0.9)){
     // winning it through the back of the man is still a foul
     if(dot<-0.3&&Math.random()<0.25){callFoul(d,c,'behind');return false;}
-    G.stats[d.team.i].tack++;
+    G.stats[d.team.i].tack++;MSx(d,'tackleWon');MSx(c,'lostBall');
     c.stun=0.4;c.cool=0.55;c.kick=null;c.act=ACT.STUMBLE;c.actT=0;
     if(d.isGK||Math.random()<0.55){gainBall(d);}
     else{B.owner=null;B.held=false;const a=Math.atan2(B.x-d.x,B.z-d.z)+rnd(-0.8,0.8),v=rnd(3,6);B.vx=Math.sin(a)*v;B.vz=Math.cos(a)*v;B.vy=0;B.last=d;B.lastTeam=d.team.i;B.kicker=d;B.kickT=G.t;d.cool=0.15;}
@@ -1820,7 +1906,9 @@ function callFoul(off,vic,kind){
   if(deny&&!inBox&&!off.isGK)card='red';
   else if(Math.random()<FOUL_SEV[kind]||(deny&&inBox))card='yellow';
   if(kind==='slideBehind'&&!off.isGK&&Math.random()<0.1)card='red';
-  if(card==='yellow'){off.yellow=(off.yellow||0)+1;if(off.yellow>=2&&!off.isGK)card='red2';}
+  if(card==='yellow'){off.yellow=(off.yellow||0)+1;MSx(off,'yel');if(off.yellow>=2&&!off.isGK)card='red2';}
+  if(card==='red'||card==='red2')MSx(off,'red');
+  MSx(off,'fouls');MSx(vic,'fouled');MSx(vic,'falls');
   const S_=G.stats[t.i];S_.fouls++;if(card==='yellow')S_.yel++;else if(card)S_.red++;
   vic.act=ACT.FALL;vic.actT=0;vic.stun=1.3;vic.kick=null;
   B.owner=null;B.held=false;B.vx*=0.2;B.vz*=0.2;B.shot=null;B.target=null;
@@ -1838,6 +1926,7 @@ function callFoul(off,vic,kind){
   AU.excite(inBox?1:0.6);
 }
 function sendOff(e){
+  if(e.ms)e.ms.min=Math.max(1,Math.round(G.clock));
   e.off=true;e.act=0;e.kick=null;e.save=null;e.vx=e.vz=e.mx=e.mz=0;e.x=(e.k-5)*0.8;e.z=HW+6;e.rig.root.visible=false;
   const pd=padOf(e.team);if(pd&&pd.ctrl===e){const n=nearestHuman(e.team,B.x,B.z,true);if(n)setCtrl(pd,n);}
 }
@@ -1857,7 +1946,7 @@ function slideUpdate(e,dt){
       const behind=(e.x-c.x)*Math.sin(c.face)+(e.z-c.z)*Math.cos(c.face)<0;  // slid in from behind the carrier
       if(Math.random()<0.62+(e.st.tackle-c.st.drib)*0.6){
         if(behind&&Math.random()<0.45){callFoul(e,c,'slideBehind');return;}
-        c.act=ACT.FALL;c.actT=0;c.stun=1.4;c.cool=1;c.kick=null;G.stats[e.team.i].tack++;say(e.name+', 슬라이딩 태클 성공!');}
+        c.act=ACT.FALL;c.actT=0;c.stun=1.4;c.cool=1;c.kick=null;G.stats[e.team.i].tack++;MSx(e,'tackles');MSx(e,'tackleWon');MSx(c,'lostBall');MSx(c,'falls');say(e.name+', 슬라이딩 태클 성공!');}
       else{if(Math.random()<0.5)callFoul(e,c,behind?'slideBehind':'slide');return;}
     }else if(c)return;
     B.owner=null;const a=e.face+rnd(-0.5,0.5),v=rnd(5,9);B.vx=Math.sin(a)*v;B.vz=Math.cos(a)*v;B.vy=rnd(0,1.5);B.last=e;B.lastTeam=e.team.i;B.kicker=e;B.kickT=G.t;B.shot=null;B.target=null;sfx.kick(7);
@@ -1881,7 +1970,7 @@ function startSkill(c,s){
   if(c.kick||B.owner!==c||B.held||c.act===ACT.SKILL||c.stun>0)return false;
   c.act=ACT.SKILL;c.actT=0;c.actD=s.id;c.ap1=s.side;c.ap2=s.dir;c.ap3=c.face;c.aimFace=null;
   c.sk={id:s.id,side:s.side,dir:s.dir,f0:c.face,beat:false,launched:false};
-  c.skillCd=G.t+SKILLS[s.id].T+0.35;
+  c.skillCd=G.t+SKILLS[s.id].T+0.35;MSx(c,'skillTries');if(s.id===1)MSx(c,'stepovers');
   if(c.team.human)say(SKILLS[s.id].n+'!');
   return true;
 }
@@ -1898,7 +1987,7 @@ function skillBeat(c,range,bonus,stun,push){
     if(push){d.vx+=fz*push*2.4;d.vz-=fx*push*2.4;}
     n++;
   }
-  if(n){G.stats[c.team.i].skill++;say(c.name+', '+SKILLS[c.sk.id].n+SKILLS[c.sk.id].j+' 제칩니다!');AU.excite(0.75);}
+  if(n){G.stats[c.team.i].skill++;MSx(c,'skills');say(c.name+', '+SKILLS[c.sk.id].n+SKILLS[c.sk.id].j+' 제칩니다!');AU.excite(0.75);}
 }
 // the body's path through a move, in the frame it started in (forward / lateral speed, facing)
 function skillStep(e,dt){
@@ -2364,7 +2453,8 @@ function planSave(e){
 function doSave(e,sv){
   const sp=hyp(B.vx,B.vy,B.vz);
   if(sv)sv.done=true;
-  if(B.shot&&!B.shot.counted){B.shot.counted=true;G.stats[1-e.team.i].onT++;}
+  if(B.shot&&!B.shot.counted){B.shot.counted=true;G.stats[1-e.team.i].onT++;MSx(B.shot.by,'onT');}
+  MSx(e,'saves');if(e.act===ACT.DIVE)MSx(e,'bigSaves');
   if(sv&&sv.catch){
     gainBall(e);B.held=true;
     e.holdT=e.act===ACT.DIVE?-(actEnd(e)-e.actT):-0.3;
@@ -2491,6 +2581,8 @@ function moveEnt(e,dt){
   const back=1;
   e.phase+=dt*sp/(1.25+sp*0.26)*TAU*back+(sp<1?dt*Math.min(5,Math.abs(e.turnRate||0))*0.8:0);
   e.speed=sp;
+  if(e.ms&&G.state==='play'){const m=e.ms;m.dist+=sp*dt;if(!e.save&&e.act!==ACT.DIVE&&e.act!==ACT.SLIDE&&e.act!==ACT.FALL&&sp*3.6>m.topKmh)m.topKmh=Math.round(Math.min(sp,e.vmax*1.12)*36)/10;if(sp<0.3)m.idle+=dt;
+    if(e.sprint&&sp>e.vmax*0.75){m.sprint+=sp*dt;e.runLen=(e.runLen||0)+sp*dt;if(e.runLen>m.longRun)m.longRun=Math.round(e.runLen);}else e.runLen=0;}
   if(e.team){if(e.sprint&&sp>e.vmax*0.75)e.stamina=Math.max(0,e.stamina-dt*0.075);else e.stamina=Math.min(1,e.stamina+dt*0.04);}
   faceUpdate(e,dt,sp);
 }
@@ -2574,6 +2666,7 @@ function checkRules(){
     const s=Math.sign(B.x);
     if(Math.abs(B.z)<GW/2&&B.y<GH){const sc=G.teams.find(t=>t.dir===s);onGoal(sc.i);return;}
     const def=G.teams.find(t=>-t.dir===s),att=oppOf(def);
+    {const ls=B.lastShot;if(ls&&!ls.ob&&G.t-ls.t<3&&ls.team!==def.i&&B.y>GH-0.2&&Math.abs(B.z)<GW/2+4){ls.ob=true;MSx(ls.by,'overBar');}}
     if(B.lastTeam===def.i){toOut('corner',att.i,s*(HL-0.4),Math.sign(B.z)*(HW-0.4));say('코너킥입니다.');}
     else{toOut('goalkick',def.i,s*(HL-5.5),Math.sign(B.z||1)*4);say(B.shot||G.t-B.kickT<2?'골문을 벗어납니다. 골킥.':'골킥.');}
     return;
@@ -2659,8 +2752,13 @@ function onGoal(ti){netEv('goalfx',[1]);
   let sc=B.last&&B.last.team===team?B.last:null,own=false;
   if(!sc){own=true;sc=team.players[9];}
   // every goal counts as a shot on target; one that went in without a strike (a tap-in off a rebound) as a shot too
-  if(!own){const ls=B.lastShot;if(ls&&ls.team===ti&&!ls.counted&&G.t-ls.t<4)ls.counted=true;else G.stats[ti].shots++;G.stats[ti].onT++;}
-  G.goal={team:ti,scorer:sc,own,recEnd:recW+38,recAt:recW};
+  let assist=null;
+  if(!own){const ls=B.lastShot;if(ls&&ls.team===ti&&!ls.counted&&G.t-ls.t<4)ls.counted=true;else{G.stats[ti].shots++;MSx(sc,'shots');}G.stats[ti].onT++;
+    MSx(sc,'onT');MSx(sc,'goals');if(ls&&ls.by===sc&&ls.x0!=null)MSmax(sc,'longGoal',Math.round(hyp(team.dir*HL-ls.x0,ls.z0)*10)/10);
+    const as=sc.rcvFrom;if(as&&as.team===team&&as!==sc&&G.t-sc.rcvT<12){MSx(as,'assists');assist=as;}}
+  else if(B.last&&B.last.team!==team)MSx(B.last,'ownGoals');
+  MSx(oppOf(team).players[0],'conceded');
+  G.goal={team:ti,scorer:sc,own,recEnd:recW+38,recAt:recW,assist};
   if(!own)G.goalLog.push({ci:ti===0?G.set.home:G.set.away,name:sc.name});
   G.kickTeam=1-ti;
   hudScore();
@@ -2705,7 +2803,7 @@ function startMatch(){
   // pads: offline the CPU plays team 1; online the host's browser also takes the guest's input for team 1
   PADS[0]=mkPad(0,NET.localTi===0?IN:IN2);PADS[1]=NET.online?mkPad(1,NET.localTi===1?IN:IN2):null;
   G.teams[1].human=NET.online;
-  G.score=[0,0];G.clock=0;G.half=1;G.stats=newStats();G.goalLog=[];G.lgRes=null;G.firstKick=Math.random()<0.5?0:1;G.kickTeam=G.firstKick;
+  G.score=[0,0];G.clock=0;G.half=1;G.stats=newStats();G.goalLog=[];G.lgRes=null;G.lastRows=null;G.firstKick=Math.random()<0.5?0:1;G.kickTeam=G.firstKick;
   recW=0;recN=0;
   hudInit();hudScore();
   G.auto=false;G.forfeit=false;$('autoBtn').classList.remove('on');$('app').classList.remove('auto');$('autoBtn').hidden=NET.online;
@@ -2729,7 +2827,7 @@ function fullTime(){
   // a league fixture goes into the table, then the rest of the round is played out
   if(!NET.online&&G.mode==='league'&&LG.s){const md=LG.s.md,f=userFixture(md);
     if(f&&G.set.home===LG.s.club&&G.set.away===f.opp){const [gh,ga]=f.home?[G.score[0],G.score[1]]:[G.score[1],G.score[0]];
-      recordResult(md,f.h,f.a,gh,ga,G.goalLog);finishRound();const T=leagueTable(),pos=T.findIndex(x=>x.i===LG.s.club);G.lgRes={md,pos:pos+1,pts:T[pos].pts};}}
+      const R=G.lastRows=matchRows();recordResult(md,f.h,f.a,gh,ga,f.home?{h:R[0],a:R[1]}:{h:R[1],a:R[0]});finishRound();const T=leagueTable(),pos=T.findIndex(x=>x.i===LG.s.club);G.lgRes={md,pos:pos+1,pts:T[pos].pts};}}
   showResult(true);
 }
 function getRec(){try{const r=JSON.parse(lsGet('fl11-rec')||'null');if(r&&typeof r.w==='number')return r;}catch(e){}return{w:0,d:0,l:0};}
@@ -3252,9 +3350,24 @@ function showResult(full){
     $('rMain').hidden=full||NET.role==='guest';$('rAlt').textContent=full?'메인 메뉴':'경기 나가기';
     if(!full)$('rMsg').textContent+=NET.role==='guest'?' 잠시 후 자동으로 시작해요.':' 7초 뒤 자동으로 시작해요.';
   }else{$('rMain').hidden=false;$('rAlt').textContent='메인 메뉴';$('rAlt').hidden=full&&!!G.lgRes;}
+  // player ratings and the match's odd superlatives (worked out where the match runs)
+  const guest=NET.role==='guest';$('rTabs').hidden=guest;if(guest)setRTab('team');
+  if(!guest){
+    const R=full&&G.lastRows?G.lastRows:matchRows();
+    $('rPl').innerHTML=R.map((rows,ti)=>`<div class="rp-col"><h4>${CLUBS[ti?G.set.away:G.set.home].name}</h4>`+rows.map(r=>
+      `<div class="rp${r.motm?' motm':''}"><i>${r.num}</i><span>${escH(r.name)}</span><em>${r.motm?'MOM ':''}${r.ms.goals?'G'+r.ms.goals+' ':''}${r.ms.assists?'A'+r.ms.assists:''}</em><b class="${band(r.rating)}">${r.rating.toFixed(1)}</b></div>`).join('')+'</div>').join('');
+    const all=R.flatMap((rows,ti)=>rows.map(r=>({...r,cid:CLUBS[ti?G.set.away:G.set.home].id})));
+    const sup=[['최고 슈팅 속도','shotKmh',x=>x+'km/h'],['가장 많이 뛴 선수','dist',x=>(x/1000).toFixed(1)+'km'],['최장 질주','longRun',x=>x+'m'],['최고 속도','topKmh',x=>x+'km/h'],
+      ['개인기 성공','skills',x=>x+'회'],['헛다리','stepovers',x=>x+'회'],['홈런 슛','overBar',x=>x+'개'],['골대 강타','woodwork',x=>x+'번'],['백패스 장인','backPasses',x=>x+'개'],
+      ['바닥과 친구','falls',x=>x+'번'],['멍때리기 1등','idle',x=>Math.round(x/60)+'분'],['볼 뺏김','lostBall',x=>x+'번'],['불운의 골잡이',r=>r.ms.xg-r.ms.goals,x=>'xG '+x.toFixed(2)+' 못 살림']];
+    $('rFun').innerHTML=sup.map(([l,k,f])=>{let b=null,bv=0;for(const r of all){const x=typeof k==='function'?k(r):r.ms[k];if(x>bv+1e-6){bv=x;b=r;}}
+      return b&&bv>0.05?`<div><span>${l}</span><b>${escH(b.name)} <i>${b.cid}</i></b><em>${f(bv)}</em></div>`:'';}).join('')||'<p class="r-msg">아직 기록할 만한 장면이 없어요.</p>';
+  }
   netEv('result',[full,G.stats,G.score,G.firstKick]);
   $('result').hidden=false;
 }
+function setRTab(t){document.querySelectorAll('#rTabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.rt===t));$('rStats').hidden=t!=='team';$('rPl').hidden=t!=='pl';$('rFun').hidden=t!=='fun';}
+$('rTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setRTab(b.dataset.rt);});
 
 /* ================= audio (synthesised) ================= */
 const AU={ctx:null,master:null,crowd:null,crowdF:null,level:0.2,target:0.2,noise:null,on:true,
@@ -3367,7 +3480,8 @@ const clubOvr=ci=>CLUBS[ci].rating;
 /* the league season: 20 clubs, 38 rounds, kept in this browser */
 const LG={s:null};
 function lgSave(){if(LG.s)lsSet('fl11-season',JSON.stringify(LG.s));}
-function lgLoad(){try{const s=JSON.parse(lsGet('fl11-season')||'null');if(s&&s.v===1&&CLUBS[s.club]&&Array.isArray(s.fx)&&s.fx.length===38)LG.s=s;}catch(e){}}
+function lgLoad(){try{const s=JSON.parse(lsGet('fl11-season')||'null');if(s&&s.v===1&&CLUBS[s.club]&&Array.isArray(s.fx)&&s.fx.length===38){LG.s=s;
+  if(!s.ps){s.ps={};s.tv={};for(const k in s.goals||{}){const p={apps:0,rs:0,motm:0,cs:0,cv:0,log:[]};for(const x of MS_KEYS)p[x]=0;p.goals=s.goals[k];s.ps[k]=p;}}}}catch(e){}}
 function makeFixtures(seed){
   // circle method: every club meets every other club once per half, home and away swapped in the second half
   const rr=seeded(seed),t=[...Array(20).keys()];
@@ -3380,18 +3494,98 @@ function makeFixtures(seed){
   }
   return first.concat(first.map(p=>p.map(([h,a])=>[a,h])));
 }
-function newSeason(club){const seed=(Date.now()%2147483647)>>>0;LG.s={v:1,club,md:0,seed,fx:makeFixtures(seed),res:{},goals:{}};lgSave();}
+function newSeason(club){const seed=(Date.now()%2147483647)>>>0;LG.s={v:1,club,md:0,seed,fx:makeFixtures(seed),res:{},goals:{},ps:{},tv:{}};lgSave();}
 const resKey=(md,h,a)=>md+':'+h+':'+a;
 function poisson(l){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
 // a simulated score: goal expectation from the gap in squad overall, plus home advantage
 function simGoals(h,a){const d=(clubOvr(h)-clubOvr(a))/8;return[poisson(Math.max(0.2,1.38*Math.exp(0.42*d)+0.12)),poisson(Math.max(0.15,1.12*Math.exp(-0.42*d)))];}
-function addScorer(ci,name){const k=ci+'|'+name;LG.s.goals[k]=(LG.s.goals[k]||0)+1;}
-function simScorers(ci,n){
-  // strikers score most, then wide forwards and the No.10; better players more often
-  const xi=CLUBS[ci].xi,sl=FORMS[CLUBS[ci].form],w=xi.map((p,k)=>(sl[k].l==='ST'?7:p[2]==='FW'?4:sl[k].l==='CAM'?3:p[2]==='MF'?1.6:p[2]==='DF'?0.45:0)*Math.pow(p[3]/80,5)),tot=w.reduce((a,b)=>a+b,0);
-  for(let g=0;g<n;g++){let r=Math.random()*tot;for(let i=0;i<xi.length;i++){r-=w[i];if(r<=0){addScorer(ci,xi[i][0]);break;}}}
+/* ratings, contribution, and the sheets kept for the season */
+function rateMS(ms,role,gf,ga){
+  let r=6.0+ms.goals*1.0+ms.assists*0.7+ms.keyPasses*0.15+ms.onT*0.12-(ms.shots-ms.onT)*0.03
+    +(ms.passes>=15?clamp((ms.passOk/ms.passes-0.78)*3,-0.6,0.6):0)+ms.tackleWon*0.1+ms.interceptions*0.08+ms.skills*0.1
+    -ms.lostBall*0.04-ms.yel*0.3-ms.red*1.5-ms.ownGoals*1.0+(gf>ga?0.3:gf<ga?-0.2:0);
+  if(role==='GK')r+=ms.saves*0.3+ms.bigSaves*0.2-ga*0.35+(ga===0?0.8:0);
+  else if(role==='DF')r+=ga===0?0.5:-ga*0.12;
+  return clamp(Math.round(r*10)/10,3,10);
 }
-function recordResult(md,h,a,gh,ga,scorers){LG.s.res[resKey(md,h,a)]=[gh,ga];if(scorers)scorers.forEach(s=>addScorer(s.ci,s.name));else{simScorers(h,gh);simScorers(a,ga);}}
+// how much a player put into the team's result: goals and assists weigh most, then chances made, duels won, saves
+function contribOf(ms,role,ga){return ms.goals*3+ms.assists*2+ms.keyPasses*0.6+ms.onT*0.3+ms.passOk*0.012+ms.tackleWon*0.25+ms.interceptions*0.25+ms.saves*0.7+ms.skills*0.2+(ga===0&&(role==='GK'||role==='DF')?1:0);}
+// a played match lasts a few real minutes: volume numbers are scaled to a 90-minute game, keeping the ratios between players
+function matchRows(){
+  const all=G.teams.flatMap(t=>t.players),of=all.filter(e=>!e.isGK);
+  const avgD=of.reduce((a,e)=>a+e.ms.dist,0)/Math.max(1,of.length)||1,kD=10600/avgD;
+  const tS=90/LENS[G.set.len].m,mean=k=>of.reduce((a,e)=>a+e.ms[k],0)/Math.max(1,of.length)||1,avP=mean('passes'),avT=mean('tackles');
+  const out=G.teams.map((t,ti)=>{const gf=G.score[ti],ga=G.score[1-ti];
+    return t.players.map(e=>{const m={...e.ms},raw=e.ms,role=e.isGK?'GK':e.role;
+      m.dist=Math.round(m.dist*kD);m.sprint=Math.round(m.sprint*kD);m.idle=Math.round(m.idle*tS);m.xg=Math.round(m.xg*100)/100;
+      // passing volume: the position's usual load, raised or lowered by how involved he was; accuracy leans on what
+      // he actually did as the sample grows
+      const sh=clamp(raw.passes/avP,0.2,2.2),base=role==='GK'?28:role==='DF'?52:role==='MF'?60:28,syn=clamp(0.62+e.ovr*0.0028,0.5,0.95),w=Math.min(1,raw.passes/8);
+      m.passes=Math.round(base*(0.55+0.45*sh));m.passOk=Math.round(m.passes*(raw.passes?(raw.passOk/raw.passes)*w+syn*(1-w):syn));
+      m.backPasses=Math.round(m.passes*(raw.passes?clamp(raw.backPasses/raw.passes,0.05,0.5):0.18));m.crosses=Math.round(raw.crosses*2.5);m.throughs=Math.round(raw.throughs*2);
+      const tb=role==='GK'?0:role==='DF'?3:role==='MF'?2.6:0.8,tsh=clamp(raw.tackles/avT,0,2.5);
+      m.tackles=Math.round(tb*(0.5+0.5*tsh))+raw.tackles;m.tackleWon=Math.min(m.tackles,Math.round(m.tackles*(raw.tackleWon+1.2)/(raw.tackles+2)));
+      m.interceptions=raw.interceptions*2+Math.round(tb*0.4);m.lostBall=raw.lostBall*2;
+      m.min=e.off&&e.ms.min?e.ms.min:90;
+      return{name:e.name,num:e.num,role,lbl:e.lbl,ms:m,rating:rateMS(m,role,gf,ga),cv:contribOf(m,role,ga)};});});
+  let best=null;for(const r of out.flat())if(!best||r.rating>best.rating)best=r;if(best)best.motm=true;
+  return out;
+}
+// the other nine games of a round: plausible sheets from the score, positions and overalls
+function pickScorers(ci,n){
+  const xi=CLUBS[ci].xi,sl=FORMS[CLUBS[ci].form],w=xi.map((p,k)=>(sl[k].l==='ST'?7:p[2]==='FW'?4:sl[k].l==='CAM'?3:p[2]==='MF'?1.6:p[2]==='DF'?0.45:0)*Math.pow(p[3]/80,5)),tot=w.reduce((a,b)=>a+b,0),out=[];
+  for(let g=0;g<n;g++){let r=Math.random()*tot;for(let i=0;i<xi.length;i++){r-=w[i];if(r<=0){out.push(xi[i][0]);break;}}}
+  return out;
+}
+function pickAssists(ci,scorers){
+  const xi=CLUBS[ci].xi,sl=FORMS[CLUBS[ci].form],out=[];
+  const wt=k=>{const L=sl[k].l;return(L==='CAM'?3:WIDE.has(L)?2.6:L==='CM'?2.2:BACKS.has(L)?1.6:L==='ST'?1.4:L==='CDM'?1:L==='CB'?0.4:0.05)*Math.pow(xi[k][3]/80,3);};
+  for(const sc of scorers){if(Math.random()>0.75)continue;const w=xi.map((p,k)=>p[0]===sc?0:wt(k)),tot=w.reduce((a,b)=>a+b,0);let r=Math.random()*tot;
+    for(let k=0;k<11;k++){r-=w[k];if(r<=0){out.push(xi[k][0]);break;}}}
+  return out;
+}
+function synthRows(ci,gf,ga,scorers,assists){
+  const c=CLUBS[ci],sl=FORMS[c.form],ros=makeRoster(ci),P=poisson,R=Math.random;
+  return c.xi.map(([name,num,role,ovr],k)=>{
+    const L=sl[k].l,q=ovr/80,m=newMS(),pf=role==='FW'?1:role==='MF'?0.55:role==='DF'?0.18:0;m.min=90;
+    m.goals=scorers.filter(n=>n===name).length;m.assists=assists.filter(n=>n===name).length;
+    m.shots=m.goals+P(pf*2.0*q);m.onT=m.goals+Math.min(m.shots-m.goals,P(pf*0.7*q));m.xg=Math.round((m.shots*0.09+m.goals*0.14+R()*0.1*pf)*100)/100;
+    m.passes=Math.round((role==='GK'?28:role==='DF'?52:role==='MF'?60:28)*(0.75+R()*0.5));m.passOk=Math.round(m.passes*clamp(0.62+ovr*0.0028+(R()-0.5)*0.08,0.5,0.96));
+    m.keyPasses=role==='GK'?0:P((role==='MF'?1.1:role==='FW'?0.8:0.3)*q)+m.assists;
+    m.crosses=BACKS.has(L)||WIDE.has(L)?P(2.6):P(0.3);m.backPasses=Math.round(m.passes*(0.12+R()*0.12));m.throughs=role==='MF'?P(1.2):P(0.3);
+    m.tackles=role==='GK'?0:P(role==='DF'?3:role==='MF'?2.6:0.8);m.tackleWon=Math.round(m.tackles*(0.5+R()*0.3));
+    m.interceptions=role==='DF'?P(1.8):role==='MF'?P(1.2):role==='FW'?P(0.3):0;m.lostBall=role==='GK'?0:P(role==='FW'?2.5:role==='MF'?1.8:0.8);
+    if(role==='GK'){m.conceded=ga;m.saves=P(2.4)+(ga===0?1:0);m.bigSaves=P(0.5);}
+    m.fouls=role==='GK'?0:P(role==='FW'?0.7:1.0);m.fouled=role==='GK'?0:P(role==='FW'?1.3:0.8);
+    m.yel=R()<(role==='GK'?0.03:0.13)?1:0;m.red=R()<0.004?1:0;
+    m.skillTries=role==='GK'?0:P(ros[k].stars*0.35);m.skills=Math.round(m.skillTries*(0.35+R()*0.35));m.stepovers=Math.round(m.skillTries*0.4);
+    m.dist=Math.round(role==='GK'?5200+R()*800:(role==='MF'?11000:role==='DF'?10000:10300)+(R()-0.5)*1400);m.sprint=Math.round(m.dist*(0.07+R()*0.05));
+    m.topKmh=Math.round((27+ros[k].st.pace*9+R()*2)*10)/10;m.longRun=Math.round(role==='GK'?8+R()*10:20+R()*40);
+    m.falls=P(role==='GK'?0.6:1.2);m.idle=Math.round(role==='GK'?1500+R()*900:200+R()*400);m.headers=P(role==='DF'?3:role==='FW'?2:0.8);
+    m.woodwork=R()<m.shots*0.03?1:0;m.overBar=P(m.shots*0.18);if(m.shots)m.shotKmh=Math.round(75+R()*35);if(m.goals)m.longGoal=Math.round((6+R()*18)*10)/10;
+    return{name,num,role,lbl:L,ms:m,rating:rateMS(m,role,gf,ga),cv:contribOf(m,role,ga)};});
+}
+function seasonAdd(ci,md,rows,ga){
+  const s=LG.s;s.ps=s.ps||{};s.tv=s.tv||{};
+  for(const r of rows){
+    const k=ci+'|'+r.name;let p=s.ps[k];
+    if(!p){p=s.ps[k]={apps:0,rs:0,motm:0,cs:0,cv:0,log:[]};for(const x of MS_KEYS)p[x]=0;}
+    p.role=r.role;p.apps++;p.rs=Math.round((p.rs+r.rating)*10)/10;p.cv+=r.cv;if(r.motm)p.motm++;if(ga===0&&(r.role==='GK'||r.role==='DF'))p.cs++;
+    for(const x of MS_KEYS){const v=r.ms[x]||0;if(MS_MAX.has(x)){if(v>p[x])p[x]=v;}else p[x]+=v;}
+    p.xg=Math.round(p.xg*100)/100;p.cv=Math.round(p.cv*100)/100;
+    p.log.push([md,Math.round(r.rating*10),r.ms.goals,r.ms.assists]);
+    s.tv[ci]=Math.round(((s.tv[ci]||0)+r.cv)*100)/100;
+    if(r.ms.goals)s.goals[k]=(s.goals[k]||0)+r.ms.goals;
+  }
+}
+function recordResult(md,h,a,gh,ga,real){
+  LG.s.res[resKey(md,h,a)]=[gh,ga];
+  let rh,ra;
+  if(real){rh=real.h;ra=real.a;}
+  else{const sh=pickScorers(h,gh),sa=pickScorers(a,ga);rh=synthRows(h,gh,ga,sh,pickAssists(h,sh));ra=synthRows(a,ga,gh,sa,pickAssists(a,sa));
+    let best=null;for(const r of rh.concat(ra))if(!best||r.rating>best.rating)best=r;if(best)best.motm=true;}
+  seasonAdd(h,md,rh,ga);seasonAdd(a,md,ra,gh);
+}
 function userFixture(md){const s=LG.s;if(!s||md>=38)return null;const p=s.fx[md].find(([h,a])=>h===s.club||a===s.club);return p?{h:p[0],a:p[1],home:p[0]===s.club,opp:p[0]===s.club?p[1]:p[0]}:null;}
 function finishRound(){const s=LG.s,md=s.md;for(const [h,a] of s.fx[md])if(!s.res[resKey(md,h,a)]){const [gh,ga]=simGoals(h,a);recordResult(md,h,a,gh,ga);}s.md++;lgSave();}
 function leagueTable(){
@@ -3416,8 +3610,9 @@ function renderHub(){
     $('goBtn').hidden=true;$('simBtn').hidden=true;
   }
   document.querySelectorAll('#hubTabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===hubTab));
-  $('hubBody').innerHTML=hubTab==='table'?tableHTML(T):hubTab==='fix'?fixHTML():scorersHTML();
-  const body=$('hubBody');body.scrollTop=0;
+  const body=$('hubBody'),keep=hubTab==='rec'||hubTab==='squad'?body.scrollTop:0;
+  body.innerHTML=hubTab==='table'?tableHTML(T):hubTab==='fix'?fixHTML():hubTab==='squad'?squadHTML():recHTML();
+  body.scrollTop=hubTab===body.dataset.tab?keep:0;body.dataset.tab=hubTab;
   if(hubTab==='table'){const r=body.querySelector('tr.me');if(r)body.scrollTop=Math.max(0,r.getBoundingClientRect().top-body.getBoundingClientRect().top-body.clientHeight/2);}
 }
 function tableHTML(T){
@@ -3433,12 +3628,88 @@ function fixHTML(){
   }
   return out.join('');
 }
-function scorersHTML(){
-  const g=Object.entries(LG.s.goals).sort((a,b)=>b[1]-a[1]).slice(0,15);
-  if(!g.length)return '<p class="fx-h">아직 득점 기록이 없어요.</p>';
-  return '<table class="lt"><thead><tr><th>#</th><th class="l">선수</th><th class="l">클럽</th><th>골</th></tr></thead><tbody>'+
-    g.map(([k,n],i)=>{const [ci,name]=k.split('|');return `<tr class="${+ci===LG.s.club?'me':''}"><td>${i+1}</td><td class="l">${name}</td><td class="l">${CLUBS[+ci].name}</td><td><b>${n}</b></td></tr>`;}).join('')+'</tbody></table>';
+// season records: every category, any club's squad, and a card per player
+const escH=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const minApps=()=>Math.max(1,Math.ceil((LG.s?LG.s.md:0)*0.3));
+const passAcc=p=>p.passes?p.passOk/p.passes*100:0;
+const contribPct=(p,ci)=>{const t=LG.s&&LG.s.tv&&LG.s.tv[ci];return t?p.cv/t*100:0;};
+const REC_CATS=[
+ {k:'goals',n:'득점'},{k:'assists',n:'도움'},{k:'ga',n:'공격포인트',v:p=>p.goals+p.assists},
+ {k:'rating',n:'평균 평점',v:p=>p.apps?p.rs/p.apps:0,d:2,min:p=>p.apps>=minApps(),desc:'출전 경기 30% 이상'},
+ {k:'contrib',n:'팀 기여도',v:(p,ci)=>contribPct(p,ci),d:1,u:'%',desc:'팀이 만든 골·기회·수비·선방 가운데 이 선수의 몫'},
+ {k:'motm',n:'MOM'},
+ {k:'xg',n:'기대 득점(xG)',v:p=>p.xg,d:2},{k:'xgOver',n:'xG 초과 득점',v:p=>p.goals-p.xg,d:2,desc:'기대 득점보다 더 넣은 골'},
+ {k:'xgUnder',n:'불운의 골잡이',v:p=>p.xg-p.goals,d:2,desc:'기대 득점보다 못 넣은 골'},
+ {k:'shots',n:'슈팅'},{k:'keyPasses',n:'키패스',desc:'바로 슈팅으로 이어진 패스'},{k:'passes',n:'패스'},
+ {k:'passAcc',n:'패스 성공률',v:passAcc,d:1,u:'%',min:p=>p.passes>=150,desc:'패스 150개 이상'},
+ {k:'crosses',n:'크로스'},{k:'tackleWon',n:'태클 성공'},{k:'interceptions',n:'가로채기'},{k:'cs',n:'클린시트'},{k:'saves',n:'선방'},{k:'bigSaves',n:'슈퍼세이브',desc:'몸을 날려 막은 슈팅'},
+ {k:'skills',n:'개인기 성공'},{k:'stepovers',n:'헛다리 장인',u:'회'},
+ {k:'distAvg',n:'경기당 뛴 거리',v:p=>p.apps?p.dist/p.apps/1000:0,d:2,u:'km',min:p=>p.apps>=minApps()},
+ {k:'topKmh',n:'최고 속도',d:1,u:'km/h'},{k:'longRun',n:'최장 질주',u:'m',desc:'한 번에 쉬지 않고 전력 질주한 거리'},
+ {k:'shotKmh',n:'최고 슈팅 속도',u:'km/h'},{k:'longGoal',n:'최장거리 골',d:1,u:'m'},
+ {k:'woodwork',n:'골대 강타'},{k:'overBar',n:'홈런 슛',desc:'크로스바 위로 날려 버린 슈팅'},{k:'backPasses',n:'백패스 장인'},
+ {k:'falls',n:'바닥과 친구',u:'회',desc:'넘어진 횟수'},{k:'idle',n:'멍때리기',v:p=>p.idle/60,u:'분',min:p=>p.role!=='GK',desc:'경기 중 가만히 서 있던 시간 (골키퍼 제외)'},
+ {k:'cards',n:'카드 수집가',v:p=>p.yel+p.red*2,desc:'경고 1, 퇴장 2로 계산'},{k:'fouled',n:'파울 유도'},{k:'lostBall',n:'볼 뺏김'},{k:'ownGoals',n:'자책골'},{k:'headers',n:'헤더'}
+];
+const catVal=(c,p,ci)=>c.v?c.v(p,ci):(p[c.k]||0);
+const fmtV=(v,c)=>(c.d?v.toFixed(c.d):Math.round(v))+(c.u||'');
+function psList(){const s=LG.s,out=[];for(const k in s.ps||{}){const i=k.indexOf('|');out.push({ci:+k.slice(0,i),name:k.slice(i+1),p:s.ps[k]});}return out;}
+function catRank(c){return psList().filter(r=>!c.min||c.min(r.p)).map(r=>({...r,val:catVal(c,r.p,r.ci)})).filter(r=>r.val>0.004).sort((a,b)=>b.val-a.val);}
+let recCat='goals',recMine=false,sqClub=null;
+function recHTML(){
+  const s=LG.s,cat=REC_CATS.find(c=>c.k===recCat)||REC_CATS[0];
+  const bar='<div class="rec-bar"><div class="rec-cats" id="recCats">'+REC_CATS.map(c=>`<button data-k="${c.k}" aria-pressed="${c.k===cat.k}">${c.n}</button>`).join('')+
+    `</div><button class="rec-mine" id="recMine" aria-pressed="${recMine}">우리 팀만</button></div>`+(cat.desc?`<p class="rec-d">${cat.desc}</p>`:'');
+  const L=catRank(cat).filter(r=>!recMine||r.ci===s.club).slice(0,recMine?11:25);
+  if(!L.length)return bar+'<p class="fx-h">아직 기록이 없어요. 경기를 하거나 결과만 보기로 라운드를 넘기면 쌓여요.</p>';
+  return bar+'<table class="lt rec"><tbody>'+L.map((r,i)=>`<tr class="${r.ci===s.club?'me':''}" data-p="${r.ci}|${escH(r.name)}"><td>${i+1}</td><td class="l">${crestHTML(CLUBS[r.ci])}<span>${escH(r.name)}</span></td><td class="l sm">${CLUBS[r.ci].name}</td><td><b>${fmtV(r.val,cat)}</b></td></tr>`).join('')+'</tbody></table>';
 }
+function squadHTML(){
+  const s=LG.s,ci=sqClub==null?s.club:sqClub,c=CLUBS[ci],sl=FORMS[c.form],ps=s.ps||{};
+  const sel=`<div class="rec-bar"><select id="sqClub" aria-label="구단">${CLUBS.map((x,i)=>`<option value="${i}"${i===ci?' selected':''}>${x.name}</option>`).join('')}</select><span class="rec-d">선수를 누르면 상세 기록</span></div>`;
+  const H=['선수','위치','경기','골','도움','평점','기여도','MOM','슈팅','xG','패스%','키패스','태클','가로채기','개인기','km/경기','카드'];
+  const rows=c.xi.map(([name,num],k)=>{const p=ps[ci+'|'+name];const a=p&&p.apps;
+    const cells=a?[p.apps,p.goals,p.assists,(p.rs/p.apps).toFixed(2),contribPct(p,ci).toFixed(1)+'%',p.motm,p.shots,p.xg.toFixed(1),passAcc(p).toFixed(0)+'%',p.keyPasses,p.tackleWon,p.interceptions,p.skills,(p.dist/p.apps/1000).toFixed(1),p.yel+'/'+p.red]:[0,p?p.goals:0,0,'-','-',0,0,'-','-',0,0,0,0,'-','0/0'];
+    return `<tr class="${ci===s.club?'':''}" data-p="${ci}|${escH(name)}"><td class="l"><i class="sq-n">${num}</i>${escH(name)}</td><td>${sl[k].l}</td>${cells.map(v=>`<td>${v}</td>`).join('')}</tr>`;}).join('');
+  return sel+'<div class="sq-wrap"><table class="lt sq"><thead><tr>'+H.map((h,i)=>`<th${i===0?' class="l"':''}>${h}</th>`).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+const band=r=>r>=8?'rb8':r>=7?'rb7':r>=6?'rb6':'rb5';
+function openPlayer(ci,name){
+  const s=LG.s,c=CLUBS[ci],k=c.xi.findIndex(x=>x[0]===name);if(k<0)return;
+  const [nm,num,role,ovr]=c.xi[k],L=FORMS[c.form][k].l,ros=makeRoster(ci)[k],p=(s.ps||{})[ci+'|'+name];
+  const apps=p?p.apps:0,v=(x,d=0)=>p?(d?(+x).toFixed(d):Math.round(x)):'-';
+  // titles: a podium place in any category
+  const badges=[];if(p)for(const cat of REC_CATS){const R=catRank(cat),i=R.findIndex(r=>r.ci===ci&&r.name===name);if(i>=0&&i<3)badges.push(`<i>${cat.n} ${i+1}위</i>`);}
+  const big=[['경기',apps],['골',p?p.goals:0],['도움',p?p.assists:0],['평점',apps?(p.rs/apps).toFixed(2):'-'],['기여도',apps?contribPct(p,ci).toFixed(1)+'%':'-']];
+  // rating in every match this season
+  let chart='';if(p&&p.log.length){const W=38*9;chart=`<svg viewBox="0 0 ${W} 74" preserveAspectRatio="none" aria-label="경기별 평점">`+
+    [6,7,8].map(y=>`<line x1="0" x2="${W}" y1="${70-(y-3)/7*64}" y2="${70-(y-3)/7*64}" class="pc-gl"/>`).join('')+
+    p.log.map(([md,r10,g,a])=>{const r=r10/10,h=Math.max(2,(r-3)/7*64);return `<rect x="${md*9+1}" y="${70-h}" width="7" height="${h}" class="${band(r)}"><title>${md+1}R 평점 ${r.toFixed(1)}${g?' · '+g+'골':''}${a?' · '+a+'도움':''}</title></rect>`+(g?`<circle cx="${md*9+4.5}" cy="${66-h}" r="2" class="pc-g"/>`:'');}).join('')+'</svg>';}
+  const sec=(t,rows)=>`<div class="pc-sec"><h4>${t}</h4>${rows.map(([l,x])=>`<div><span>${l}</span><b>${x}</b></div>`).join('')}</div>`;
+  const pct=(a,b)=>b?Math.round(a/b*100)+'%':'-';
+  const secs=[
+    sec('공격',[['슈팅 / 유효',p?p.shots+' / '+p.onT:'-'],['기대 득점(xG)',v(p&&p.xg,2)],['xG 대비',p?((p.goals-p.xg>=0?'+':'')+(p.goals-p.xg).toFixed(2)):'-'],['헤더',v(p&&p.headers)],['최장거리 골',p&&p.longGoal?p.longGoal.toFixed(1)+'m':'-'],['최고 슈팅 속도',p&&p.shotKmh?p.shotKmh+'km/h':'-']]),
+    sec('패스',[['패스 / 성공률',p?p.passes+' / '+pct(p.passOk,p.passes):'-'],['키패스',v(p&&p.keyPasses)],['스루패스',v(p&&p.throughs)],['크로스',v(p&&p.crosses)],['백패스',v(p&&p.backPasses)]]),
+    sec('수비',[['태클 성공 / 시도',p?p.tackleWon+' / '+p.tackles:'-'],['가로채기',v(p&&p.interceptions)],['볼 뺏김',v(p&&p.lostBall)],['파울 / 파울 유도',p?p.fouls+' / '+p.fouled:'-'],['클린시트',v(p&&p.cs)]]),
+    role==='GK'?sec('골키퍼',[['선방',v(p&&p.saves)],['슈퍼세이브',v(p&&p.bigSaves)],['실점',v(p&&p.conceded)],['경기당 실점',apps?(p.conceded/apps).toFixed(2):'-'],['클린시트',v(p&&p.cs)]]):
+      sec('개인기 ★'+ros.stars,[['성공 / 시도',p?p.skills+' / '+p.skillTries:'-'],['헛다리',v(p&&p.stepovers)],['성공률',p?pct(p.skills,p.skillTries):'-'],['MOM',v(p&&p.motm)]]),
+    sec('피지컬',[['경기당 뛴 거리',apps?(p.dist/apps/1000).toFixed(2)+'km':'-'],['총 뛴 거리',p?(p.dist/1000).toFixed(1)+'km':'-'],['전력 질주',p?(p.sprint/1000).toFixed(1)+'km':'-'],['최고 속도',p&&p.topKmh?p.topKmh+'km/h':'-'],['최장 질주',p&&p.longRun?p.longRun+'m':'-']]),
+    sec('괴랄 기록',[['홈런 슛',v(p&&p.overBar)],['골대 강타',v(p&&p.woodwork)],['바닥과 친구',p?p.falls+'회':'-'],['멍때리기',p?Math.round(p.idle/60)+'분':'-'],['자책골',v(p&&p.ownGoals)],['경고 / 퇴장',p?p.yel+' / '+p.red:'-']])
+  ];
+  $('pcBody').innerHTML=`<div class="pc-head">${crestHTML(c,true)}<span class="pc-num">${num}</span><div class="pc-name"><b>${escH(nm)}</b><span>${c.name} · ${L} · OVR ${ovr} · 개인기 ★${ros.stars}</span></div></div>`+
+    `<div class="pc-big">${big.map(([l,x])=>`<div><b>${x}</b><span>${l}</span></div>`).join('')}</div>`+
+    (badges.length?`<div class="pc-badges">${badges.join('')}</div>`:'')+
+    (chart?`<div class="pc-chart"><p class="rec-d">경기별 평점 (점은 골)</p>${chart}</div>`:'<p class="rec-d">아직 이번 시즌 출전 기록이 없어요.</p>')+
+    `<div class="pc-grid">${secs.join('')}</div>`;
+  $('pcard').hidden=false;
+}
+$('hubBody').addEventListener('click',e=>{
+  const cb=e.target.closest('#recCats button');if(cb){recCat=cb.dataset.k;renderHub();const b=$('recCats').querySelector('[aria-pressed="true"]');if(b)b.scrollIntoView({inline:'center',block:'nearest'});return;}
+  if(e.target.closest('#recMine')){recMine=!recMine;renderHub();return;}
+  const row=e.target.closest('[data-p]');if(row){const v=row.dataset.p,i=v.indexOf('|');openPlayer(+v.slice(0,i),v.slice(i+1));}
+});
+$('hubBody').addEventListener('change',e=>{if(e.target.id==='sqClub'){sqClub=+e.target.value;renderHub();}});
+$('pcClose').addEventListener('click',()=>{$('pcard').hidden=true;});
 function renderPick(canBack){
   $('pickGrid').innerHTML=CLUBS.map((c,i)=>`<button class="club" data-i="${i}">${crestHTML(c)}<span>${c.name}</span><em>OVR ${c.rating}</em></button>`).join('');
   $('pickBack').hidden=!canBack;$('pickNote').hidden=!canBack;$('pick').hidden=false;
